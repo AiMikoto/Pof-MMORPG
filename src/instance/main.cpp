@@ -1,3 +1,4 @@
+#include "lib/log.h"
 #include "instance/server.h"
 #include <boost/asio.hpp>
 #include <cstdlib>
@@ -12,6 +13,7 @@ int main(int argc, char **argv)
     std::cerr << "improper call of instance creation" << std::endl;
     return 1;
   }
+  log_init("instance");
   // extract arguments
   int port = std::atoi(argv[1]);
   // create a server 
