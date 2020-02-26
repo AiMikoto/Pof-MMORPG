@@ -16,3 +16,4 @@ link_libraries(${Boost_LIBRARIES})
 
 add_executable(instance ${INSTANCE_SOURCES} ${SHARED_SOURCES})
 add_executable(world_test ${WORLD_STRUCTURE_SOURCES} ${SHARED_SOURCES} src/test/world_structure_test.cpp)
+add_executable(call_test ${WORLD_STRUCTURE_SOURCES} ${SHARED_SOURCES} src/test/call_test.cpp)

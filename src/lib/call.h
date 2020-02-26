@@ -10,9 +10,9 @@ public:
   call();
   void decode(std::string enc);
   std::string encode();
-  boost::property_tree::ptree& get();
+  boost::property_tree::ptree& tree();
 private:
-  boost::property_tree::ptree tree;
+  boost::property_tree::ptree _tree;
 };
 
 #endif // LIB_CALL_H
