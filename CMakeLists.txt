@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(x)
+project(pof)
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(dep/glfw)
 
 file(GLOB INSTANCE_SOURCES "src/instance/*.cpp")
 file(GLOB GRAPHICS_SOURCES "src/graphics/*.cpp")
@@ -14,10 +20,13 @@ find_package(Boost 1.72 COMPONENTS system thread log log_setup REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIR} ${OPENGL_LIBRARY_DIR}  ${GLUT_LIBRARY_DIR})
+link_directories(${Boost_LIBRARY_DIR})
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
+
 add_executable(instance ${INSTANCE_SOURCES} ${SHARED_SOURCES})
-add_executable(gfx ${GRAPHICS_SOURCES} ${SHARED_SOURCES})
+add_executable(gfx ${GRAPHICS_SOURCES} ${SHARED_SOURCES} dep/libglfw3.a)
+target_link_libraries(gfx glfw)
+target_link_libraries(gfx OpenGL::GL)
 add_executable(world_test ${WORLD_STRUCTURE_SOURCES} ${SHARED_SOURCES} src/test/world_structure_test.cpp)
 add_executable(call_test ${WORLD_STRUCTURE_SOURCES} ${SHARED_SOURCES} src/test/call_test.cpp)
