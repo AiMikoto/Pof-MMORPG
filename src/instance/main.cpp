@@ -17,7 +17,7 @@ int main(int argc, char **argv)
   // create a server 
   server s(ioc, port);
   // block current thread
-  mutex m;
+  std::mutex m;
   m.lock();
   m.lock();
   return 0;
