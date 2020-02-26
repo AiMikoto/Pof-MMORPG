@@ -1,22 +1,14 @@
-instance
-  receives actions from clients
-  updates list of objects, validating action
-  forwards the action to other clients
+protocol:
 
-client
-  sends actions to server
-  receives actions from server
-  updates list of objects, without validating action
+staging:
 
-server
-  creates instance
+stage 1 - authentification
+client sends authentification request
+server sends authentification confirmation
+enter stage 2 - continuous data transfer
+either client/server can send messages across the network
 
-world structure
-  global - list of objects
-         - actions
-  local  - field of view
-
-1 - list of objects
-2 - physics
-3 - action
-4 - field of view
+endpoint shutdown - active at all time - enter stage 3 immediately on receive
+stage 3 - shutdown
+send shutdown to partner
+close socket
