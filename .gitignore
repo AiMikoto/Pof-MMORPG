@@ -14,4 +14,4 @@ build
 *.sln
 /Graphics Engine
 *.vs
-x64/
+Release/
