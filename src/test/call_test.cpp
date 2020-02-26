@@ -13,6 +13,16 @@ int tests;
 
 void noop() {}
 
+void call_expected(call c)
+{
+  PASS;
+}
+
+void call_unexpected(call c)
+{
+  FAIL;
+}
+
 void test_call_creation()
 {
   TEST("TESTING CALL CREATION");
@@ -73,6 +83,8 @@ void test_call_encoding()
   {
     PASS;
   }
+  delete c;
+  delete c2;
 }
 
 void test_call_network_transfer()
@@ -105,6 +117,25 @@ void test_call_network_transfer()
   {
     PASS;
   }
+  delete c;
+}
+
+void test_endpoint_table()
+{
+  endpoint_table et;
+  call c;
+  TEST("TESTING CALLBACK CALL ON EXPECTED ENDPOINT");
+  et.add("1", call_expected);
+  et.add_err(call_unexpected);
+  et.look_up("1", c);
+  TEST("TESTING CALLBACK CALL ON UNEXPECTED ENDPOINT");
+  et.add("1", call_unexpected);
+  et.add_err(call_expected);
+  et.look_up("2", c);
+  TEST("TESTING REMOVAL OF UNEXPECTED ENDPOINT");
+  et.remove("1");
+  et.add_err(call_expected);
+  et.look_up("1", c);
 }
 
 int main()
@@ -113,6 +144,7 @@ int main()
   test_call_access();
   test_call_encoding();
   test_call_network_transfer();
+  test_endpoint_table();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
 }
