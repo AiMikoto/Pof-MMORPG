@@ -21,12 +21,17 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
+
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
+add_library(log STATIC src/lib/log.cpp)
+add_library(call STATIC src/lib/call.cpp)
 
-add_executable(instance ${INSTANCE_SOURCES} ${SHARED_SOURCES})
-add_executable(gfx ${GRAPHICS_SOURCES} ${SHARED_SOURCES})
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call)
+
+add_executable(instance ${INSTANCE_SOURCES})
+add_executable(gfx ${GRAPHICS_SOURCES})
 target_link_libraries(gfx glfw)
 target_link_libraries(gfx OpenGL::GL)
-add_executable(world_test ${WORLD_STRUCTURE_SOURCES} ${SHARED_SOURCES} src/test/world_structure_test.cpp)
-add_executable(call_test ${WORLD_STRUCTURE_SOURCES} ${SHARED_SOURCES} src/test/call_test.cpp)
+add_executable(world_test ${WORLD_STRUCTURE_SOURCES} src/test/world_structure_test.cpp)
+add_executable(call_test ${WORLD_STRUCTURE_SOURCES} src/test/call_test.cpp)
