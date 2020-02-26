@@ -8,7 +8,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(dep/glfw)
 
 file(GLOB INSTANCE_SOURCES "src/instance/*.cpp")
-file(GLOB GRAPHICS_SOURCES "src/graphics/*.cpp")
+file(GLOB GRAPHICS_SOURCES "src/graphics/*.cpp" "src/graphics/*.c")
 file(GLOB WORLD_STRUCTURE_SOURCES "src/world_structure/*.cpp")
 file(GLOB SHARED_SOURCES "src/lib/*.cpp")
 include_directories(src)
@@ -25,7 +25,7 @@ link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 
 add_executable(instance ${INSTANCE_SOURCES} ${SHARED_SOURCES})
-add_executable(gfx ${GRAPHICS_SOURCES} ${SHARED_SOURCES} dep/libglfw3.a)
+add_executable(gfx ${GRAPHICS_SOURCES} ${SHARED_SOURCES})
 target_link_libraries(gfx glfw)
 target_link_libraries(gfx OpenGL::GL)
 add_executable(world_test ${WORLD_STRUCTURE_SOURCES} ${SHARED_SOURCES} src/test/world_structure_test.cpp)
