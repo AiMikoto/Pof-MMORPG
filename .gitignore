@@ -11,3 +11,7 @@ CTestTestfile.cmake
 _deps
 /bin
 build
+*.sln
+/Graphics Engine
+*.vs
+/x64
