@@ -15,10 +15,9 @@ void server::routine()
 {
   forever
   {
-    boost::asio::ip::tcp::iostream *stream = new boost::asio::ip::tcp::iostream;
-    acceptor.accept(stream -> socket());
-    BOOST_LOG_TRIVIAL(debug) << "received new connection from " << stream -> socket().remote_endpoint().address().to_string();;
-    *stream << "greetings";
+    boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(io_context);
+    acceptor.accept(*socket);
+    BOOST_LOG_TRIVIAL(debug) << "received new connection from " << socket -> remote_endpoint().address().to_string();;
 //    client *c = new client(stream);
   }
 }
