@@ -16,5 +16,6 @@ void server::routine()
     boost::asio::ip::tcp::iostream *stream = new boost::asio::ip::tcp::iostream;
     acceptor.accept(stream -> socket());
     *stream << "greetings";
+//    client *c = new client(stream);
   }
 }
