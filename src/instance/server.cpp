@@ -17,7 +17,6 @@ void server::routine()
   {
     boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(io_context);
     acceptor.accept(*socket);
-    BOOST_LOG_TRIVIAL(debug) << "received new connection from " << socket -> remote_endpoint().address().to_string();;
     client *c = new client(socket);
   }
 }
