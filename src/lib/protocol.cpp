@@ -12,6 +12,7 @@
 protocol::protocol(boost::asio::ip::tcp::socket *sock)
 {
   socket = sock;
+  ping = 0;
   ept.add_err(boost::bind(&protocol::terminate_force, this, _1));
   ept.add(OP_PING, boost::bind(&protocol::handle_ping, this, _1));
   ept.add(OP_PONG, boost::bind(&protocol::handle_pong, this, _1));
@@ -44,6 +45,7 @@ void protocol::close()
     BOOST_LOG_TRIVIAL(trace) << "protocol::close - exception thrown when writing to socket - " << e.what();
   }
   socket -> close();
+  ping = -1;
 }
 
 int protocol::get_ping()
