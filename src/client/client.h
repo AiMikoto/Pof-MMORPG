@@ -8,7 +8,6 @@ class instance:public protocol
 public:
   instance(boost::asio::ip::tcp::socket *sock);
   ~instance();
-  void periodic();
   bool authenticate(std::string username, std::string password);
 private:
   void authenticate_cb(std::mutex *lock, bool *status, call c);

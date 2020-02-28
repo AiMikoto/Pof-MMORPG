@@ -33,15 +33,7 @@ bool instance::authenticate(std::string username, std::string password)
   c.tree().put(OPCODE, OP_AUTH);
   c.tree().put("login.username", username);
   c.tree().put("login.password", password);
-  try
-  {
-    write_call(socket, c);
-  }
-  catch(std::exception &e)
-  {
-    
-    this -> close();
-  }
+  safe_write(c);
   lock.lock();
   lock.lock();
   lock.unlock();
@@ -52,12 +44,4 @@ void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
   ept.remove(OP_AUTH);
   *status = c.tree().get<bool>("success");
   lock -> unlock();
-}
-
-void instance::periodic()
-{
-  BOOST_LOG_TRIVIAL(info) << "sending ping";
-  call ping;
-  ping.tree().put(OPCODE, OP_PING);
-  write_call(socket, ping);
 }

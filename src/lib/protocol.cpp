@@ -31,6 +31,22 @@ protocol::~protocol()
   delete t_routine;
 }
 
+int protocol::safe_write(call c)
+{
+  try
+  {
+    // TODO: mutex
+    write_call(socket, c);
+  }
+  catch(std::exception &e)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "protocol::write_safe - exception thrown when writing to socket - " << e.what();
+    this -> close();
+    return -1;
+  }
+  return 0;
+}
+
 void protocol::close()
 {
   BOOST_LOG_TRIVIAL(info) << "ending connection";
@@ -38,6 +54,7 @@ void protocol::close()
   c.tree().put(OPCODE, OP_TERMINATE);
   try
   {
+    // TODO: mutex
     write_call(socket, c);
   }
   catch(std::exception &e)
@@ -72,41 +89,30 @@ void protocol::routine()
     BOOST_LOG_TRIVIAL(debug) << "protocol::routine - exception thrown during routine - " << e.what();
     call answer;
     answer.tree().put(OPCODE, OP_TERMINATE);
-    try
-    {
-      write_call(socket, answer);
-    }
-    catch(std::exception &_e)
-    {
-      BOOST_LOG_TRIVIAL(trace) << "protocol::routine - exception thrown when writing to socket - " << _e.what();
-    }
+    safe_write(answer);
     this -> close();
   }
 }
 
 void protocol::latency_service()
 {
-  try
+  boost::asio::io_context io;
+  boost::uuids::random_generator generator;
+  forever
   {
-    boost::asio::io_context io;
-    boost::uuids::random_generator generator;
-    forever
+    BOOST_LOG_TRIVIAL(trace) << "sending ping";
+    std::string uuid = boost::lexical_cast<std::string>(generator());
+    call ping_c;
+    ping_c.tree().put(OPCODE, OP_PING);
+    ping_c.tree().put("ping.uuid", uuid);
+    pings[uuid] = boost::chrono::high_resolution_clock::now();
+    if(safe_write(ping_c))
     {
-      BOOST_LOG_TRIVIAL(trace) << "sending ping";
-      std::string uuid = boost::lexical_cast<std::string>(generator());
-      call ping_c;
-      ping_c.tree().put(OPCODE, OP_PING);
-      ping_c.tree().put("ping.uuid", uuid);
-      pings[uuid] = boost::chrono::high_resolution_clock::now();
-      write_call(socket, ping_c);
-      boost::asio::steady_timer t(io, boost::asio::chrono::seconds(1));
-      t.wait();
+      this -> close();
+      return;
     }
-  }
-  catch(std::exception &e)
-  {
-    BOOST_LOG_TRIVIAL(debug) << "protocol::latency_service - exception thrown while writing to socket - " << e.what();
-    this -> close();
+    boost::asio::steady_timer t(io, boost::asio::chrono::seconds(1));
+    t.wait();
   }
 }
 
@@ -114,7 +120,7 @@ void protocol::handle_ping(call c)
 {
   BOOST_LOG_TRIVIAL(trace) << "received ping";
   c.tree().put(OPCODE, OP_PONG);
-  write_call(socket, c);
+  safe_write(c);
 }
 
 void protocol::handle_pong(call c)

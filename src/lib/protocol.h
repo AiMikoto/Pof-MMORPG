@@ -18,6 +18,7 @@ class protocol
 public:
   protocol(boost::asio::ip::tcp::socket *sock);
   ~protocol();
+  int safe_write(call c);
   void close();
   int get_ping();
 protected:

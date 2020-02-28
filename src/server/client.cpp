@@ -27,15 +27,15 @@ void client::handle_auth(call c)
     answer.tree().put("success", true);
     // TODO: assign login token to user
     // TODO: load user card
-    write_call(socket, answer);
+    safe_write(answer);
     // TODO: transfer user card to instance
     call term;
     term.tree().put(OPCODE, OP_TERMINATE);
-//    write_call(socket, term);
+//    safe_write(term);
   }
   else
   {
     answer.tree().put("success", false);
-    write_call(socket, answer);
+    safe_write(answer);
   }
 }
