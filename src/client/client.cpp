@@ -43,5 +43,6 @@ void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
 {
   ept.remove(OP_AUTH);
   *status = c.tree().get<bool>("success");
+  BOOST_LOG_TRIVIAL(trace) << "authentification: " << *status;
   lock -> unlock();
 }
