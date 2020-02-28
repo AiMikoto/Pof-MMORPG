@@ -1,14 +1,15 @@
-#ifndef INSTANCE_CLIENT_H
-#define INSTANCE_CLIENT_H
+#ifndef CLIENT_CLIENT_H
+#define CLIENT_CLIENT_H
 
 #include <boost/asio.hpp>
 #include "lib/call.h"
 
-class client
+class instance
 {
 public:
-  client(boost::asio::ip::tcp::socket *sock);
-  ~client();
+  instance(std::string host, int port);
+  ~instance();
+  void close();
   void periodic();
 private:
   void routine();
@@ -20,4 +21,4 @@ private:
   endpoint_table ept;
 };
 
-#endif
+#endif // CLIENT_CLIENT_H
