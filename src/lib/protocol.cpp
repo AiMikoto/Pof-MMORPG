@@ -2,6 +2,10 @@
 #include "lib/log.h"
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/lexical_cast.hpp>
 #include "include/common_macro.h"
 #include <exception>
 
@@ -13,16 +17,17 @@ protocol::protocol(boost::asio::ip::tcp::socket *sock)
   ept.add(OP_PONG, boost::bind(&protocol::handle_pong, this, _1));
   ept.add(OP_TERMINATE, boost::bind(&protocol::terminate, this, _1));
   t_routine = new boost::thread(boost::bind(&protocol::routine, this));
+  t_pinger = new boost::thread(boost::bind(&protocol::latency_service, this));
 }
 
 protocol::~protocol()
 {
   socket -> close();
   delete socket;
-  if(t_routine)
-  { // might have been stopped by protocol::close
-    delete t_routine;
-  }
+  t_pinger -> join();
+  delete t_pinger;
+  t_routine -> join();
+  delete t_routine;
 }
 
 void protocol::close()
@@ -30,9 +35,20 @@ void protocol::close()
   BOOST_LOG_TRIVIAL(info) << "ending connection";
   call c;
   c.tree().add(OPCODE, OP_TERMINATE);
-  write_call(socket, c);
-  delete t_routine;
-  t_routine = NULL;
+  try
+  {
+    write_call(socket, c);
+  }
+  catch(std::exception &e)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "protocol::close - exception thrown when writing to socket - " << e.what();
+  }
+  socket -> close();
+}
+
+int protocol::get_ping()
+{
+  return ping;
 }
 
 void protocol::routine()
@@ -51,7 +67,7 @@ void protocol::routine()
   }
   catch(std::exception &e)
   {
-    BOOST_LOG_TRIVIAL(debug) << "exception thrown - " << e.what();
+    BOOST_LOG_TRIVIAL(debug) << "protocol::routine - exception thrown during routine - " << e.what();
     call answer;
     answer.tree().add(OPCODE, OP_TERMINATE);
     try
@@ -60,21 +76,60 @@ void protocol::routine()
     }
     catch(std::exception &_e)
     {
-      BOOST_LOG_TRIVIAL(trace) << "exception thrown - " << _e.what();
+      BOOST_LOG_TRIVIAL(trace) << "protocol::routine - exception thrown when writing to socket - " << _e.what();
     }
+    this -> close();
+  }
+}
+
+void protocol::latency_service()
+{
+  try
+  {
+    boost::asio::io_context io;
+    boost::uuids::random_generator generator;
+    forever
+    {
+      BOOST_LOG_TRIVIAL(trace) << "sending ping";
+      std::string uuid = boost::lexical_cast<std::string>(generator());
+      call ping_c;
+      ping_c.tree().add(OPCODE, OP_PING);
+      ping_c.tree().add("ping.uuid", uuid);
+      pings[uuid] = boost::chrono::high_resolution_clock::now();
+      write_call(socket, ping_c);
+      boost::asio::steady_timer t(io, boost::asio::chrono::seconds(1));
+      t.wait();
+    }
+  }
+  catch(std::exception &e)
+  {
+    BOOST_LOG_TRIVIAL(debug) << "protocol::latency_service - exception thrown while writing to socket - " << e.what();
+    this -> close();
   }
 }
 
 void protocol::handle_ping(call c)
 {
-  BOOST_LOG_TRIVIAL(info) << "received ping";
+  BOOST_LOG_TRIVIAL(trace) << "received ping";
   c.tree().add(OPCODE, OP_PONG);
   write_call(socket, c);
 }
 
 void protocol::handle_pong(call c)
 {
-  BOOST_LOG_TRIVIAL(info) << "received pong";
+  BOOST_LOG_TRIVIAL(trace) << "received pong";
+  std::string uuid = c.tree().get<std::string>("ping.uuid");
+  auto i = pings.find(uuid);
+  if(i != pings.end())
+  {
+    boost::chrono::high_resolution_clock::duration diff = boost::chrono::high_resolution_clock::now() - pings[uuid];
+    ping = boost::chrono::duration_cast<boost::chrono::milliseconds>(diff).count();
+    BOOST_LOG_TRIVIAL(debug) << "updated ping - " << ping;
+  }
+  else
+  {
+    throw std::logic_error("forged UUID in pong");
+  }
 }
 
 //termination by remote host
