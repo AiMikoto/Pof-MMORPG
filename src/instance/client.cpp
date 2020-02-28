@@ -14,6 +14,7 @@ client::client(boost::asio::ip::tcp::socket *sock)
   ept.add_err(boost::bind(&client::terminate_force, this, _1));
   ept.add(OP_PING, boost::bind(&client::handle_ping, this, _1));
   ept.add(OP_PONG, boost::bind(&client::handle_pong, this, _1));
+  ept.add(OP_TERMINATE, boost::bind(&client::terminate, this, _1));
   boost::thread t_routine(boost::bind(&client::routine, this));
 }
 
@@ -39,7 +40,7 @@ void client::routine()
   }
   catch(std::exception &e)
   {
-    BOOST_LOG_TRIVIAL(debug) << "exception thrown" << e.what();
+    BOOST_LOG_TRIVIAL(debug) << "exception thrown - " << e.what();
     call answer;
     answer.tree().add(OPCODE, OP_TERMINATE);
     try
@@ -48,7 +49,7 @@ void client::routine()
     }
     catch(std::exception &_e)
     {
-      BOOST_LOG_TRIVIAL(trace) << "exception thrown" << _e.what();
+      BOOST_LOG_TRIVIAL(trace) << "exception thrown - " << _e.what();
     }
   }
   delete this;
@@ -69,6 +70,12 @@ void client::handle_ping(call c)
 
 void client::handle_pong(call c)
 {
+}
+
+//termination by remote host
+void client::terminate(call c)
+{
+  throw std::logic_error("connection closed by remote host");
 }
 
 // called when protocol is violated
