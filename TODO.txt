@@ -1,14 +1,14 @@
+server:
+
+assign user a login token
+load user card
+transfer user card
+
+
+instance:
+
+transfer user card
+authentificate using login token
+
+
 protocol:
-
-staging:
-
-stage 1 - authentification
-client sends authentification request
-server sends authentification confirmation
-enter stage 2 - continuous data transfer
-either client/server can send messages across the network
-
-endpoint shutdown - active at all time - enter stage 3 immediately on receive
-stage 3 - shutdown
-send shutdown to partner
-close socket
