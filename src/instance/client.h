@@ -8,7 +8,6 @@ class client:public protocol
 public:
   client(boost::asio::ip::tcp::socket *sock);
   ~client();
-  void periodic();
 private:
 };
 

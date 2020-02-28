@@ -35,7 +35,7 @@ void protocol::close()
 {
   BOOST_LOG_TRIVIAL(info) << "ending connection";
   call c;
-  c.tree().add(OPCODE, OP_TERMINATE);
+  c.tree().put(OPCODE, OP_TERMINATE);
   try
   {
     write_call(socket, c);
@@ -71,7 +71,7 @@ void protocol::routine()
   {
     BOOST_LOG_TRIVIAL(debug) << "protocol::routine - exception thrown during routine - " << e.what();
     call answer;
-    answer.tree().add(OPCODE, OP_TERMINATE);
+    answer.tree().put(OPCODE, OP_TERMINATE);
     try
     {
       write_call(socket, answer);
@@ -95,8 +95,8 @@ void protocol::latency_service()
       BOOST_LOG_TRIVIAL(trace) << "sending ping";
       std::string uuid = boost::lexical_cast<std::string>(generator());
       call ping_c;
-      ping_c.tree().add(OPCODE, OP_PING);
-      ping_c.tree().add("ping.uuid", uuid);
+      ping_c.tree().put(OPCODE, OP_PING);
+      ping_c.tree().put("ping.uuid", uuid);
       pings[uuid] = boost::chrono::high_resolution_clock::now();
       write_call(socket, ping_c);
       boost::asio::steady_timer t(io, boost::asio::chrono::seconds(1));
@@ -113,7 +113,7 @@ void protocol::latency_service()
 void protocol::handle_ping(call c)
 {
   BOOST_LOG_TRIVIAL(trace) << "received ping";
-  c.tree().add(OPCODE, OP_PONG);
+  c.tree().put(OPCODE, OP_PONG);
   write_call(socket, c);
 }
 

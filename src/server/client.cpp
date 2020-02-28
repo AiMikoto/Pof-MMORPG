@@ -21,21 +21,21 @@ void client::handle_auth(call c)
   std::string username = c.tree().get<std::string>("login.username");
   std::string password = c.tree().get<std::string>("login.password");
   call answer;
-  answer.tree().add(OPCODE, OP_AUTH);
+  answer.tree().put(OPCODE, OP_AUTH);
   if(true) // TODO: use username and password to confirm authentification
   {
-    answer.tree().add("success", true);
+    answer.tree().put("success", true);
     // TODO: assign login token to user
     // TODO: load user card
     write_call(socket, answer);
     // TODO: transfer user card to instance
     call term;
-    term.tree().add(OPCODE, OP_TERMINATE);
-    write_call(socket, term);
+    term.tree().put(OPCODE, OP_TERMINATE);
+//    write_call(socket, term);
   }
   else
   {
-    answer.tree().add("success", false);
+    answer.tree().put("success", false);
     write_call(socket, answer);
   }
 }
