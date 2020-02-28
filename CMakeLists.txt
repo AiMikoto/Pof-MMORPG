@@ -26,8 +26,9 @@ link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 add_library(log STATIC src/lib/log.cpp)
 add_library(call STATIC src/lib/call.cpp)
+add_library(protocol STATIC src/lib/protocol.cpp)
 
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol)
 
 add_executable(instance ${INSTANCE_SOURCES})
 add_executable(gfx ${GRAPHICS_SOURCES})

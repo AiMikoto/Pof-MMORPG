@@ -6,7 +6,7 @@ boost::asio::io_context ioc;
 
 int main(int argc, char **argv)
 {
-  instance *ins = new instance("localhost", 7777);
+  instance *ins = instance_builder("localhost", 7777);
   
   ins -> periodic();
   ins -> close();
