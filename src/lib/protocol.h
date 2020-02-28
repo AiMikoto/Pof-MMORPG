@@ -8,6 +8,7 @@
 #define OPCODE "opcode"
 #define OP_PING "ping"
 #define OP_PONG "pong"
+#define OP_AUTH "auth"
 #define OP_TERMINATE "term"
 
 class protocol

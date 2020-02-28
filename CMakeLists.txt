@@ -7,6 +7,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(dep/glfw)
 
+file(GLOB SERVER_SOURCES "src/server/*.cpp")
 file(GLOB INSTANCE_SOURCES "src/instance/*.cpp")
 file(GLOB GRAPHICS_SOURCES "src/graphics/*.cpp" "src/graphics/*.c")
 file(GLOB CLIENT_SOURCES "src/client/*.cpp")
@@ -30,6 +31,7 @@ add_library(protocol STATIC src/lib/protocol.cpp)
 
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol)
 
+add_executable(server ${SERVER_SOURCES})
 add_executable(instance ${INSTANCE_SOURCES})
 add_executable(gfx ${GRAPHICS_SOURCES})
 target_link_libraries(gfx glfw)
