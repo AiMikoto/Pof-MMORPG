@@ -7,7 +7,8 @@
 server::server(boost::asio::io_context& ioc, int port):io_context(ioc),endpoint(boost::asio::ip::tcp::v4(), port), acceptor(ioc, endpoint)
 {
   BOOST_LOG_TRIVIAL(info) << "Created listener on port " << port;
-  boost::thread t(boost::bind(&server::routine, this));
+  boost::thread t_routine(boost::bind(&server::routine, this));
+  boost::thread t_cleanup(boost::bind(&server::cleanup, this));
 }
 
 void server::routine()
@@ -18,5 +19,26 @@ void server::routine()
     acceptor.accept(*socket);
     client *c = new client(socket);
     clients.push_back(c);
+  }
+}
+
+void server::cleanup()
+{
+  forever
+  {
+    boost::this_thread::sleep( boost::posix_time::seconds(10));
+    BOOST_LOG_TRIVIAL(trace) << "cleaning up";
+    for(auto it = clients.begin(); it != clients.end(); it++)
+    {
+      client *c = *it;
+      BOOST_LOG_TRIVIAL(trace) << "checking client";
+      if(c -> get_ping() == -1)
+      {
+        BOOST_LOG_TRIVIAL(info) << "cleaned client";
+        clients.erase(it);
+        delete c;
+	it--;
+      }
+    }
   }
 }
