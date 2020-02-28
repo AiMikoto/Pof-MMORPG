@@ -12,7 +12,9 @@ client::client(boost::asio::ip::tcp::socket *sock)
   socket = sock;
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
   ept.add_err(boost::bind(&client::terminate_force, this, _1));
-  boost::thread t(boost::bind(&client::routine, this));
+  ept.add(OP_PING, boost::bind(&client::handle_ping, this, _1));
+  ept.add(OP_PONG, boost::bind(&client::handle_pong, this, _1));
+  boost::thread t_routine(boost::bind(&client::routine, this));
 }
 
 client::~client()
@@ -50,6 +52,23 @@ void client::routine()
     }
   }
   delete this;
+}
+
+void client::periodic()
+{
+  call ping;
+  ping.tree().add(OPCODE, OP_PING);
+  write_call(socket, ping);
+}
+
+void client::handle_ping(call c)
+{
+  c.tree().add(OPCODE, OP_PONG);
+  write_call(socket, c);
+}
+
+void client::handle_pong(call c)
+{
 }
 
 // called when protocol is violated

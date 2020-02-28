@@ -2,6 +2,8 @@
 #define INSTANCE_SERVER_H
 
 #include <boost/asio.hpp>
+#include <vector>
+#include "instance/client.h"
 
 class server
 {
@@ -12,7 +14,7 @@ private:
   boost::asio::ip::tcp::endpoint endpoint;
   boost::asio::ip::tcp::acceptor acceptor;
   boost::asio::io_context& io_context;
-//  std::set<client> clients;
+  std::vector<client*> clients;
 };
 
 #endif // INSTANCE_SERVER_H
