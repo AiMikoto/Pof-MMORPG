@@ -11,6 +11,8 @@
 #include <boost/lexical_cast.hpp>
 #include "common/user_card.h"
 #include "server/instances.h"
+#include "include/maps.h"
+#include "include/regions.h"
 
 boost::uuids::random_generator generator;
 
@@ -44,7 +46,7 @@ void client::handle_auth(call c)
     uc_transfer.tree().put_child("data", uc.tree());
     // TODO: transfer user card to instance
     safe_write(uc_transfer);
-    instance_info *target_instance = pins[REG_EU]["flatlands"];
+    instance_info *target_instance = pins[REG_EU][MAP_FLATLANDS];
     uc_transfer.tree().put("authority.token", target_instance -> auth_tok);
     target_instance -> in -> safe_write(uc_transfer);
     call move;

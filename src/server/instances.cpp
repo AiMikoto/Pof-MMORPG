@@ -1,5 +1,7 @@
 #include "server/instances.h"
 #include "server/ioc.h"
+#include "include/maps.h"
+#include "include/regions.h"
 
 std::map<int, std::map<std::string, public_instance*>> pins;
 
@@ -32,6 +34,6 @@ public_instance::public_instance(std::string auth_tok, std::string hostname, int
 void populate_pins()
 {
   // TODO: spawn servers
-  public_instance *pi = new public_instance("fish", "localhost", 7000, REG_EU, "flatlands");
-  pins[REG_EU]["flatlands"] = pi;
+  public_instance *pi = new public_instance("fish", "localhost", 7000, REG_EU, MAP_FLATLANDS);
+  pins[REG_EU][MAP_FLATLANDS] = pi;
 }

@@ -66,7 +66,30 @@ void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
   ept.remove(OP_AUTH);
   *status = c.tree().get<bool>("success");
   BOOST_LOG_TRIVIAL(trace) << "authentification: " << *status;
-  ept.remove(OP_AUTH);
+  lock -> unlock();
+}
+
+bool instance::change_map(map_t map, region_t region)
+{
+  std::mutex lock;
+  bool status;
+  call c;
+  ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::change_map_cb, this, &lock, &status, _1));
+  c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP);
+  c.tree().put("target.map", map);
+  c.tree().put("target.region", region);
+  safe_write(c);
+  lock.lock();
+  lock.lock();
+  lock.unlock();
+  return status;
+}
+
+void instance::change_map_cb(std::mutex *lock, bool *status, call c)
+{
+  ept.remove(OP_REQUEST_CHANGE_MAP);
+  *status = c.tree().get<bool>("success");
+  BOOST_LOG_TRIVIAL(trace) << "map_change: " << *status;
   lock -> unlock();
 }
 

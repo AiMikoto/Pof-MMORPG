@@ -17,6 +17,7 @@
 #define OP_UC_TRANS_ALL "ucta"
 #define OP_UC_TRANS "uct"
 #define OP_TERMINATE "term"
+#define OP_REQUEST_CHANGE_MAP "req_change_map"
 
 class protocol
 {

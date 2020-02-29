@@ -2,6 +2,8 @@
 #define CLIENT_CLIENT_H
 
 #include "lib/protocol.h"
+#include "include/regions.h"
+#include "include/maps.h"
 
 class instance:public protocol
 {
@@ -9,9 +11,11 @@ public:
   instance(boost::asio::ip::tcp::socket *sock);
   ~instance();
   bool authenticate(std::string username, std::string password);
-  bool authenticate_token(std::string username, std::string token);
+  bool authenticate_token(std::string username, std::string tok);
+  bool change_map(map_t map, region_t region);
 private:
   void authenticate_cb(std::mutex *lock, bool *status, call c);
+  void change_map_cb(std::mutex *lock, bool *status, call c);
   void uc_transfer(call c);
   void move_cb(call c);
 };

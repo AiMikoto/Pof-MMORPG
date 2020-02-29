@@ -1,8 +1,6 @@
 #ifndef SERVER_INSTANCES_H
 #define SERVER_INSTANCES_H
 
-#define REG_EU 0
-
 #include <map>
 #include <string>
 #include "lib/protocol.h"
