@@ -1,9 +1,7 @@
 #include "server/instances.h"
 #include "server/ioc.h"
-#include "include/maps.h"
-#include "include/regions.h"
 
-std::map<int, std::map<std::string, public_instance*>> pins;
+std::map<region_t, std::map<map_t, public_instance*>> pins;
 
 instance *instance_builder(instance_info ini)
 {
@@ -25,8 +23,10 @@ instance_info::instance_info(std::string auth_tok, std::string hostname, int por
   this -> port = port;
 }
 
-public_instance::public_instance(std::string auth_tok, std::string hostname, int port, int channel, std::string map):instance_info(auth_tok, hostname, port)
+public_instance::public_instance(std::string auth_tok, std::string hostname, int port, region_t channel, map_t map):instance_info(auth_tok, hostname, port)
 {
+  this -> channel = channel;
+  this -> map = map;
   this -> in = instance_builder(*this);
   // TODO: connect to instance and load map
 }
