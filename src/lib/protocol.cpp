@@ -11,6 +11,11 @@
 
 protocol::protocol(boost::asio::ip::tcp::socket *sock)
 {
+  protocol(sock, 1);
+}
+
+protocol::protocol(boost::asio::ip::tcp::socket *sock, int ping_freq)
+{
   socket = sock;
   ping = 0;
   ept.add_err(boost::bind(&protocol::terminate_force, this, _1));
@@ -18,15 +23,25 @@ protocol::protocol(boost::asio::ip::tcp::socket *sock)
   ept.add(OP_PONG, boost::bind(&protocol::handle_pong, this, _1));
   ept.add(OP_TERMINATE, boost::bind(&protocol::terminate, this, _1));
   t_routine = new boost::thread(boost::bind(&protocol::routine, this));
-  t_pinger = new boost::thread(boost::bind(&protocol::latency_service, this));
+  if(ping_freq > 0)
+  {
+    t_pinger = new boost::thread(boost::bind(&protocol::latency_service, this, ping_freq));
+  }
+  else
+  {
+    t_pinger = NULL;
+  }
 }
 
 protocol::~protocol()
 {
   socket -> close();
   delete socket;
-  t_pinger -> join();
-  delete t_pinger;
+  if(t_pinger)
+  {
+    t_pinger -> join();
+    delete t_pinger;
+  }
   t_routine -> join();
   delete t_routine;
 }
@@ -94,7 +109,7 @@ void protocol::routine()
   }
 }
 
-void protocol::latency_service()
+void protocol::latency_service(int ping_freq)
 {
   boost::asio::io_context io;
   boost::uuids::random_generator generator;
@@ -111,7 +126,7 @@ void protocol::latency_service()
       this -> close();
       return;
     }
-    boost::asio::steady_timer t(io, boost::asio::chrono::seconds(1));
+    boost::asio::steady_timer t(io, boost::asio::chrono::seconds(ping_freq));
     t.wait();
   }
 }
