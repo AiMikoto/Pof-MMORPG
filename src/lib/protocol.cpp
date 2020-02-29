@@ -9,9 +9,8 @@
 #include "include/common_macro.h"
 #include <exception>
 
-protocol::protocol(boost::asio::ip::tcp::socket *sock)
+protocol::protocol(boost::asio::ip::tcp::socket *sock):protocol(sock, 1)
 {
-  protocol(sock, 1);
 }
 
 protocol::protocol(boost::asio::ip::tcp::socket *sock, int ping_freq)
@@ -115,6 +114,8 @@ void protocol::latency_service(int ping_freq)
   boost::uuids::random_generator generator;
   forever
   {
+    boost::asio::steady_timer t(io, boost::asio::chrono::seconds(ping_freq));
+    t.wait();
     BOOST_LOG_TRIVIAL(trace) << "sending ping";
     std::string uuid = boost::lexical_cast<std::string>(generator());
     call ping_c;
@@ -126,8 +127,6 @@ void protocol::latency_service(int ping_freq)
       this -> close();
       return;
     }
-    boost::asio::steady_timer t(io, boost::asio::chrono::seconds(ping_freq));
-    t.wait();
   }
 }
 

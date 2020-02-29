@@ -13,8 +13,11 @@ public:
 private:
   void authenticate_cb(std::mutex *lock, bool *status, call c);
   void uc_transfer(call c);
+  void move_cb(call c);
 };
 
 instance *instance_builder(std::string host, int port);
+
+extern instance *current_instance;
 
 #endif // CLIENT_CLIENT_H

@@ -10,6 +10,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 #include "common/user_card.h"
+#include "server/instances.h"
 
 boost::uuids::random_generator generator;
 
@@ -43,9 +44,17 @@ void client::handle_auth(call c)
     uc_transfer.tree().put_child("data", uc.tree());
     // TODO: transfer user card to instance
     safe_write(uc_transfer);
+    instance_info *target_instance = pins[REG_EU]["flatlands"];
+    uc_transfer.tree().put("authority.token", target_instance -> auth_tok);
+    target_instance -> in -> safe_write(uc_transfer);
+    call move;
+    move.tree().put(OPCODE, OP_MOVE);
+    move.tree().put("target.host", target_instance -> hostname);
+    move.tree().put("target.port", target_instance -> port);
+    safe_write(move);
     call term;
     term.tree().put(OPCODE, OP_TERMINATE);
-//    safe_write(term);
+    safe_write(term);
   }
   else
   {

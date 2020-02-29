@@ -8,13 +8,12 @@
 class server
 {
 public:
-  server(boost::asio::io_context& ioc, int port);
+  server(int port);
 private:
   void routine();
   void cleanup();
   boost::asio::ip::tcp::endpoint endpoint;
   boost::asio::ip::tcp::acceptor acceptor;
-  boost::asio::io_context& io_context;
   std::vector<client*> clients;
 };
 

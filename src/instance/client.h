@@ -9,6 +9,10 @@ public:
   client(boost::asio::ip::tcp::socket *sock);
   ~client();
 private:
+  void uc_transfer(call c);
+  void handle_auth(call c);
+  void handle_auth_helper(call c);
+  void handle_cmd(call c);
 };
 
 #endif

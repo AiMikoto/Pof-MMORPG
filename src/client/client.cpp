@@ -22,6 +22,7 @@ instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock)
   BOOST_LOG_TRIVIAL(info) << "connected to " << socket -> remote_endpoint().address().to_string();
   ept.add(OP_UC_TRANS_ALL, boost::bind(&instance::uc_transfer, this, _1));
   ept.add(OP_UC_TRANS, boost::bind(&instance::uc_transfer, this, _1));
+  ept.add(OP_MOVE, boost::bind(&instance::move_cb, this, _1));
 }
 
 instance::~instance()
@@ -49,7 +50,7 @@ bool instance::authenticate_token(std::string username, std::string tok)
   std::mutex lock;
   bool status;
   call c;
-  ept.add(OP_AUTH, boost::bind(&instance::authenticate_cb, this, &lock, &status, _1));
+  ept.add(OP_AUTH_TOKEN, boost::bind(&instance::authenticate_cb, this, &lock, &status, _1));
   c.tree().put(OPCODE, OP_AUTH_TOKEN);
   c.tree().put("login.username", username);
   c.tree().put("login.token", tok);
@@ -75,4 +76,12 @@ void instance::uc_transfer(call c)
   uc.tree() = c.tree().get_child("data");  
   BOOST_LOG_TRIVIAL(trace) << "received user card: " << uc.tree().get<std::string>("user.name");
   ucl.add(uc);
+}
+
+void instance::move_cb(call c)
+{
+  std::string host = c.tree().get<std::string>("target.host");
+  int port = c.tree().get<int>("target.port");
+  BOOST_LOG_TRIVIAL(info) << "received instance transfer to " << host << ":" << port;
+  boost::thread t(boost::bind(move, host, port));
 }

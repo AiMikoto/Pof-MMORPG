@@ -13,6 +13,7 @@
 #define OP_AUTH "auth"
 #define OP_AUTH_TOKEN "auth_tok"
 #define OP_MOVE "move"
+#define OP_CMD "command"
 #define OP_UC_TRANS_ALL "ucta"
 #define OP_UC_TRANS "uct"
 #define OP_TERMINATE "term"

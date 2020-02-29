@@ -1,14 +1,8 @@
 server:
 
-assign user a login token
 load user card
-transfer user card
 
 
 instance:
-
-transfer user card
-authentificate using login token
-
 
 protocol:
