@@ -6,6 +6,7 @@
 #include <exception>
 #include "client/ioc.h"
 #include "common/user_card.h"
+#include "client/game.h"
 
 instance *instance_builder(std::string host, int port)
 {
@@ -19,6 +20,8 @@ instance *instance_builder(std::string host, int port)
 instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock)
 {
   BOOST_LOG_TRIVIAL(info) << "connected to " << socket -> remote_endpoint().address().to_string();
+  ept.add(OP_UC_TRANS_ALL, boost::bind(&instance::uc_transfer, this, _1));
+  ept.add(OP_UC_TRANS, boost::bind(&instance::uc_transfer, this, _1));
 }
 
 instance::~instance()
@@ -38,7 +41,22 @@ bool instance::authenticate(std::string username, std::string password)
   lock.lock();
   lock.lock();
   lock.unlock();
-  // TODO: transfer to instance
+  return status;
+}
+
+bool instance::authenticate_token(std::string username, std::string tok)
+{
+  std::mutex lock;
+  bool status;
+  call c;
+  ept.add(OP_AUTH, boost::bind(&instance::authenticate_cb, this, &lock, &status, _1));
+  c.tree().put(OPCODE, OP_AUTH_TOKEN);
+  c.tree().put("login.username", username);
+  c.tree().put("login.token", tok);
+  safe_write(c);
+  lock.lock();
+  lock.lock();
+  lock.unlock();
   return status;
 }
 
@@ -47,11 +65,7 @@ void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
   ept.remove(OP_AUTH);
   *status = c.tree().get<bool>("success");
   BOOST_LOG_TRIVIAL(trace) << "authentification: " << *status;
-  if(*status)
-  {
-    ept.add(OP_UC_TRANS_ALL, boost::bind(&instance::uc_transfer, this, _1));
-    ept.add(OP_UC_TRANS, boost::bind(&instance::uc_transfer, this, _1));
-  }
+  ept.remove(OP_AUTH);
   lock -> unlock();
 }
 
@@ -60,5 +74,5 @@ void instance::uc_transfer(call c)
   user_card uc;
   uc.tree() = c.tree().get_child("data");  
   BOOST_LOG_TRIVIAL(trace) << "received user card: " << uc.tree().get<std::string>("user.name");
-  // TODO: store user card
+  ucl.add(uc);
 }

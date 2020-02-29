@@ -9,6 +9,7 @@ public:
   instance(boost::asio::ip::tcp::socket *sock);
   ~instance();
   bool authenticate(std::string username, std::string password);
+  bool authenticate_token(std::string username, std::string token);
 private:
   void authenticate_cb(std::mutex *lock, bool *status, call c);
   void uc_transfer(call c);
