@@ -5,6 +5,7 @@
 #include "include/common_macro.h"
 #include <exception>
 #include "client/ioc.h"
+#include "common/user_card.h"
 
 instance *instance_builder(std::string host, int port)
 {
@@ -37,6 +38,8 @@ bool instance::authenticate(std::string username, std::string password)
   lock.lock();
   lock.lock();
   lock.unlock();
+  // TODO: transfer to instance
+  return status;
 }
 
 void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
@@ -44,5 +47,18 @@ void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
   ept.remove(OP_AUTH);
   *status = c.tree().get<bool>("success");
   BOOST_LOG_TRIVIAL(trace) << "authentification: " << *status;
+  if(*status)
+  {
+    ept.add(OP_UC_TRANS_ALL, boost::bind(&instance::uc_transfer, this, _1));
+    ept.add(OP_UC_TRANS, boost::bind(&instance::uc_transfer, this, _1));
+  }
   lock -> unlock();
+}
+
+void instance::uc_transfer(call c)
+{
+  user_card uc;
+  uc.tree() = c.tree().get_child("data");  
+  BOOST_LOG_TRIVIAL(trace) << "received user card: " << uc.tree().get<std::string>("user.name");
+  // TODO: store user card
 }

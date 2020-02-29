@@ -11,6 +11,7 @@ public:
   bool authenticate(std::string username, std::string password);
 private:
   void authenticate_cb(std::mutex *lock, bool *status, call c);
+  void uc_transfer(call c);
 };
 
 instance *instance_builder(std::string host, int port);

@@ -11,6 +11,8 @@
 #define OP_PING "ping"
 #define OP_PONG "pong"
 #define OP_AUTH "auth"
+#define OP_UC_TRANS_ALL "ucta"
+#define OP_UC_TRANS "uct"
 #define OP_TERMINATE "term"
 
 class protocol

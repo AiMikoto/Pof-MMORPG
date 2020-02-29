@@ -11,7 +11,7 @@ int main(int argc, char **argv)
   log_init("client");
   instance *ins = instance_builder("localhost", 7777);
   
-  ins -> authenticate("username", "password");
+  ins -> authenticate("joe", "p455w0rd");
   boost::this_thread::sleep( boost::posix_time::seconds(10) );
   ins -> close();
   delete ins;

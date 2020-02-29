@@ -5,6 +5,13 @@
 #include <boost/thread/thread.hpp>
 #include "include/common_macro.h"
 #include <exception>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/lexical_cast.hpp>
+#include "common/user_card.h"
+
+boost::uuids::random_generator generator;
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock)
 {
@@ -25,10 +32,17 @@ void client::handle_auth(call c)
   if(true) // TODO: use username and password to confirm authentification
   {
     answer.tree().put("success", true);
-    // TODO: assign login token to user
-    // TODO: load user card
     safe_write(answer);
+    user_card uc;
+    // TODO: load user card
+    std::string token = boost::lexical_cast<std::string>(generator());
+    uc.tree().put("user.name", username);
+    uc.tree().put("user.token", token);
+    call uc_transfer;
+    uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);
+    uc_transfer.tree().put_child("data", uc.tree());
     // TODO: transfer user card to instance
+    safe_write(uc_transfer);
     call term;
     term.tree().put(OPCODE, OP_TERMINATE);
 //    safe_write(term);

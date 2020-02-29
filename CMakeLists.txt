@@ -25,11 +25,12 @@ link_directories(${Boost_LIBRARY_DIR})
 
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
+add_library(user_card STATIC src/common/user_card.cpp)
 add_library(log STATIC src/lib/log.cpp)
 add_library(call STATIC src/lib/call.cpp)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call user_card)
 add_library(protocol STATIC src/lib/protocol.cpp)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol user_card)
 
 add_executable(server ${SERVER_SOURCES})
 add_executable(instance ${INSTANCE_SOURCES})
