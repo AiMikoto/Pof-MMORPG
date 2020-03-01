@@ -56,6 +56,7 @@ public_instance::public_instance(std::string auth_tok, std::string hostname, int
   call init;
   init.tree().put(OPCODE, OP_CMD);
   init.tree().put("authority.token", this -> auth_tok);
+  init.tree().put("command", "init");
   this -> in -> safe_write(init);
   // TODO: connect to instance and load map
 }

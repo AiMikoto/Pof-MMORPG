@@ -34,7 +34,7 @@ void client::handle_auth(call c)
   answer.tree().put(OPCODE, OP_AUTH);
   if(true) // TODO: use username and password to confirm authentification
   {
-    answer.tree().put("success", true);
+    answer.tree().put("status", true);
     safe_write(answer);
     user_card uc;
     // TODO: load user card
@@ -59,7 +59,7 @@ void client::handle_auth(call c)
   }
   else
   {
-    answer.tree().put("success", false);
+    answer.tree().put("status", false);
     safe_write(answer);
   }
 }

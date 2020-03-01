@@ -63,7 +63,7 @@ bool instance::authenticate_token(std::string username, std::string tok)
 
 void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
 {
-  *status = c.tree().get<bool>("success");
+  *status = c.tree().get<bool>("status");
   BOOST_LOG_TRIVIAL(trace) << "authentication: " << *status;
   lock -> unlock();
 }
@@ -103,7 +103,7 @@ bool instance::change_map(std::string instance_uuid)
 void instance::change_map_cb(std::mutex *lock, bool *status, call c)
 {
   ept.remove(OP_REQUEST_CHANGE_MAP);
-  *status = c.tree().get<bool>("success");
+  *status = c.tree().get<bool>("status");
   BOOST_LOG_TRIVIAL(trace) << "map_change_request: " << *status;
   lock -> unlock();
 }

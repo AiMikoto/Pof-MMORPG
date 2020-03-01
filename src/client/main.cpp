@@ -37,6 +37,7 @@ int main(int argc, char **argv)
   BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
   current_instance -> change_map(MAP_FLATLANDS, REG_EU);
   m.lock();
+  BOOST_LOG_TRIVIAL(error) << "client finished successfully";
   m.lock();
   return 0;
 }

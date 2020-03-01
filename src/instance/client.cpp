@@ -23,24 +23,26 @@ client::~client()
 {
 }
 
-void client::uc_transfer(call c)
+// throws instead of returning.
+void client::validate_authority(std::string auth_tok)
 {
-  std::string auth_tok = c.tree().get<std::string>("authority.token");
-  if(auth_tok == my_tok)
+  if(auth_tok != my_tok)
   {
-    user_card uc;
-    uc.tree() = c.tree().get_child("data");
-    BOOST_LOG_TRIVIAL(trace) << "received user card(pending): " << uc.tree().get<std::string>("user.name");
-    uclp.add(uc);
-  }
-  else
-  { 
     throw std::logic_error("wrong authority token");
   }
 }
 
-void client::handle_auth_helper(call c)
+void client::uc_transfer(call c)
 {
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  user_card uc;
+  uc.tree() = c.tree().get_child("data");
+  BOOST_LOG_TRIVIAL(trace) << "received user card(pending): " << uc.tree().get<std::string>("user.name");
+  uclp.add(uc);
+}
+
+void client::handle_auth_helper(call c)
+{ // try block because this is a helper
   try
   {
     username = c.tree().get<std::string>("login.username");
@@ -49,7 +51,7 @@ void client::handle_auth_helper(call c)
     call answer;
     user_card uc;
     answer.tree().put(OPCODE, OP_AUTH_TOKEN);
-    answer.tree().put("success", false);
+    answer.tree().put("status", false);
     for(int trials = 1; trials <= 3; trials++)
     {
       if(uclp.contains(username))
@@ -57,14 +59,20 @@ void client::handle_auth_helper(call c)
         uc = uclp.get(username);
         if(uc.tree().get<std::string>("user.token") == tok)
         {
+          BOOST_LOG_TRIVIAL(trace) << "user login successful - " << username;
 	  uclp.remove(username);
           uc.aux = (void *) this;
 	  ucl.add(uc);
-          answer.tree().put("success", true);
+          answer.tree().put("status", true);
           ept.remove(OP_AUTH_TOKEN);
           ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&client::handle_map_change_request, this, _1));
           // TODO: populate calls
+	  break;
         }
+	else
+	{
+	  break;
+	}
       }
       else
       {
@@ -92,6 +100,10 @@ void client::handle_map_change_request_cb(call c)
   std::string uname = c.tree().get<std::string>("card.user.name");
   user_card uc = ucl.get(uname);
   client *that = (client *)(uc.aux);
+  call answer;
+  answer.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP);
+  answer.tree().put("status", c.tree().get<bool>("status"));
+  that -> safe_write(answer);
   if(c.tree().get<bool>("status"))
   {
     BOOST_LOG_TRIVIAL(trace) << "server approved map change";
@@ -116,16 +128,14 @@ void client::handle_auth(call c)
 
 void client::handle_cmd(call c)
 {
-  std::string auth_tok = c.tree().get<std::string>("authority.token");
-  if(auth_tok == my_tok)
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  std::string command = c.tree().get<std::string>("command");
+  if(command == "init")
   {
-    master = this;
     BOOST_LOG_TRIVIAL(info) << "updated master to " << socket -> remote_endpoint().address().to_string();
-    // TODO: do what command tells you
+    master = this;
     ept.add(OP_REQUEST_CHANGE_MAP_CB, boost::bind(&client::handle_map_change_request_cb, this, _1));
+    return;
   }
-  else
-  { 
-    throw std::logic_error("wrong authority token");
-  }
+  BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }
