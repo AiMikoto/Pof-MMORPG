@@ -18,7 +18,6 @@
 #define OP_UC_TRANS "uct"
 #define OP_TERMINATE "term"
 #define OP_REQUEST_CHANGE_MAP "req_change_map"
-#define OP_INSTANCE_INIT "instance_init"
 
 class protocol
 {
