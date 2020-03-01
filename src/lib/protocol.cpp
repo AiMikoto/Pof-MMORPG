@@ -47,6 +47,7 @@ protocol::~protocol()
 
 int protocol::safe_write(call c)
 {
+  BOOST_LOG_TRIVIAL(trace) << "sending call - " << c.tree().get<std::string>(OPCODE);
   try
   {
     // TODO: mutex
