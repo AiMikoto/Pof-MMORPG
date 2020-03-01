@@ -1,11 +1,5 @@
-server:
-
-load user card
-upon receiving move map request, inform new instance of movement
-
-
-instance:
-
-upon receiving move map request, forward request to server and issue move command to client
-
-protocol:
+map change:
+CLIENT issues request to change map to INSTANCE
+INSTANCE forwards the request to SERVER
+SERVER answers the call to INSTANCE
+INSTANCE forwards the answer to CLIENT
