@@ -4,6 +4,7 @@
 #include "common/user_card.h"
 
 extern user_card_library ucl;
+extern user_card_library uclp;
 
 // extern game *g;
 

@@ -8,6 +8,7 @@ class user_card
 {
 public:
   boost::property_tree::ptree& tree();
+  void *aux; // hook for whatever you fancy
 private:
   boost::property_tree::ptree _tree;
 };

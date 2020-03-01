@@ -30,8 +30,8 @@ void client::uc_transfer(call c)
   {
     user_card uc;
     uc.tree() = c.tree().get_child("data");
-    BOOST_LOG_TRIVIAL(trace) << "received user card: " << uc.tree().get<std::string>("user.name");
-    ucl.add(uc);
+    BOOST_LOG_TRIVIAL(trace) << "received user card(pending): " << uc.tree().get<std::string>("user.name");
+    uclp.add(uc);
   }
   else
   { 
@@ -43,7 +43,7 @@ void client::handle_auth_helper(call c)
 {
   try
   {
-    std::string username = c.tree().get<std::string>("login.username");
+    username = c.tree().get<std::string>("login.username");
     std::string tok = c.tree().get<std::string>("login.token");
     BOOST_LOG_TRIVIAL(trace) << "extracted login token" << tok;
     call answer;
@@ -52,13 +52,17 @@ void client::handle_auth_helper(call c)
     answer.tree().put("success", false);
     for(int trials = 1; trials <= 3; trials++)
     {
-      if(ucl.contains(username))
+      if(uclp.contains(username))
       {
-        uc = ucl.get(username);
+        uc = uclp.get(username);
         if(uc.tree().get<std::string>("user.token") == tok)
         {
+	  uclp.remove(username);
+          uc.aux = (void *) this;
+	  ucl.add(uc);
           answer.tree().put("success", true);
           ept.remove(OP_AUTH_TOKEN);
+          ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&client::handle_map_change_request, this, _1));
           // TODO: populate calls
         }
       }
@@ -76,6 +80,35 @@ void client::handle_auth_helper(call c)
   }
 }
 
+void client::handle_map_change_request(call c)
+{
+  BOOST_LOG_TRIVIAL(trace) << "client requested map change";
+  c.tree().put_child("card", ucl.get(username).tree());
+  master -> safe_write(c);
+}
+
+void client::handle_map_change_request_cb(call c)
+{
+  std::string uname = c.tree().get<std::string>("card.user.name");
+  user_card uc = ucl.get(uname);
+  client *that = (client *)(uc.aux);
+  if(c.tree().get<bool>("status"))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "server approved map change";
+    // if authorised, card will be transferred to new instance
+    ucl.remove(uname);
+    call move;
+    move.tree().put(OPCODE, OP_MOVE);
+    move.tree().put("target.host", c.tree().get<std::string>("target.host"));
+    move.tree().put("target.port", c.tree().get<int>("target.port"));
+    that -> safe_write(move);
+    call term;
+    term.tree().put(OPCODE, OP_TERMINATE);
+    that -> safe_write(term);
+    that -> close();
+  }
+}
+
 void client::handle_auth(call c)
 {
   boost::thread t(boost::bind(&client::handle_auth_helper, this, c));
@@ -89,6 +122,7 @@ void client::handle_cmd(call c)
     master = this;
     BOOST_LOG_TRIVIAL(info) << "updated master to " << socket -> remote_endpoint().address().to_string();
     // TODO: do what command tells you
+    ept.add(OP_REQUEST_CHANGE_MAP_CB, boost::bind(&client::handle_map_change_request_cb, this, _1));
   }
   else
   { 

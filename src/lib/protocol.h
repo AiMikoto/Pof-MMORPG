@@ -18,6 +18,7 @@
 #define OP_UC_TRANS "uct"
 #define OP_TERMINATE "term"
 #define OP_REQUEST_CHANGE_MAP "req_change_map"
+#define OP_REQUEST_CHANGE_MAP_CB "ans_change_map"
 
 class protocol
 {
@@ -28,13 +29,14 @@ public:
   int safe_write(call c);
   void close();
   int get_ping();
+// careful with ept
+  endpoint_table ept;
 protected:
   void handle_ping(call c);
   void handle_pong(call c);
   void terminate(call c);
   void terminate_force(call c);
   boost::asio::ip::tcp::socket *socket;
-  endpoint_table ept;
 private:
   int ping;
   void routine();

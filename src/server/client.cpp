@@ -55,6 +55,7 @@ void client::handle_auth(call c)
     call term;
     term.tree().put(OPCODE, OP_TERMINATE);
     safe_write(term);
+    this -> close();
   }
   else
   {

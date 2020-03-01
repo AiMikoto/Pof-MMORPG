@@ -14,6 +14,7 @@ instance *instance_builder(instance_info ini)
 
 instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock, -1)
 {
+  ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::handle_map_change_request, this, _1));
 }
 
 void instance::handle_map_change_request(call c)
@@ -22,7 +23,13 @@ void instance::handle_map_change_request(call c)
   map_t map = c.tree().get<map_t>("target.map");
   user_card uc;
   uc.tree() = c.tree().get_child("card");
-  pins[reg][map] -> transfer_user_card(uc);
+  instance_info *instance = pins[reg][map];
+  instance -> transfer_user_card(uc);
+  c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP_CB);
+  c.tree().put("status", true);
+  c.tree().put("target.host", instance -> hostname);
+  c.tree().put("target.port", instance -> port);
+  this -> safe_write(c);
 }
 
 instance_info::instance_info(std::string auth_tok, std::string hostname, int port)
