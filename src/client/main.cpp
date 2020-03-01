@@ -4,6 +4,8 @@
 #include "client/client.h"
 #include <boost/thread/thread.hpp>
 #include "client/game.h"
+#include "include/maps.h"
+#include "include/regions.h"
 
 #define LOGIN_SV_HOST "localhost"
 #define LOGIN_SV_PORT 7777
@@ -33,6 +35,8 @@ int main(int argc, char **argv)
   // finished initialisation
   init_l.unlock();
   std::mutex m;
+  boost::this_thread::sleep(boost::posix_time::seconds(15));
+  current_instance -> change_map(MAP_FLATLANDS, REG_EU);
   m.lock();
   m.lock();
   return 0;
