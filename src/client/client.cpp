@@ -63,14 +63,14 @@ bool instance::authenticate_token(std::string username, std::string tok)
 
 void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
 {
-  ept.remove(OP_AUTH);
   *status = c.tree().get<bool>("success");
-  BOOST_LOG_TRIVIAL(trace) << "authentification: " << *status;
+  BOOST_LOG_TRIVIAL(trace) << "authentication: " << *status;
   lock -> unlock();
 }
 
 bool instance::change_map(map_t map, region_t region)
 {
+  // TODO: make this obsolete.
   std::mutex lock;
   bool status;
   call c;
@@ -85,11 +85,26 @@ bool instance::change_map(map_t map, region_t region)
   return status;
 }
 
+bool instance::change_map(std::string instance_uuid)
+{
+  std::mutex lock;
+  bool status;
+  call c;
+  ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::change_map_cb, this, &lock, &status, _1));
+  c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP);
+  c.tree().put("target.uuid", instance_uuid);
+  safe_write(c);
+  lock.lock();
+  lock.lock();
+  lock.unlock();
+  return status;
+}
+
 void instance::change_map_cb(std::mutex *lock, bool *status, call c)
 {
   ept.remove(OP_REQUEST_CHANGE_MAP);
   *status = c.tree().get<bool>("success");
-  BOOST_LOG_TRIVIAL(trace) << "map_change: " << *status;
+  BOOST_LOG_TRIVIAL(trace) << "map_change_request: " << *status;
   lock -> unlock();
 }
 

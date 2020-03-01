@@ -14,4 +14,4 @@ extern std::string username;
 
 void move(std::string host, int port);
 
-#endif
+#endif // CLIENT_GAME_H

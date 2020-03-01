@@ -13,6 +13,7 @@ public:
   bool authenticate(std::string username, std::string password);
   bool authenticate_token(std::string username, std::string tok);
   bool change_map(map_t map, region_t region);
+  bool change_map(std::string instance_uuid);
 private:
   void authenticate_cb(std::mutex *lock, bool *status, call c);
   void change_map_cb(std::mutex *lock, bool *status, call c);

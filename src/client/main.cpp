@@ -12,30 +12,29 @@
 
 boost::asio::io_context ioc;
 instance *current_instance;
-// game *g;
 std::mutex init_l;
 std::string username = "joe";
 
 int main(int argc, char **argv)
 {
-  // prevent other processes from activating during login
+  log_init("client");
+  BOOST_LOG_TRIVIAL(trace) << "client initialising";
   init_l.lock();
   // artificially create a new game
-//  g = new game();
-  log_init("client");
-  // connect to login server
+  BOOST_LOG_TRIVIAL(trace) << "attempting to connect to login server";
   current_instance = instance_builder(LOGIN_SV_HOST, LOGIN_SV_PORT);
-  // authenticate to the login server
+  BOOST_LOG_TRIVIAL(trace) << "attempting to login";
   current_instance -> authenticate(username, "p455w0rd");
-  // wait for user card to be transferred
   while(!ucl.contains(username))
   {
+    BOOST_LOG_TRIVIAL(trace) << "waiting for user card";
     boost::this_thread::sleep(boost::posix_time::seconds(1));
   }
-  // finished initialisation
+  BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
   init_l.unlock();
   std::mutex m;
   boost::this_thread::sleep(boost::posix_time::seconds(15));
+  BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
   current_instance -> change_map(MAP_FLATLANDS, REG_EU);
   m.lock();
   m.lock();
