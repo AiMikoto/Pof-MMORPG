@@ -7,6 +7,8 @@
 #include <exception>
 #include "instance/game.h"
 
+client *master;
+
 std::string my_tok = "fish"; // TODO: export this
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, 10)
@@ -84,6 +86,8 @@ void client::handle_cmd(call c)
   std::string auth_tok = c.tree().get<std::string>("authority.token");
   if(auth_tok == my_tok)
   {
+    master = this;
+    BOOST_LOG_TRIVIAL(info) << "updated master to " << socket -> remote_endpoint().address().to_string();
     // TODO: do what command tells you
   }
   else

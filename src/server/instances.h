@@ -6,6 +6,7 @@
 #include "lib/protocol.h"
 #include "include/maps.h"
 #include "include/regions.h"
+#include "common/user_card.h"
 
 // all instances have a static hostname and a port assigned to then
 // a single hostname can be shared by multiple instances as long as
@@ -17,12 +18,15 @@ class instance:public protocol
 {
 public:
   instance(boost::asio::ip::tcp::socket *sock);
+private:
+  void handle_map_change_request(call c);
 };
 
 class instance_info
 {
 public:
   instance_info(std::string auth_tok, std::string hostname, int port);
+  void transfer_user_card(user_card uc);
   std::string uuid;
   std::string auth_tok;
   std::string hostname;

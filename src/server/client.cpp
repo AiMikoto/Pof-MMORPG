@@ -44,11 +44,9 @@ void client::handle_auth(call c)
     call uc_transfer;
     uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);
     uc_transfer.tree().put_child("data", uc.tree());
-    // TODO: transfer user card to instance
     safe_write(uc_transfer);
     instance_info *target_instance = pins[REG_EU][MAP_FLATLANDS];
-    uc_transfer.tree().put("authority.token", target_instance -> auth_tok);
-    target_instance -> in -> safe_write(uc_transfer);
+    target_instance -> transfer_user_card(uc);
     call move;
     move.tree().put(OPCODE, OP_MOVE);
     move.tree().put("target.host", target_instance -> hostname);
