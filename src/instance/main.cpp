@@ -14,11 +14,12 @@ int main(int argc, char **argv)
     return 1;
   }
   log_init("instance");
-  // extract arguments
+  BOOST_LOG_TRIVIAL(trace) << "extracting arguments";
   int port = std::atoi(argv[1]);
-  // create a server 
+  BOOST_LOG_TRIVIAL(trace) << "creating server";
   server s(ioc, port);
   // block current thread
+  BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
   std::mutex m;
   m.lock();
   m.lock();

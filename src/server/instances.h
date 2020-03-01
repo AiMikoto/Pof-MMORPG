@@ -54,4 +54,4 @@ instance *instance_builder(instance_info ini);
 
 void populate_pins();
 
-#endif
+#endif // SERVER_INSTANCES_H
