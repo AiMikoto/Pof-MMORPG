@@ -26,7 +26,7 @@ void server::cleanup()
 {
   forever
   {
-    boost::this_thread::sleep( boost::posix_time::seconds(10));
+    boost::this_thread::sleep( boost::posix_time::seconds(2));
     BOOST_LOG_TRIVIAL(trace) << "cleaning up";
     for(auto it = clients.begin(); it != clients.end(); it++)
     {
@@ -35,6 +35,7 @@ void server::cleanup()
       if(c -> get_ping() == -1)
       {
         BOOST_LOG_TRIVIAL(info) << "cleaned client";
+	// TODO: remove user card if present
         clients.erase(it);
         delete c;
 	it--;

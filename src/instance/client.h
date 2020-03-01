@@ -19,4 +19,4 @@ private:
   std::string username;
 };
 
-#endif
+#endif // INSTANCE_CLIENT_H
