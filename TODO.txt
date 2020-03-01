@@ -1,8 +1,11 @@
 server:
 
 load user card
+upon receiving move map request, inform new instance of movement
 
 
 instance:
+
+upon receiving move map request, forward request to server and issue move command to client
 
 protocol:
