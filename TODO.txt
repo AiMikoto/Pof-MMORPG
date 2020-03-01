@@ -1,22 +1,5 @@
-instance
-  receives actions from clients
-  updates list of objects, validating action
-  forwards the action to other clients
-
-client
-  sends actions to server
-  receives actions from server
-  updates list of objects, without validating action
-
-server
-  creates instance
-
-world structure
-  global - list of objects
-         - actions
-  local  - field of view
-
-1 - list of objects
-2 - physics
-3 - action
-4 - field of view
+map change:
+CLIENT issues request to change map to INSTANCE
+INSTANCE forwards the request to SERVER
+SERVER answers the call to INSTANCE
+INSTANCE forwards the answer to CLIENT

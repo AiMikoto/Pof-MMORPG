@@ -1,6 +1,8 @@
 #include "lib/call.h"
 #include <boost/property_tree/json_parser.hpp>
 
+void noop(call c) {}
+
 std::string make_string(boost::asio::streambuf& streambuf)
 {
   return {boost::asio::buffers_begin(streambuf.data()),
@@ -47,4 +49,40 @@ void write_call(boost::asio::ip::tcp::socket *s, call c)
   uint32_t size = payload.length();
   payload.insert(0, (char *) &size, sizeof(uint32_t));
   boost::asio::write(*s, boost::asio::buffer(payload), boost::asio::transfer_all());
+}
+
+endpoint_table::endpoint_table()
+{
+  err_cb = noop;
+}
+
+void endpoint_table::add(std::string endpoint, callback cb)
+{
+  table[endpoint] = cb;
+}
+
+void endpoint_table::add_err(callback cb)
+{
+  err_cb = cb;
+}
+
+void endpoint_table::remove(std::string endpoint)
+{
+  auto it = table.find(endpoint);
+  if(it == table.end())
+  {
+    return;
+  }
+  table.erase(it);
+}
+
+void endpoint_table::look_up(std::string endpoint, call c)
+{ 
+  auto it = table.find(endpoint);
+  if(it == table.end())
+  {
+    err_cb(c);
+    return;
+  }
+  it -> second(c);
 }

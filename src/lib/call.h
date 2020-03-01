@@ -3,8 +3,10 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/asio.hpp>
+#include <boost/function.hpp>
 #include <string>
 #include <iostream>
+#include <map>
 
 class call
 {
@@ -20,5 +22,21 @@ private:
 call read_call(boost::asio::ip::tcp::socket *s);
 
 void write_call(boost::asio::ip::tcp::socket *s, call c);
+
+typedef boost::function<void(call)> callback;
+
+class endpoint_table
+{
+public:
+  endpoint_table();
+  void add(std::string endpoint, callback cb);
+  void add_err(callback cb);
+  void remove(std::string endpoint);
+  void look_up(std::string endpoint, call c);
+private:
+  std::map<std::string, callback> table;
+  callback err_cb;
+};
+
 
 #endif // LIB_CALL_H

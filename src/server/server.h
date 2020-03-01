@@ -1,5 +1,5 @@
-#ifndef INSTANCE_SERVER_H
-#define INSTANCE_SERVER_H
+#ifndef SERVER_SERVER_H
+#define SERVER_SERVER_H
 
 #include <boost/asio.hpp>
 #include <vector>
@@ -8,14 +8,13 @@
 class server
 {
 public:
-  server(boost::asio::io_context& ioc, int port);
+  server(int port);
 private:
   void routine();
   void cleanup();
   boost::asio::ip::tcp::endpoint endpoint;
   boost::asio::ip::tcp::acceptor acceptor;
-  boost::asio::io_context& io_context;
   std::vector<client*> clients;
 };
 
-#endif // INSTANCE_SERVER_H
+#endif // SERVER_SERVER_H
