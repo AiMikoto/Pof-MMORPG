@@ -5,10 +5,16 @@ namespace gph = graphics;
 
 int main() {
 	GLFWwindow* window = gph::createGLFWContext(gph::windowWidth, gph::windowHeight, gph::windowName);
-	std::vector<std::string> c = gph::charArrayToStringVector(gph::requiredShadersPath, (size_t)gph::requiredShadersPathLength);
-	for (auto s : c) {
-		std::cout << s << std::endl;
-	}
+
+	GLuint vertexArrayID;
+	glGenVertexArrays(1, &vertexArrayID);
+	glBindVertexArray(vertexArrayID);
+
+	gph::GameObject* mainScene = new gph::GameObject();
+
+	std::vector<std::string> requiredShaders = gph::charArrayToStringVector(gph::requiredShadersPath,
+		(size_t)gph::requiredShadersPathLength);
+	gph::loadRequiredShaders(requiredShaders);
 
 	float lastTime = (float)glfwGetTime();
 	float check = 0;
@@ -18,6 +24,7 @@ int main() {
 	while (!gph::quit) {
 		gph::update(window, lastTime, check, fps);
 	}
+	gph::Cleanup(mainScene, vertexArrayID);
 	glfwTerminate();
 	return 0;
 }

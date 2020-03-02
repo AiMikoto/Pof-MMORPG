@@ -1,7 +1,9 @@
 #include "gl_functions.h"
 #include "keyboard_functions.h"
 
-GLFWwindow * graphics::createGLFWContext(int width, int height, std::string name) {
+namespace gph = graphics;
+
+GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 	if (!glfwInit())
 	{
 		std::cout << "Failed to initialize GLFW" << std::endl;
@@ -53,21 +55,24 @@ GLFWwindow * graphics::createGLFWContext(int width, int height, std::string name
 	return window;
 }
 
-void graphics::windowResizeCallback(GLFWwindow* window, int width, int height) {
+void gph::windowResizeCallback(GLFWwindow* window, int width, int height) {
 	windowWidth = width;
 	windowHeight = height;
 	windowResized = true;
 }
 
-void graphics::update(GLFWwindow* window, float lastTime, float check, int fps) {
+void gph::update(GLFWwindow* window, float lastTime, float check, int fps) {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	//we only load 1 program for now, will later declare a shaders class and deal with that
+	glUseProgram(shaderProgramsIDs[0]);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 }
 
-GLuint graphics::loadShaders(std::string vertexFilePath, std::string fragmentFilePath)
+GLuint gph::loadShaders(std::string vertexFilePath, std::string fragmentFilePath)
 {
 	// Create the shaders
 	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -155,7 +160,7 @@ GLuint graphics::loadShaders(std::string vertexFilePath, std::string fragmentFil
 	return programID;
 }
 
-void graphics::loadRequiredShaders(std::vector<std::string> shadersPath) {
+void gph::loadRequiredShaders(std::vector<std::string> shadersPath) {
 	if (shadersPath.size() % 2) {
 		std::cout << "The required shaders must be pairs of vertex and fragment shaders." << std::endl;
 		std::cin.ignore();
@@ -164,4 +169,20 @@ void graphics::loadRequiredShaders(std::vector<std::string> shadersPath) {
 	for (size_t i = 0; i < shadersPath.size(); i += 2) {
 		shaderProgramsIDs.push_back(loadShaders(shadersPath[i], shadersPath[i + 1]));
 	}
+}
+
+void gph::UpdateCamera(GLFWwindow* window) { }
+
+void gph::DrawScene(gph::GameObject* mainScene) {
+
+}
+
+void gph::DrawUI() { }
+
+void gph::Cleanup(GameObject* mainScene, GLuint vertexArrayID) {
+	std::cout << "Cleaning up..." << std::endl;
+	for (auto programID: shaderProgramsIDs) {
+		glDeleteProgram(programID);
+	}
+	glDeleteVertexArrays(1, &vertexArrayID);
 }

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include "objects.h"
 
 namespace graphics {
 	GLFWwindow * createGLFWContext(int width, int height, std::string name);
@@ -12,4 +13,8 @@ namespace graphics {
 	void update(GLFWwindow* window, float lastTime, float check, int fps);
 	GLuint loadShaders(std::string vertexFilePath, std::string fragmentFilePath);
 	void loadRequiredShaders(std::vector<std::string> shadersPaths);
+	void UpdateCamera(GLFWwindow* window);
+	void DrawScene(GameObject* mainScene);
+	void DrawUI();
+	void Cleanup(GameObject* mainScene, GLuint vertexArrayID);
 }
