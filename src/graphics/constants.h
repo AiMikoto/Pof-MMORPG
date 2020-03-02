@@ -8,6 +8,5 @@ namespace graphics {
 	//I need this ugly workaround, oh well...
 	const uint requiredShadersPathLength = 4;
 	constexpr const char* const requiredShadersPath[] = 
-		{ "vertex_shader1.path", "fragment_shader1.path",
-		  "vertex_shader2.path", "fragment_shader2.path"};
+		{ "shaders/model.vertexshader", "shaders/model.fragmentshader"};
 }
