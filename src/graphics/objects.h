@@ -6,17 +6,19 @@
 
 namespace graphics {
 	struct GameObject {
+		std::string name, tag;
+		size_t id;
 		GameObject* parent;
 		std::vector<GameObject*> children;
-		Transform* transform;
-		GameObject* gameObject;
 
 		GameObject();
-		GameObject(Transform* transform);
+		~GameObject();
+		GameObject(GameObject* parent);
 		GameObject(std::vector<GameObject*> children);
-		GameObject(std::vector<GameObject*> children, Transform* transform);
+		GameObject(GameObject* parent, std::vector<GameObject*> children);
 		void add_child(GameObject* child);
 		void add_children(std::vector<GameObject*> children);
+		size_t generateID();
 	};
 
 	struct Transform:GameObject {
@@ -24,6 +26,7 @@ namespace graphics {
 		glm::quat rotation;
 
 		Transform();
+		~Transform();
 		Transform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
 		glm::vec3 forward();
 		glm::vec3 right();
@@ -32,6 +35,7 @@ namespace graphics {
 
 	struct Camera :GameObject {
 		Camera();
+		~Camera();
 		Camera(Transform* transform);
 	};
 }
