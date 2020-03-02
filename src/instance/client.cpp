@@ -22,7 +22,6 @@ void init_crypto(std::string priv)
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
-  aes = NULL;
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
   ept.add(OP_AUTH_TOKEN, boost::bind(&client::handle_auth, this, _1));
   ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
@@ -32,10 +31,6 @@ client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 
 client::~client()
 {
-  if(aes)
-  {
-    delete aes;
-  }
 }
 
 // throws instead of returning.

@@ -83,6 +83,7 @@ public_instance::public_instance(std::string auth_tok, std::string hostname, int
   init.tree().put("aes.iv", g_aes -> iv);
   this -> in -> safe_write(init); // uses RSA
   this -> in -> replace_crypto(g_aes); // chance crypto to aes
+  this -> in -> start();
   // TODO: connect to instance and load map
 }
 

@@ -50,42 +50,45 @@ std::string aes_crypto::decrypt(std::string data)
 
 rsa_crypto::rsa_crypto(BIO *enc, BIO *dec)
 {
+  key = RSA_new();
   this -> enc = enc;
   this -> dec = dec;
+  // initialise encryption operation
+  if(enc)
+  {
+    PEM_read_bio_RSA_PUBKEY(enc, &key, NULL, NULL);
+  }
+  if(dec)
+  {
+    PEM_read_bio_RSAPrivateKey(dec, &key, NULL, NULL);
+  }
 }
 
 rsa_crypto::~rsa_crypto()
 {
   BIO_free_all(enc);
   BIO_free_all(dec);
+  RSA_free(key);
 }
 
 std::string rsa_crypto::encrypt(std::string data)
 {
   uint32_t size = data.length();
-  // initialise encryption operation
-  RSA *key = RSA_new();
-  PEM_read_bio_RSA_PUBKEY(enc, &key, NULL, NULL);
   // allocate buffer
   unsigned char buffer[RSA_size(key)];
   // encrypt
   uint32_t output_size = RSA_public_encrypt(size, (unsigned char *)data.c_str(), buffer, key, padding_convention);
   // clean-up
-  RSA_free(key);
   return std::string((char *)buffer, output_size);
 }
 
 std::string rsa_crypto::decrypt(std::string data)
 {
   uint32_t size = data.length();
-  // initialise decryption operation
-  RSA *key = RSA_new();
-  PEM_read_bio_RSAPrivateKey(dec, &key, NULL, NULL);
   // allocate buffer
   unsigned char buffer[RSA_size(key)];
   // decrypt
   uint32_t output_size = RSA_private_decrypt(size, (unsigned char *)data.c_str(), buffer, key, padding_convention);
   // clean-up
-  RSA_free(key);
   return std::string((char *)buffer, output_size);
 }

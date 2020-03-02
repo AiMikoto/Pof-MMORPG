@@ -11,7 +11,6 @@ public:
   client(boost::asio::ip::tcp::socket *sock);
   ~client();
 private:
-  crypto *aes;
   void validate_authority(std::string token);
   void uc_transfer(call c);
   void handle_auth(call c);

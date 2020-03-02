@@ -25,12 +25,12 @@ protocol::protocol(boost::asio::ip::tcp::socket *sock, crypto *c, int ping_freq)
   ept.add(OP_PONG, boost::bind(&protocol::handle_pong, this, _1));
   ept.add(OP_TERMINATE, boost::bind(&protocol::terminate, this, _1));
   t_routine = NULL;
+  aes = NULL;
 }
 
 protocol::~protocol()
 {
   socket -> close();
-  delete socket;
   if(t_pinger)
   {
     t_pinger -> join();
@@ -40,6 +40,11 @@ protocol::~protocol()
   {
     t_routine -> join();
     delete t_routine;
+  }
+  delete socket;
+  if(aes)
+  {
+    delete aes;
   }
 }
 
@@ -112,7 +117,6 @@ void protocol::routine()
     {
       BOOST_LOG_TRIVIAL(trace) << "attempting to read call";
       call c = read_call(socket, cry);
-      BOOST_LOG_TRIVIAL(trace) << "received call";
       std::string opc = c.tree().get<std::string>(OPCODE);
       BOOST_LOG_TRIVIAL(trace) << "received call " << opc;
       ept.look_up(opc, c);

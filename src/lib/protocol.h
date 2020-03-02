@@ -27,6 +27,7 @@ public:
   protocol(boost::asio::ip::tcp::socket *sock, crypto *c);
   protocol(boost::asio::ip::tcp::socket *sock, crypto *c, int ping_freq);
   ~protocol();
+  void start();
   void start_ping();
   void replace_crypto(crypto *cry);
   int safe_write(call c);
@@ -35,11 +36,11 @@ public:
 // careful with ept
   endpoint_table ept;
 protected:
-  void start();
   void handle_ping(call c);
   void handle_pong(call c);
   void terminate(call c);
   void terminate_force(call c);
+  crypto *aes;
   boost::asio::ip::tcp::socket *socket;
 private:
   crypto *cry;

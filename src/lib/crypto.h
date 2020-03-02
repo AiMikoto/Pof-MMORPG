@@ -31,6 +31,7 @@ public:
   std::string decrypt(std::string data);
   BIO *enc;
   BIO *dec;
+  RSA *key;
   int padding_convention = RSA_PKCS1_OAEP_PADDING;
 };
 

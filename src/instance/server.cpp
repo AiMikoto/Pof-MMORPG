@@ -34,10 +34,11 @@ void server::cleanup()
       BOOST_LOG_TRIVIAL(trace) << "checking client";
       if(c -> get_ping() == -1)
       {
-        BOOST_LOG_TRIVIAL(info) << "cleaned client";
 	// TODO: remove user card if present
+        BOOST_LOG_TRIVIAL(info) << "cleaning client";
         clients.erase(it);
         delete c;
+        BOOST_LOG_TRIVIAL(info) << "cleaned client";
 	it--;
       }
     }

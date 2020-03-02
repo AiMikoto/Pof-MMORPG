@@ -78,6 +78,8 @@ bool instance::authenticate_token(std::string username, std::string tok)
   c.tree().put(OPCODE, OP_AUTH_TOKEN);
   c.tree().put("login.username", username);
   c.tree().put("login.token", tok);
+  c.tree().put("aes.key", g_aes -> key);
+  c.tree().put("aes.iv", g_aes -> iv);
   safe_write(c); // uses RSA
   replace_crypto(g_aes); // chance crypto to aes
   start();

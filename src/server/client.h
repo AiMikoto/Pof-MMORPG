@@ -10,7 +10,6 @@ class client:public protocol
 public:
   client(boost::asio::ip::tcp::socket *sock);
   ~client();
-  crypto *aes;
 private:
   void handle_auth(call c);
 };
