@@ -1,3 +1,11 @@
 add encryption to network
 server database connection for usercards loading and authentication
 instance database connection for periodic usercard save
+
+server and instance share a private key
+
+client owns public key
+
+client -> server - client uses public key
+client -> instance - client uses public key
+server -> instance - server uses public key
