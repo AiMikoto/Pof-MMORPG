@@ -7,6 +7,26 @@
 #include "client/ioc.h"
 #include "common/user_card.h"
 #include "client/game.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/lexical_cast.hpp>
+
+rsa_crypto *g_rsa;
+aes_crypto *g_aes;
+boost::uuids::random_generator generator;
+
+void init_crypto(std::string pub)
+{
+  std::string uuid1 = boost::lexical_cast<std::string>(generator());
+  std::string uuid2 = boost::lexical_cast<std::string>(generator());
+  std::string uuid3 = uuid1 + uuid2;
+  std::string uuid4 = boost::lexical_cast<std::string>(generator());
+  g_aes = new aes_crypto(uuid3.substr(0, 32), uuid4.substr(36, 16));
+  BIO *keybio = BIO_new(BIO_s_file());
+  BIO_read_filename(keybio, pub.c_str());
+  g_rsa = new rsa_crypto(keybio, NULL);
+}
 
 instance *instance_builder(std::string host, int port)
 {
@@ -17,7 +37,7 @@ instance *instance_builder(std::string host, int port)
   return new instance(sock);
 }
 
-instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock)
+instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa)
 {
   BOOST_LOG_TRIVIAL(info) << "connected to " << socket -> remote_endpoint().address().to_string();
   ept.add(OP_UC_TRANS_ALL, boost::bind(&instance::uc_transfer, this, _1));
@@ -38,7 +58,11 @@ bool instance::authenticate(std::string username, std::string password)
   c.tree().put(OPCODE, OP_AUTH);
   c.tree().put("login.username", username);
   c.tree().put("login.password", password);
-  safe_write(c);
+  c.tree().put("aes.key", g_aes -> key);
+  c.tree().put("aes.iv", g_aes -> iv);
+  safe_write(c); // uses RSA
+  replace_crypto(g_aes); // chance crypto to aes
+  start();
   lock.lock();
   lock.lock();
   lock.unlock();
@@ -54,7 +78,9 @@ bool instance::authenticate_token(std::string username, std::string tok)
   c.tree().put(OPCODE, OP_AUTH_TOKEN);
   c.tree().put("login.username", username);
   c.tree().put("login.token", tok);
-  safe_write(c);
+  safe_write(c); // uses RSA
+  replace_crypto(g_aes); // chance crypto to aes
+  start();
   lock.lock();
   lock.lock();
   lock.unlock();

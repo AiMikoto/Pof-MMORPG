@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include "lib/crypto.h"
 
 class call
 {
@@ -19,9 +20,9 @@ private:
   boost::property_tree::ptree _tree;
 };
 
-call read_call(boost::asio::ip::tcp::socket *s);
+call read_call(boost::asio::ip::tcp::socket *s, crypto *cry);
 
-void write_call(boost::asio::ip::tcp::socket *s, call c);
+void write_call(boost::asio::ip::tcp::socket *s, call c, crypto *cry);
 
 typedef boost::function<void(call)> callback;
 

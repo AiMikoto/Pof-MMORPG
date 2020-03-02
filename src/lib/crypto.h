@@ -17,7 +17,6 @@ public:
   aes_crypto(std::string key, std::string iv);
   std::string encrypt(std::string data);
   std::string decrypt(std::string data);
-private:
   int block_size = 128;
   std::string key;
   std::string iv;
@@ -30,7 +29,6 @@ public:
   ~rsa_crypto();
   std::string encrypt(std::string data);
   std::string decrypt(std::string data);
-private:
   BIO *enc;
   BIO *dec;
   int padding_convention = RSA_PKCS1_OAEP_PADDING;

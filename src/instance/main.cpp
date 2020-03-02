@@ -14,6 +14,8 @@ int main(int argc, char **argv)
     return 1;
   }
   log_init("instance");
+  BOOST_LOG_TRIVIAL(trace) << "loading keys";
+  init_crypto("setup/private_key.pem");
   BOOST_LOG_TRIVIAL(trace) << "extracting arguments";
   int port = std::atoi(argv[1]);
   BOOST_LOG_TRIVIAL(trace) << "creating server";

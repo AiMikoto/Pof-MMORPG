@@ -5,6 +5,8 @@
 #include "include/regions.h"
 #include "include/maps.h"
 
+void init_crypto(std::string pub);
+
 class instance:public protocol
 {
 public:

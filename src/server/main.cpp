@@ -12,6 +12,8 @@ boost::asio::io_context ioc;
 int main(int argc, char **argv)
 {
   log_init("server");
+  BOOST_LOG_TRIVIAL(trace) << "loading keys";
+  init_crypto("setup/public_key.pem", "setup/private_key.pem");
   int port = std::atoi(argv[1]);
   BOOST_LOG_TRIVIAL(trace) << "creating instances";
   populate_pins();

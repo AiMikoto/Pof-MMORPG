@@ -18,6 +18,8 @@ std::string username = "joe";
 int main(int argc, char **argv)
 {
   log_init("client");
+  BOOST_LOG_TRIVIAL(trace) << "loading keys";
+  init_crypto("setup/public_key.pem");
   BOOST_LOG_TRIVIAL(trace) << "client initialising";
   init_l.lock();
   // artificially create a new game

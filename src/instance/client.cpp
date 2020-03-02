@@ -11,16 +11,31 @@ client *master;
 
 std::string my_tok = "fish"; // TODO: export this
 
-client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, 10)
+rsa_crypto *g_rsa;
+
+void init_crypto(std::string priv)
 {
+  BIO *keybio = BIO_new(BIO_s_file());
+  BIO_read_filename(keybio, priv.c_str());
+  g_rsa = new rsa_crypto(NULL, keybio);
+}
+
+client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
+{
+  aes = NULL;
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
   ept.add(OP_AUTH_TOKEN, boost::bind(&client::handle_auth, this, _1));
   ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
   ept.add(OP_UC_TRANS_ALL, boost::bind(&client::uc_transfer, this, _1));
+  start();
 }
 
 client::~client()
 {
+  if(aes)
+  {
+    delete aes;
+  }
 }
 
 // throws instead of returning.
@@ -47,6 +62,10 @@ void client::handle_auth_helper(call c)
   {
     username = c.tree().get<std::string>("login.username");
     std::string tok = c.tree().get<std::string>("login.token");
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
     BOOST_LOG_TRIVIAL(trace) << "extracted login token" << tok;
     call answer;
     user_card uc;
@@ -122,8 +141,8 @@ void client::handle_map_change_request_cb(call c)
 }
 
 void client::handle_auth(call c)
-{
-  boost::thread t(boost::bind(&client::handle_auth_helper, this, c));
+{ // uses RSA
+  handle_auth_helper(c);
 }
 
 void client::handle_cmd(call c)
@@ -131,8 +150,12 @@ void client::handle_cmd(call c)
   validate_authority(c.tree().get<std::string>("authority.token"));
   std::string command = c.tree().get<std::string>("command");
   if(command == "init")
-  {
+  { // uses RSA
     BOOST_LOG_TRIVIAL(info) << "updated master to " << socket -> remote_endpoint().address().to_string();
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
     master = this;
     ept.add(OP_REQUEST_CHANGE_MAP_CB, boost::bind(&client::handle_map_change_request_cb, this, _1));
     return;

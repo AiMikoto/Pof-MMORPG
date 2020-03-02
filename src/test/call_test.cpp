@@ -100,6 +100,7 @@ void test_call_network_transfer()
   boost::asio::ip::tcp::acceptor acceptor(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 0));
   boost::asio::ip::tcp::socket rs(io_service);
   boost::asio::ip::tcp::socket ws(io_service);
+  crypto *cry = new aes_crypto("01234567890123456789012345678901", "0123456789012345");
 
   // Connect client and server sockets.
   acceptor.async_accept(rs, boost::bind(&noop));
@@ -107,8 +108,8 @@ void test_call_network_transfer()
   io_service.run();
 
   // transferring call
-  write_call(&ws, *c);
-  call c2 = read_call(&rs);
+  write_call(&ws, *c, cry);
+  call c2 = read_call(&rs, cry);
   if(c2.tree().get<std::string>("endpoint") != "parameter")
   {
     FAIL;
