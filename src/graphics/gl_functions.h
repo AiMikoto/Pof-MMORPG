@@ -10,11 +10,11 @@
 namespace graphics {
 	GLFWwindow * createGLFWContext(int width, int height, std::string name);
 	void windowResizeCallback(GLFWwindow* window, int width, int height);
-	void update(GLFWwindow* window, float lastTime, float check, int fps);
+	void update(GLFWwindow* window, GameObject* mainScene, float lastTime, float check, int fps);
 	GLuint loadShaders(std::string vertexFilePath, std::string fragmentFilePath);
 	void loadRequiredShaders(std::vector<std::string> shadersPaths);
 	void UpdateCamera(GLFWwindow* window);
 	void DrawScene(GameObject* mainScene);
 	void DrawUI();
-	void Cleanup(GameObject* mainScene, GLuint vertexArrayID);
+	void Cleanup(GameObject* mainScene);
 }

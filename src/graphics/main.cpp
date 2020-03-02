@@ -7,8 +7,9 @@ int main() {
 	GLFWwindow* window = gph::createGLFWContext(gph::windowWidth, gph::windowHeight, gph::windowName);
 
 	GLuint vertexArrayID;
-	glGenVertexArrays(1, &vertexArrayID);
-	glBindVertexArray(vertexArrayID);
+	glGenVertexArrays(1, &gph::vertexArrayID);
+	glBindVertexArray(gph::vertexArrayID);
+	glGenBuffers(1, &gph::vertexBufferID);
 
 	gph::GameObject* mainScene = new gph::GameObject();
 
@@ -22,9 +23,9 @@ int main() {
 	glfwSwapInterval(0);
 
 	while (!gph::quit) {
-		gph::update(window, lastTime, check, fps);
+		gph::update(window, mainScene, lastTime, check, fps);
 	}
-	gph::Cleanup(mainScene, vertexArrayID);
+	gph::Cleanup(mainScene);
 	glfwTerminate();
 	return 0;
 }

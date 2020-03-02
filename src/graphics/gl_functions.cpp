@@ -61,12 +61,14 @@ void gph::windowResizeCallback(GLFWwindow* window, int width, int height) {
 	windowResized = true;
 }
 
-void gph::update(GLFWwindow* window, float lastTime, float check, int fps) {
+void gph::update(GLFWwindow* window, gph::GameObject* mainScene, float lastTime, float check, int fps) {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	
 	//we only load 1 program for now, will later declare a shaders class and deal with that
-	glUseProgram(shaderProgramsIDs[0]);
+	
+	DrawScene(mainScene);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
@@ -174,15 +176,24 @@ void gph::loadRequiredShaders(std::vector<std::string> shadersPath) {
 void gph::UpdateCamera(GLFWwindow* window) { }
 
 void gph::DrawScene(gph::GameObject* mainScene) {
-
+	glBindVertexArray(vertexArrayID);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glUseProgram(shaderProgramsIDs[0]);
+	glBindVertexArray(vertexArrayID);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void gph::DrawUI() { }
 
-void gph::Cleanup(GameObject* mainScene, GLuint vertexArrayID) {
+void gph::Cleanup(GameObject* mainScene) {
 	std::cout << "Cleaning up..." << std::endl;
 	for (auto programID: shaderProgramsIDs) {
 		glDeleteProgram(programID);
 	}
 	glDeleteVertexArrays(1, &vertexArrayID);
+	glDeleteBuffers(1, &vertexBufferID);
+	delete mainScene;
 }
