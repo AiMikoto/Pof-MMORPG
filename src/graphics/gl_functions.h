@@ -3,6 +3,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <string>
 
 namespace graphics {
 	GLFWwindow * createGLFWContext(int width, int height, std::string name);
