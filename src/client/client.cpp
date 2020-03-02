@@ -22,7 +22,7 @@ void init_crypto(std::string pub)
   std::string uuid2 = boost::lexical_cast<std::string>(generator());
   std::string uuid3 = uuid1 + uuid2;
   std::string uuid4 = boost::lexical_cast<std::string>(generator());
-  g_aes = new aes_crypto(uuid3.substr(0, 32), uuid4.substr(36, 16));
+  g_aes = new aes_crypto(uuid3.substr(0, 32), uuid4.substr(0, 16));
   BIO *keybio = BIO_new(BIO_s_file());
   BIO_read_filename(keybio, pub.c_str());
   g_rsa = new rsa_crypto(keybio, NULL);

@@ -65,7 +65,7 @@ std::string rsa_crypto::encrypt(std::string data)
   uint32_t size = data.length();
   // initialise encryption operation
   RSA *key = RSA_new();
-  PEM_read_bio_RSAPublicKey(enc, &key, NULL, NULL);
+  PEM_read_bio_RSA_PUBKEY(enc, &key, NULL, NULL);
   // allocate buffer
   unsigned char buffer[RSA_size(key)];
   // encrypt

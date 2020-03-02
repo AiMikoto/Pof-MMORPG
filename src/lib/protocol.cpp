@@ -58,7 +58,9 @@ void protocol::start()
 
 void protocol::replace_crypto(crypto *cry)
 {
+  BOOST_LOG_TRIVIAL(trace) << "switching crypto to aes";
   this -> cry = cry;
+  BOOST_LOG_TRIVIAL(trace) << "starting ping service";
   start_ping();
 }
 
