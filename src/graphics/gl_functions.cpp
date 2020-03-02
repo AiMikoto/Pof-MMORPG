@@ -1,6 +1,5 @@
 #include "gl_functions.h"
 #include "keyboard_functions.h"
-#include <iostream>
 
 GLFWwindow * graphics::createGLFWContext(int width, int height, std::string name) {
 	if (!glfwInit())
@@ -60,10 +59,109 @@ void graphics::windowResizeCallback(GLFWwindow* window, int width, int height) {
 	windowResized = true;
 }
 
-void graphics::Update(GLFWwindow* window, float lastTime, float check, int fps) {
+void graphics::update(GLFWwindow* window, float lastTime, float check, int fps) {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
+}
+
+GLuint graphics::loadShaders(std::string vertexFilePath, std::string fragmentFilePath)
+{
+	// Create the shaders
+	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+	// Read the Vertex Shader code from the file
+	std::string vertexShaderCode;
+	std::ifstream vertexShaderStream(vertexFilePath, std::ios::in);
+	if (vertexShaderStream.is_open())
+	{
+		std::string Line = "";
+		while (std::getline(vertexShaderStream, Line))
+			vertexShaderCode += "\n" + Line;
+		vertexShaderStream.close();
+	}
+	else
+	{
+		std::cout << "Impossible to open " << vertexFilePath << std::endl;
+		std::cin.ignore();
+		exit(1);
+	}
+	// Read the Fragment Shader code from the file
+	std::string fragmentShaderCode;
+	std::ifstream fragmentShaderStream(fragmentFilePath, std::ios::in);
+	if (fragmentShaderStream.is_open())
+	{
+		std::string line = "";
+		while (std::getline(fragmentShaderStream, line))
+			fragmentShaderCode += "\n" + line;
+		fragmentShaderStream.close();
+	}
+	else
+	{
+		std::cout << "Impossible to open " << fragmentFilePath << std::endl;
+		std::cin.ignore();
+		exit(1);
+	}
+	GLint result = GL_FALSE;
+	int infoLogLength;
+	// Compile Vertex Shader
+	std::cout << "Compiling vertex shader: " << vertexFilePath << std::endl;
+	char const * vertexSourcePointer = vertexShaderCode.c_str();
+	glShaderSource(vertexShaderID, 1, &vertexSourcePointer, NULL);
+	glCompileShader(vertexShaderID);
+	// Check Vertex Shader
+	glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(vertexShaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 0)
+	{
+		std::vector<char> vertexShaderErrorMessage(infoLogLength + 1);
+		glGetShaderInfoLog(vertexShaderID, infoLogLength, NULL, &vertexShaderErrorMessage[0]);
+		std::cout << &vertexShaderErrorMessage[0] << std::endl;
+	}
+	// Compile Fragment Shader
+	std::cout << "Compiling fragment shader: " << fragmentFilePath << std::endl;
+	char const * fragmentSourcePointer = fragmentShaderCode.c_str();
+	glShaderSource(fragmentShaderID, 1, &fragmentSourcePointer, NULL);
+	glCompileShader(fragmentShaderID);
+	// Check Fragment Shader
+	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(fragmentShaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 0)
+	{
+		std::vector<char> fragmentShaderErrorMessage(infoLogLength + 1);
+		glGetShaderInfoLog(fragmentShaderID, infoLogLength, NULL, &fragmentShaderErrorMessage[0]);
+		std::cout << &fragmentShaderErrorMessage[0] << std::endl;
+	}
+	// Link the program
+	std::cout << "Linking program" << std::endl;
+	GLuint programID = glCreateProgram();
+	glAttachShader(programID, vertexShaderID);
+	glAttachShader(programID, fragmentShaderID);
+	glLinkProgram(programID);
+	// Check the program
+	glGetProgramiv(programID, GL_LINK_STATUS, &result);
+	glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 0) {
+		std::vector<char> programErrorMessage(infoLogLength + 1);
+		glGetProgramInfoLog(programID, infoLogLength, NULL, &programErrorMessage[0]);
+		std::cout << &programErrorMessage[0] << std::endl;
+	}
+	glDetachShader(programID, vertexShaderID);
+	glDetachShader(programID, fragmentShaderID);
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
+	return programID;
+}
+
+void graphics::loadRequiredShaders(std::vector<std::string> shadersPath) {
+	if (shadersPath.size() % 2) {
+		std::cout << "The required shaders must be pairs of vertex and fragment shaders." << std::endl;
+		std::cin.ignore();
+		exit(-1);
+	}
+	for (size_t i = 0; i < shadersPath.size(); i += 2) {
+		shaderProgramsIDs.push_back(loadShaders(shadersPath[i], shadersPath[i + 1]));
+	}
 }

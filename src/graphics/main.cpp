@@ -12,7 +12,7 @@ int main() {
 
 	while (!gph::quit)
 	{
-		gph::Update(window, lastTime, check, fps);		
+		gph::update(window, lastTime, check, fps);
 	}
 	glfwTerminate();
 	return 0;
