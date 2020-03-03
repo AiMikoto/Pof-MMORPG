@@ -14,4 +14,4 @@ COPY build/setup/private_key.pem /instance/private_key.pem
 
 EXPOSE 7000
 
-CMD ["/instance/instance", "-port", "7000", "-priv" "/instance/private_key.pem"]
+CMD ["/instance/instance", "-port", "7000", "-priv", "/instance/private_key.pem"]

@@ -60,11 +60,17 @@ rsa_crypto::rsa_crypto(BIO *enc, BIO *dec)
   // initialise encryption operation
   if(enc)
   {
-    PEM_read_bio_RSA_PUBKEY(enc, &key, NULL, NULL);
+    if(PEM_read_bio_RSA_PUBKEY(enc, &key, NULL, NULL) == NULL)
+    {
+      throw std::logic_error("invalid public key");
+    }
   }
   if(dec)
   {
-    PEM_read_bio_RSAPrivateKey(dec, &key, NULL, NULL);
+    if(PEM_read_bio_RSAPrivateKey(dec, &key, NULL, NULL) == NULL)
+    {
+      throw std::logic_error("invalid private key");
+    }
   }
 }
 

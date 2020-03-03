@@ -20,7 +20,7 @@ int main(int argc, char **argv)
   }
   for(int i = 1; i < argc; i++)
   {
-    if(args[i] == "-pri")
+    if(args[i] == "-priv")
     {
       pri = args[++i];
       continue;

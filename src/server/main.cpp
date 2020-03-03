@@ -28,7 +28,7 @@ int main(int argc, char **argv)
       pub = args[++i];
       continue;
     }
-    if(args[i] == "-pri")
+    if(args[i] == "-priv")
     {
       pri = args[++i];
       continue;
