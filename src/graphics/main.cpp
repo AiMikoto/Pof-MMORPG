@@ -6,16 +6,21 @@ namespace gph = graphics;
 int main() {
 	GLFWwindow* window = gph::createGLFWContext(gph::windowWidth, gph::windowHeight, gph::windowName);
 
-	GLuint vertexArrayID;
 	glGenVertexArrays(1, &gph::vertexArrayID);
 	glBindVertexArray(gph::vertexArrayID);
-	glGenBuffers(1, &gph::vertexBufferID);
+	
+	glGenBuffers(1, &gph::vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, gph::vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(gph::triangleVertices), &gph::triangleVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	
 
 	gph::GameObject* mainScene = new gph::GameObject();
 
-	std::vector<std::string> requiredShaders = gph::charArrayToStringVector(gph::requiredShadersPath,
+	std::vector<std::string> shaders = gph::charArrayToStringVector(gph::requiredShadersPath,
 		(size_t)gph::requiredShadersPathLength);
-	gph::loadRequiredShaders(requiredShaders);
+	gph::loadShaders(shaders);
 
 	float lastTime = (float)glfwGetTime();
 	float check = 0;

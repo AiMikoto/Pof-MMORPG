@@ -9,7 +9,7 @@ bool gph::quit = false;
 bool gph::windowResized = false;
 std::vector<GLuint> gph::shaderProgramsIDs;
 GLuint gph::vertexArrayID;
-GLuint gph::vertexBufferID;
+GLuint gph::vertexBuffer;
 
 //just as a test, will remove later when adding proper graphics
 float gph::triangleVertices[9] = {

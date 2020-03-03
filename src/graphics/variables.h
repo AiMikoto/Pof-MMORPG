@@ -10,7 +10,7 @@ namespace graphics {
 	extern const char* windowName;
 	extern std::vector<GLuint> shaderProgramsIDs;
 	extern GLuint vertexArrayID;
-	extern GLuint vertexBufferID;
+	extern GLuint vertexBuffer;
 
 	extern float triangleVertices[9];
 	extern uint triangleIndices[6];
