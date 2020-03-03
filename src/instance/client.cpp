@@ -11,12 +11,21 @@ client *master;
 
 std::string my_tok = "fish"; // TODO: export this
 
-client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, 10)
+rsa_crypto *g_rsa;
+
+void init_crypto(std::string priv)
+{
+  BIO *keybio = BIO_new(BIO_s_file());
+  BIO_read_filename(keybio, priv.c_str());
+  g_rsa = new rsa_crypto(NULL, keybio);
+}
+
+client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
   ept.add(OP_AUTH_TOKEN, boost::bind(&client::handle_auth, this, _1));
   ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
-  ept.add(OP_UC_TRANS_ALL, boost::bind(&client::uc_transfer, this, _1));
+  start();
 }
 
 client::~client()
@@ -41,49 +50,49 @@ void client::uc_transfer(call c)
   uclp.add(uc);
 }
 
-void client::handle_auth_helper(call c)
-{ // try block because this is a helper
-  try
+void client::handle_auth(call c)
+{ // uses RSA
+  username = c.tree().get<std::string>("login.username");
+  std::string tok = c.tree().get<std::string>("login.token");
+  std::string key = c.tree().get<std::string>("aes.key");
+  std::string iv = c.tree().get<std::string>("aes.iv");
+  aes = new aes_crypto(key, iv);
+  replace_crypto(aes);
+  BOOST_LOG_TRIVIAL(trace) << "extracted login token - " << tok;
+  call answer;
+  user_card uc;
+  answer.tree().put(OPCODE, OP_AUTH_TOKEN);
+  answer.tree().put("status", false);
+  for(int trials = 1; trials <= 3; trials++)
   {
-    username = c.tree().get<std::string>("login.username");
-    std::string tok = c.tree().get<std::string>("login.token");
-    BOOST_LOG_TRIVIAL(trace) << "extracted login token" << tok;
-    call answer;
-    user_card uc;
-    answer.tree().put(OPCODE, OP_AUTH_TOKEN);
-    answer.tree().put("status", false);
-    for(int trials = 1; trials <= 3; trials++)
+    if(uclp.contains(username))
     {
-      if(uclp.contains(username))
+      uc = uclp.get(username);
+      if(uc.tree().get<std::string>("user.token") == tok)
       {
-        uc = uclp.get(username);
-        if(uc.tree().get<std::string>("user.token") == tok)
-        {
-          BOOST_LOG_TRIVIAL(trace) << "user login successful - " << username;
-	  uclp.remove(username);
-          uc.aux = (void *) this;
-	  ucl.add(uc);
-          answer.tree().put("status", true);
-          ept.remove(OP_AUTH_TOKEN);
-          ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&client::handle_map_change_request, this, _1));
-          // TODO: populate calls
-	  break;
-        }
-	else
-	{
-	  break;
-	}
+        BOOST_LOG_TRIVIAL(trace) << "user login successful - " << username;
+        uclp.remove(username);
+        uc.aux = (void *) this;
+        ucl.add(uc);
+        answer.tree().put("status", true);
+        ept.remove(OP_AUTH_TOKEN);
+        ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&client::handle_map_change_request, this, _1));
+        // TODO: populate calls
+        break;
       }
       else
       {
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        break;
       }
     }
-    safe_write(answer);
+    else
+    {
+      boost::this_thread::sleep(boost::posix_time::seconds(1));
+    }
   }
-  catch(std::exception &e)
-  {
-    BOOST_LOG_TRIVIAL(trace) << "client::handle_auth_helper - exception thrown - " << e.what();
+  safe_write(answer);
+  if(!answer.tree().get<bool>("status"))
+  { // terminate upon failed authentication
     this -> close();
   }
 }
@@ -114,16 +123,8 @@ void client::handle_map_change_request_cb(call c)
     move.tree().put("target.host", c.tree().get<std::string>("target.host"));
     move.tree().put("target.port", c.tree().get<int>("target.port"));
     that -> safe_write(move);
-    call term;
-    term.tree().put(OPCODE, OP_TERMINATE);
-    that -> safe_write(term);
     that -> close();
   }
-}
-
-void client::handle_auth(call c)
-{
-  boost::thread t(boost::bind(&client::handle_auth_helper, this, c));
 }
 
 void client::handle_cmd(call c)
@@ -131,10 +132,15 @@ void client::handle_cmd(call c)
   validate_authority(c.tree().get<std::string>("authority.token"));
   std::string command = c.tree().get<std::string>("command");
   if(command == "init")
-  {
+  { // uses RSA
     BOOST_LOG_TRIVIAL(info) << "updated master to " << socket -> remote_endpoint().address().to_string();
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
     master = this;
     ept.add(OP_REQUEST_CHANGE_MAP_CB, boost::bind(&client::handle_map_change_request_cb, this, _1));
+    ept.add(OP_UC_TRANS_ALL, boost::bind(&client::uc_transfer, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;

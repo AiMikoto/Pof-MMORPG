@@ -13,18 +13,55 @@
 boost::asio::io_context ioc;
 instance *current_instance;
 std::mutex init_l;
-std::string username = "joe";
+std::string username;
 
 int main(int argc, char **argv)
 {
   log_init("client");
+  std::string pub = "setup/public_key.pem";
+  std::string host = LOGIN_SV_HOST;
+  int port = LOGIN_SV_PORT;
+  std::string password = "";
+  username = "";
+  // parsing arguments;
+  std::string args[argc];
+  for(int i = 0; i < argc; i++)
+  {
+    args[i] = std::string(argv[i]);
+  }
+  for(int i = 1; i < argc; i++)
+  {
+    if(args[i] == "-pub")
+    {
+      pub = args[++i];
+      continue;
+    }
+    if(args[i] == "-login_server")
+    {
+      host = args[++i];
+      port = std::stoi(args[++i]);
+      continue;
+    }
+    if(args[i] == "-login_details")
+    {
+      username = args[++i];
+      password = args[++i];
+      continue;
+    }
+    BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
+  }
+  BOOST_LOG_TRIVIAL(trace) << "loading keys";
+  init_crypto(pub);
   BOOST_LOG_TRIVIAL(trace) << "client initialising";
   init_l.lock();
   // artificially create a new game
   BOOST_LOG_TRIVIAL(trace) << "attempting to connect to login server";
-  current_instance = instance_builder(LOGIN_SV_HOST, LOGIN_SV_PORT);
+  current_instance = instance_builder(host, port);
   BOOST_LOG_TRIVIAL(trace) << "attempting to login";
-  current_instance -> authenticate(username, "p455w0rd");
+  if(!current_instance -> authenticate(username, password))
+  {
+    BOOST_LOG_TRIVIAL(error) << "authentication refused by login server.";
+  }
   while(!ucl.contains(username))
   {
     BOOST_LOG_TRIVIAL(trace) << "waiting for user card";

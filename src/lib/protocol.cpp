@@ -9,40 +9,66 @@
 #include "include/common_macro.h"
 #include <exception>
 
-protocol::protocol(boost::asio::ip::tcp::socket *sock):protocol(sock, 1)
+protocol::protocol(boost::asio::ip::tcp::socket *sock, crypto *c):protocol(sock, c, 1)
 {
 }
 
-protocol::protocol(boost::asio::ip::tcp::socket *sock, int ping_freq)
+protocol::protocol(boost::asio::ip::tcp::socket *sock, crypto *c, int ping_freq)
 {
   socket = sock;
   ping = 0;
+  this -> cry = c;
+  this -> ping_freq = ping_freq;
+  t_pinger = NULL;
   ept.add_err(boost::bind(&protocol::terminate_force, this, _1));
   ept.add(OP_PING, boost::bind(&protocol::handle_ping, this, _1));
   ept.add(OP_PONG, boost::bind(&protocol::handle_pong, this, _1));
   ept.add(OP_TERMINATE, boost::bind(&protocol::terminate, this, _1));
-  t_routine = new boost::thread(boost::bind(&protocol::routine, this));
-  if(ping_freq > 0)
-  {
-    t_pinger = new boost::thread(boost::bind(&protocol::latency_service, this, ping_freq));
-  }
-  else
-  {
-    t_pinger = NULL;
-  }
+  t_routine = NULL;
+  aes = NULL;
+  aes_enabled = false;
 }
 
 protocol::~protocol()
 {
   socket -> close();
-  delete socket;
   if(t_pinger)
   {
     t_pinger -> join();
     delete t_pinger;
   }
-  t_routine -> join();
-  delete t_routine;
+  if(t_routine)
+  {
+    t_routine -> join();
+    delete t_routine;
+  }
+  delete socket;
+  if(aes)
+  {
+    delete aes;
+  }
+}
+
+void protocol::start_ping()
+{
+  if(ping_freq > 0)
+  {
+    t_pinger = new boost::thread(boost::bind(&protocol::latency_service, this));
+  }
+}
+
+void protocol::start()
+{
+  t_routine = new boost::thread(boost::bind(&protocol::routine, this));
+}
+
+void protocol::replace_crypto(crypto *cry)
+{
+  BOOST_LOG_TRIVIAL(trace) << "switching crypto to aes";
+  this -> cry = cry;
+  aes_enabled = true;
+  BOOST_LOG_TRIVIAL(trace) << "starting ping service";
+  start_ping();
 }
 
 int protocol::safe_write(call c)
@@ -51,7 +77,7 @@ int protocol::safe_write(call c)
   try
   {
     // TODO: mutex
-    write_call(socket, c);
+    write_call(socket, cry, c);
   }
   catch(std::exception &e)
   {
@@ -65,16 +91,23 @@ int protocol::safe_write(call c)
 void protocol::close()
 {
   BOOST_LOG_TRIVIAL(info) << "ending connection";
-  call c;
-  c.tree().put(OPCODE, OP_TERMINATE);
-  try
+  if(aes_enabled)
   {
-    // TODO: mutex
-    write_call(socket, c);
+    call c;
+    c.tree().put(OPCODE, OP_TERMINATE);
+    try
+    {
+      // TODO: mutex
+      write_call(socket, cry, c);
+    }
+    catch(std::exception &e)
+    {
+      BOOST_LOG_TRIVIAL(trace) << "protocol::close - exception thrown when writing to socket - " << e.what();
+    }
   }
-  catch(std::exception &e)
+  else
   {
-    BOOST_LOG_TRIVIAL(trace) << "protocol::close - exception thrown when writing to socket - " << e.what();
+    BOOST_LOG_TRIVIAL(trace) << "forcefully closing socket due to no aes being set";
   }
   socket -> close();
   ping = -1;
@@ -92,8 +125,7 @@ void protocol::routine()
     forever
     {
       BOOST_LOG_TRIVIAL(trace) << "attempting to read call";
-      call c = read_call(socket);
-      BOOST_LOG_TRIVIAL(trace) << "received call";
+      call c = read_call(socket, cry);
       std::string opc = c.tree().get<std::string>(OPCODE);
       BOOST_LOG_TRIVIAL(trace) << "received call " << opc;
       ept.look_up(opc, c);
@@ -102,14 +134,11 @@ void protocol::routine()
   catch(std::exception &e)
   {
     BOOST_LOG_TRIVIAL(debug) << "protocol::routine - exception thrown during routine - " << e.what();
-    call answer;
-    answer.tree().put(OPCODE, OP_TERMINATE);
-    safe_write(answer);
     this -> close();
   }
 }
 
-void protocol::latency_service(int ping_freq)
+void protocol::latency_service()
 {
   boost::asio::io_context io;
   boost::uuids::random_generator generator;
