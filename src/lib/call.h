@@ -22,7 +22,7 @@ private:
 
 call read_call(boost::asio::ip::tcp::socket *s, crypto *cry);
 
-void write_call(boost::asio::ip::tcp::socket *s, call c, crypto *cry);
+void write_call(boost::asio::ip::tcp::socket *s, crypto *cry, call c);
 
 typedef boost::function<void(call)> callback;
 

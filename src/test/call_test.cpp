@@ -108,7 +108,7 @@ void test_call_network_transfer()
   io_service.run();
 
   // transferring call
-  write_call(&ws, *c, cry);
+  write_call(&ws, cry, *c);
   call c2 = read_call(&rs, cry);
   if(c2.tree().get<std::string>("endpoint") != "parameter")
   {

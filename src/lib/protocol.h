@@ -43,6 +43,7 @@ protected:
   crypto *aes;
   boost::asio::ip::tcp::socket *socket;
 private:
+  bool aes_enabled;
   crypto *cry;
   int ping;
   int ping_freq;

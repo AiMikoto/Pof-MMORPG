@@ -43,7 +43,7 @@ call read_call(boost::asio::ip::tcp::socket *s, crypto *cry)
   return c;
 }
 
-void write_call(boost::asio::ip::tcp::socket *s, call c, crypto *cry)
+void write_call(boost::asio::ip::tcp::socket *s, crypto *cry, call c)
 {
   std::string payload = cry -> encrypt(c.encode());
   uint32_t size = payload.length();

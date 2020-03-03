@@ -26,6 +26,7 @@ protocol::protocol(boost::asio::ip::tcp::socket *sock, crypto *c, int ping_freq)
   ept.add(OP_TERMINATE, boost::bind(&protocol::terminate, this, _1));
   t_routine = NULL;
   aes = NULL;
+  aes_enabled = false;
 }
 
 protocol::~protocol()
@@ -65,6 +66,7 @@ void protocol::replace_crypto(crypto *cry)
 {
   BOOST_LOG_TRIVIAL(trace) << "switching crypto to aes";
   this -> cry = cry;
+  aes_enabled = true;
   BOOST_LOG_TRIVIAL(trace) << "starting ping service";
   start_ping();
 }
@@ -75,7 +77,7 @@ int protocol::safe_write(call c)
   try
   {
     // TODO: mutex
-    write_call(socket, c, cry);
+    write_call(socket, cry, c);
   }
   catch(std::exception &e)
   {
@@ -89,14 +91,14 @@ int protocol::safe_write(call c)
 void protocol::close()
 {
   BOOST_LOG_TRIVIAL(info) << "ending connection";
-  if(aes)
+  if(aes_enabled)
   {
     call c;
     c.tree().put(OPCODE, OP_TERMINATE);
     try
     {
       // TODO: mutex
-      write_call(socket, c, cry);
+      write_call(socket, cry, c);
     }
     catch(std::exception &e)
     {
