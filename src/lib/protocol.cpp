@@ -89,16 +89,23 @@ int protocol::safe_write(call c)
 void protocol::close()
 {
   BOOST_LOG_TRIVIAL(info) << "ending connection";
-  call c;
-  c.tree().put(OPCODE, OP_TERMINATE);
-  try
+  if(aes)
   {
-    // TODO: mutex
-    write_call(socket, c, cry);
+    call c;
+    c.tree().put(OPCODE, OP_TERMINATE);
+    try
+    {
+      // TODO: mutex
+      write_call(socket, c, cry);
+    }
+    catch(std::exception &e)
+    {
+      BOOST_LOG_TRIVIAL(trace) << "protocol::close - exception thrown when writing to socket - " << e.what();
+    }
   }
-  catch(std::exception &e)
+  else
   {
-    BOOST_LOG_TRIVIAL(trace) << "protocol::close - exception thrown when writing to socket - " << e.what();
+    BOOST_LOG_TRIVIAL(trace) << "forcefully closing socket due to no aes being set";
   }
   socket -> close();
   ping = -1;
@@ -125,9 +132,6 @@ void protocol::routine()
   catch(std::exception &e)
   {
     BOOST_LOG_TRIVIAL(debug) << "protocol::routine - exception thrown during routine - " << e.what();
-    call answer;
-    answer.tree().put(OPCODE, OP_TERMINATE);
-    safe_write(answer);
     this -> close();
   }
 }

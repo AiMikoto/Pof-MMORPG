@@ -35,10 +35,11 @@ void server::cleanup()
       BOOST_LOG_TRIVIAL(trace) << "checking client";
       if(c -> get_ping() == -1)
       {
-        BOOST_LOG_TRIVIAL(info) << "cleaned client";
+        BOOST_LOG_TRIVIAL(info) << "cleaning client";
         clients.erase(it);
         delete c;
 	it--;
+        BOOST_LOG_TRIVIAL(info) << "cleaned client";
       }
     }
   }

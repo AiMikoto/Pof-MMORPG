@@ -6,6 +6,10 @@
 
 aes_crypto::aes_crypto(std::string key, std::string iv)
 {
+  if((key.size() != 32) || (iv.size() != 16))
+  {
+    throw std::logic_error("incorrect cypher sizes");
+  }
   this -> key = key;
   this -> iv = iv;
 }
@@ -66,8 +70,14 @@ rsa_crypto::rsa_crypto(BIO *enc, BIO *dec)
 
 rsa_crypto::~rsa_crypto()
 {
-  BIO_free_all(enc);
-  BIO_free_all(dec);
+  if(enc)
+  {
+    BIO_free_all(enc);
+  }
+  if(dec)
+  {
+    BIO_free_all(dec);
+  }
   RSA_free(key);
 }
 
