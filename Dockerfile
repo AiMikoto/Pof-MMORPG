@@ -10,7 +10,8 @@ RUN rm -rf home/boost_1_72_0.tar.gz home/boost_1_72_0
 
 RUN mkdir /instance
 COPY build/bin/instance /instance/instance
+COPY build/setup/private_key.pem /instance/private_key.pem
 
 EXPOSE 7000
 
-CMD ["/instance/instance", "-port", "7000"]
+CMD ["/instance/instance", "-port", "7000", "-priv" "/instance/private_key.pem"]
