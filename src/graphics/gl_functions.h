@@ -13,10 +13,10 @@ namespace graphics {
 	void update(GLFWwindow* window, GameObject* mainScene, float lastTime, float check, int fps);
 	void compileShader(std::string shader);
 	void loadShaders(std::vector<std::string> shadersPaths);
-	void UpdateCamera(GLFWwindow* window);
-	void DrawScene(GameObject* mainScene);
-	void DrawUI();
-	void Cleanup(GameObject* mainScene);
+	void updateCamera(GLFWwindow* window);
+	void drawScene(GameObject* mainScene);
+	void drawUI();
+	void cleanup(GameObject* mainScene);
 
 	struct ShaderLoader {
 		GLuint vertexShaderID, fragmentShaderID;

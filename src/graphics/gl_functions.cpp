@@ -5,6 +5,8 @@
 namespace gph = graphics;
 
 GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
+	windowWidth = width;
+	windowHeight = height;
 	if (!glfwInit())
 	{
 		std::cout << "Failed to initialize GLFW" << std::endl;
@@ -34,6 +36,7 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 		exit(-1);
 	}
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glViewport(0, 0, windowWidth, windowHeight);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -62,12 +65,14 @@ void gph::windowResizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void gph::update(GLFWwindow* window, gph::GameObject* mainScene, float lastTime, float check, int fps) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (windowResized) {
+		glViewport(0, 0, windowWidth, windowHeight);
+		windowResized = false;
+	}
 	
-	glClear(GL_COLOR_BUFFER_BIT);
-	
-	//we only load 1 program for now, will later declare a shaders class and deal with that
-	
-	DrawScene(mainScene);
+	drawScene(mainScene);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
@@ -107,8 +112,8 @@ GLuint gph::ShaderLoader::loadShaders() {
 		std::cout << "Compiling vertex shader: " << vertexShaderPath << std::endl;
 		compileShader(vertexShaderCode, vertexShaderID);
 		std::cout << "Compiling fragment shader: " << fragmentShaderPath << std::endl;
-		compileShader(vertexShaderCode, vertexShaderID);
-
+		compileShader(fragmentShaderCode, fragmentShaderID);
+		std::cout << "Linking program" << std::endl;
 		return linkProgram();
 	}
 	catch (std::string e) {
@@ -131,11 +136,11 @@ void gph::ShaderLoader::compileShader(std::string shader, GLuint shaderID) {
 		glShaderSource(shaderID, 1, &sourcePointer, NULL);
 		glCompileShader(shaderID);
 		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
-		glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		if (infoLogLength > 0) {
-			std::vector<char> vertexShaderErrorMessage(infoLogLength + 1);
-			glGetShaderInfoLog(vertexShaderID, infoLogLength, NULL, &vertexShaderErrorMessage[0]);
-			throw vertexShaderErrorMessage;
+		if (!result) {
+			glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+			std::vector<char> shaderErrorMessage(infoLogLength + 1);
+			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
+			throw shaderErrorMessage;
 		}
 	}
 	catch (std::vector<char> e) {
@@ -145,7 +150,6 @@ void gph::ShaderLoader::compileShader(std::string shader, GLuint shaderID) {
 
 GLuint gph::ShaderLoader::linkProgram() {
 	try {
-		std::cout << "Linking program" << std::endl;
 		GLint result = GL_FALSE;
 		int infoLogLength;
 		GLuint programID = glCreateProgram();
@@ -153,16 +157,12 @@ GLuint gph::ShaderLoader::linkProgram() {
 		glAttachShader(programID, fragmentShaderID);
 		glLinkProgram(programID);
 		glGetProgramiv(programID, GL_LINK_STATUS, &result);
-		glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		if (infoLogLength > 0) {
+		if (!result) {
+			glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
 			std::vector<char> programErrorMessage(infoLogLength + 1);
 			glGetProgramInfoLog(programID, infoLogLength, NULL, &programErrorMessage[0]);
-			glDetachShader(programID, vertexShaderID);
-			glDetachShader(programID, fragmentShaderID);
 			throw programErrorMessage;
 		}
-		glDetachShader(programID, vertexShaderID);
-		glDetachShader(programID, fragmentShaderID);
 		glDeleteShader(vertexShaderID);
 		glDeleteShader(fragmentShaderID);
 		return programID;
@@ -184,17 +184,17 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 	}
 }
 
-void gph::UpdateCamera(GLFWwindow* window) { }
+void gph::updateCamera(GLFWwindow* window) { }
 
-void gph::DrawScene(gph::GameObject* mainScene) {
+void gph::drawScene(gph::GameObject* mainScene) {
 	glUseProgram(shaderProgramsIDs[0]);
 	glBindVertexArray(vertexArrayID);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void gph::DrawUI() { }
+void gph::drawUI() { }
 
-void gph::Cleanup(GameObject* mainScene) {
+void gph::cleanup(GameObject* mainScene) {
 	std::cout << "Cleaning up..." << std::endl;
 	for (auto programID: shaderProgramsIDs) {
 		glDeleteProgram(programID);
@@ -202,4 +202,5 @@ void gph::Cleanup(GameObject* mainScene) {
 	glDeleteVertexArrays(1, &vertexArrayID);
 	glDeleteBuffers(1, &vertexBuffer);
 	delete mainScene;
+	glfwTerminate();
 }
