@@ -3,8 +3,9 @@
 #include <boost/thread/thread.hpp>
 #include "instance/server.h"
 #include "include/common_macro.h"
+#include "instance/ioc.h"
 
-server::server(boost::asio::io_context& ioc, int port):io_context(ioc),endpoint(boost::asio::ip::tcp::v4(), port), acceptor(ioc, endpoint)
+server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(ioc, endpoint)
 {
   BOOST_LOG_TRIVIAL(info) << "Created listener on port " << port;
   boost::thread t_routine(boost::bind(&server::routine, this));
@@ -15,7 +16,7 @@ void server::routine()
 {
   forever
   {
-    boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(io_context);
+    boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(ioc);
     acceptor.accept(*socket);
     client *c = new client(socket);
     clients.push_back(c);
