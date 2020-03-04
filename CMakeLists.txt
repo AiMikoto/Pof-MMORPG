@@ -35,12 +35,22 @@ link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call u
 add_library(protocol STATIC src/lib/protocol.cpp)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol user_card crypto)
 
+# idk how to set this for windows
+set(OPENSSL openssl)
+
+add_custom_target(rsa_key DEPENDS priv pub)
+add_custom_target(keys_f DEPENDS keys)
 add_custom_command(OUTPUT keys
 	COMMAND ${CMAKE_COMMAND} -E make_directory keys
-	COMMAND openssl genpkey -algorithm RSA -out keys/private_key.pem -pkeyopt rsa_keygen_bits:16384
-	COMMAND openssl rsa -pubout -in keys/private_key.pem -out keys/public_key.pem
 )
-add_custom_target(rsa_key DEPENDS keys)
+add_custom_target(priv DEPENDS keys/private_key.pem keys_f)
+add_custom_command(OUTPUT keys/private_key.pem
+	COMMAND ${OPENSSL} genpkey -algorithm RSA -out keys/private_key.pem -pkeyopt rsa_keygen_bits:16384
+)
+add_custom_target(pub DEPENDS keys/public_key.pem priv)
+add_custom_command(OUTPUT keys/public_key.pem
+	COMMAND ${OPENSSL} rsa -pubout -in keys/private_key.pem -out keys/public_key.pem
+)
 
 add_executable(server ${SERVER_SOURCES})
 add_executable(instance ${INSTANCE_SOURCES})
