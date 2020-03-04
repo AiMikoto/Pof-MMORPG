@@ -12,32 +12,69 @@
 
 boost::asio::io_context ioc;
 instance *current_instance;
-// game *g;
 std::mutex init_l;
-std::string username = "joe";
+std::string username;
 
 int main(int argc, char **argv)
 {
-  // prevent other processes from activating during login
+  log_init("client");
+  std::string pub = "keys/public_key.pem";
+  std::string host = LOGIN_SV_HOST;
+  int port = LOGIN_SV_PORT;
+  std::string password = "";
+  username = "";
+  // parsing arguments;
+  std::string args[argc];
+  for(int i = 0; i < argc; i++)
+  {
+    args[i] = std::string(argv[i]);
+  }
+  for(int i = 1; i < argc; i++)
+  {
+    if(args[i] == "-pub")
+    {
+      pub = args[++i];
+      continue;
+    }
+    if(args[i] == "-login_server")
+    {
+      host = args[++i];
+      port = std::stoi(args[++i]);
+      continue;
+    }
+    if(args[i] == "-login_details")
+    {
+      username = args[++i];
+      password = args[++i];
+      continue;
+    }
+    BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
+  }
+  BOOST_LOG_TRIVIAL(trace) << "loading keys";
+  init_crypto(pub);
+  BOOST_LOG_TRIVIAL(trace) << "client initialising";
   init_l.lock();
   // artificially create a new game
-//  g = new game();
-  log_init("client");
-  // connect to login server
-  current_instance = instance_builder(LOGIN_SV_HOST, LOGIN_SV_PORT);
-  // authenticate to the login server
-  current_instance -> authenticate(username, "p455w0rd");
-  // wait for user card to be transferred
+  BOOST_LOG_TRIVIAL(trace) << "attempting to connect to login server";
+  current_instance = instance_builder(host, port);
+  BOOST_LOG_TRIVIAL(trace) << "attempting to login";
+  if(!current_instance -> authenticate(username, password))
+  {
+    BOOST_LOG_TRIVIAL(error) << "authentication refused by login server.";
+  }
   while(!ucl.contains(username))
   {
+    BOOST_LOG_TRIVIAL(trace) << "waiting for user card";
     boost::this_thread::sleep(boost::posix_time::seconds(1));
   }
-  // finished initialisation
+  BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
   init_l.unlock();
   std::mutex m;
   boost::this_thread::sleep(boost::posix_time::seconds(15));
+  BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
   current_instance -> change_map(MAP_FLATLANDS, REG_EU);
   m.lock();
+  BOOST_LOG_TRIVIAL(error) << "client finished successfully";
   m.lock();
   return 0;
 }

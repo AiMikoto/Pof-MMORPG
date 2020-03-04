@@ -18,7 +18,9 @@ class user_card_library
 public:
   void add(user_card uc);
   void remove(std::string name);
+  void remove(user_card uc);
   bool contains(std::string name);
+  bool contains(user_card uc);
   user_card& get(std::string name);
 private:
   std::map<std::string, user_card> library;

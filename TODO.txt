@@ -1,5 +1,2 @@
-map change:
-CLIENT issues request to change map to INSTANCE
-INSTANCE forwards the request to SERVER
-SERVER answers the call to INSTANCE
-INSTANCE forwards the answer to CLIENT
+server database connection for usercards loading and authentication
+instance database connection for periodic usercard save

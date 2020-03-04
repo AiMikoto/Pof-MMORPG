@@ -5,21 +5,22 @@
 #include <boost/thread/thread.hpp>
 #include "include/common_macro.h"
 #include <exception>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/lexical_cast.hpp>
 #include "common/user_card.h"
 #include "server/instances.h"
 #include "include/maps.h"
 #include "include/regions.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/lexical_cast.hpp>
 
 boost::uuids::random_generator generator;
 
-client::client(boost::asio::ip::tcp::socket *sock):protocol(sock)
+client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
   ept.add(OP_AUTH, boost::bind(&client::handle_auth, this, _1));
+  start();
 }
 
 client::~client()
@@ -27,14 +28,19 @@ client::~client()
 }
 
 void client::handle_auth(call c)
-{
+{ // uses RSA
   std::string username = c.tree().get<std::string>("login.username");
   std::string password = c.tree().get<std::string>("login.password");
+  std::string key = c.tree().get<std::string>("aes.key");
+  std::string iv = c.tree().get<std::string>("aes.iv");
+  BOOST_LOG_TRIVIAL(trace) << "creating aes object";
+  aes = new aes_crypto(key, iv);
+  replace_crypto(aes);
   call answer;
   answer.tree().put(OPCODE, OP_AUTH);
   if(true) // TODO: use username and password to confirm authentification
   {
-    answer.tree().put("success", true);
+    answer.tree().put("status", true);
     safe_write(answer);
     user_card uc;
     // TODO: load user card
@@ -52,14 +58,11 @@ void client::handle_auth(call c)
     move.tree().put("target.host", target_instance -> hostname);
     move.tree().put("target.port", target_instance -> port);
     safe_write(move);
-    call term;
-    term.tree().put(OPCODE, OP_TERMINATE);
-    safe_write(term);
-    this -> close();
   }
   else
   {
-    answer.tree().put("success", false);
+    answer.tree().put("status", false);
     safe_write(answer);
   }
+  this -> close();
 }

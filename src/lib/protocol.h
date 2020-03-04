@@ -5,6 +5,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/chrono.hpp>
 #include "lib/call.h"
+#include "lib/crypto.h"
 #include <map>
 
 #define OPCODE "opcode"
@@ -23,9 +24,12 @@
 class protocol
 {
 public:
-  protocol(boost::asio::ip::tcp::socket *sock);
-  protocol(boost::asio::ip::tcp::socket *sock, int ping_freq);
+  protocol(boost::asio::ip::tcp::socket *sock, crypto *c);
+  protocol(boost::asio::ip::tcp::socket *sock, crypto *c, int ping_freq);
   ~protocol();
+  void start();
+  void start_ping();
+  void replace_crypto(crypto *cry);
   int safe_write(call c);
   void close();
   int get_ping();
@@ -36,11 +40,15 @@ protected:
   void handle_pong(call c);
   void terminate(call c);
   void terminate_force(call c);
+  crypto *aes;
   boost::asio::ip::tcp::socket *socket;
 private:
+  bool aes_enabled;
+  crypto *cry;
   int ping;
+  int ping_freq;
   void routine();
-  void latency_service(int ping_freq);
+  void latency_service();
   boost::thread *t_routine;
   boost::thread *t_pinger;
   std::map<std::string, boost::chrono::high_resolution_clock::time_point> pings;
