@@ -3,6 +3,10 @@
 #include <string>
 
 using uint = unsigned int;
+using ushort = unsigned short;
+using uchar = unsigned char;
+using llong = long long;
+
 namespace graphics {
 	//Too bad we're not using c++ 20, or we could just use vectors and strings in constexpr,
 	//I need this ugly workaround, oh well...

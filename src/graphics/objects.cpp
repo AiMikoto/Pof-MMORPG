@@ -1,4 +1,5 @@
 #include "objects.h"
+#include "transform.h"
 
 namespace gph = graphics;
 
@@ -13,6 +14,7 @@ gph::GameObject::~GameObject() {
 		delete c;
 	}
 	children.clear();
+	delete transform;
 }
 
 gph::GameObject::GameObject(gph::GameObject* parent) {
@@ -38,28 +40,6 @@ void gph::GameObject::add_children(std::vector<GameObject*> children) {
 
 size_t gph::GameObject::generateID() {
 	return 0;
-}
-
-gph::Transform::Transform() { }
-
-gph::Transform::~Transform() { }
-
-gph::Transform::Transform(glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
-	this->position = position;
-	this->rotation = rotation;
-	this->scale = scale;
-}
-
-glm::vec3 gph::Transform::forward() {
-	return rotation * glm::vec3(0,0,-1);
-}
-
-glm::vec3 gph::Transform::up() {
-	return rotation * glm::vec3(0, 1, 0);
-}
-
-glm::vec3 gph::Transform::right() {
-	return rotation * glm::vec3(1, 0, 0);
 }
 
 gph::Camera::Camera() { }
