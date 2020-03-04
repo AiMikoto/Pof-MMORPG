@@ -41,9 +41,3 @@ void gph::GameObject::add_children(std::vector<GameObject*> children) {
 size_t gph::GameObject::generateID() {
 	return 0;
 }
-
-gph::Camera::Camera() { }
-
-gph::Camera::~Camera() { }
-
-gph::Camera::Camera(Transform* transform) { }

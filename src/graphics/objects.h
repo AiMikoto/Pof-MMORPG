@@ -25,9 +25,5 @@ namespace graphics {
 		size_t generateID();
 	};
 
-	struct Camera :GameObject {
-		Camera();
-		~Camera();
-		Camera(Transform* transform);
-	};
+	
 }

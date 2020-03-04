@@ -2,6 +2,7 @@
 #include "graphics_files.h"
 #include "objects.h"
 #include "light.h"
+#include "camera.h"
 
 namespace graphics {
 	struct Mesh:GameObject {
