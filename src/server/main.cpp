@@ -12,8 +12,8 @@ boost::asio::io_context ioc;
 int main(int argc, char **argv)
 {
   log_init("server");
-  std::string pub = "setup/public_key.pem";
-  std::string pri = "setup/private_key.pem";
+  std::string pub = "keys/public_key.pem";
+  std::string pri = "keys/private_key.pem";
   int port = 7777;
   // parsing arguments;
   std::string args[argc];

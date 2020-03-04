@@ -18,7 +18,7 @@ std::string username;
 int main(int argc, char **argv)
 {
   log_init("client");
-  std::string pub = "setup/public_key.pem";
+  std::string pub = "keys/public_key.pem";
   std::string host = LOGIN_SV_HOST;
   int port = LOGIN_SV_PORT;
   std::string password = "";

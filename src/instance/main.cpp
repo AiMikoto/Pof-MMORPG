@@ -10,7 +10,7 @@ boost::asio::io_context ioc;
 int main(int argc, char **argv)
 {
   boost::asio::io_context ioc;
-  std::string pri = "setup/private_key.pem";
+  std::string pri = "keys/private_key.pem";
   int port = 7000;
   // parsing arguments;
   std::string args[argc];
