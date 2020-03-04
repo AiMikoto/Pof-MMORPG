@@ -6,7 +6,6 @@
 #include <mutex>
 #include "server/ioc.h"
 #include "server/instances.h"
-#include "lib/database.h"
 
 database *db;
 
@@ -45,7 +44,6 @@ int main(int argc, char **argv)
   }
   BOOST_LOG_TRIVIAL(trace) << "initialising database";
   db = new database("localhost", "postgres", "pof");
-  db -> auth("joe", "biden");
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pub, pri);
   BOOST_LOG_TRIVIAL(trace) << "creating instances";

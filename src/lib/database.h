@@ -10,7 +10,7 @@ class database
 public:
   database(std::string host, std::string user, std::string password);
   ~database();
-  user_card auth(std::string username, std::string password);
+  user_card auth(std::string username, std::string password, int *status);
 private:
   PGconn *conn;
 };

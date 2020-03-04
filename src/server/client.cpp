@@ -13,6 +13,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
+#include "server/ioc.h"
 
 boost::uuids::random_generator generator;
 
@@ -38,7 +39,9 @@ void client::handle_auth(call c)
   replace_crypto(aes);
   call answer;
   answer.tree().put(OPCODE, OP_AUTH);
-  if(true) // TODO: use username and password to confirm authentification
+  int status = false;
+  db -> auth(username, password, &status);
+  if(status) // TODO: use username and password to confirm authentification
   {
     answer.tree().put("status", true);
     safe_write(answer);
