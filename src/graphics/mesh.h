@@ -5,12 +5,22 @@
 #include "camera.h"
 
 namespace graphics {
+	struct Vertex {
+		glm::vec3 position, normal;
+		glm::vec2 textureCoordinates;
+	};
+
+	struct Texture {
+		uint id;
+		std::string type;
+	};
+
 	struct Mesh:GameObject {
-		std::vector<glm::vec3> vertices, normals;
-		std::vector<glm::vec2> uvs;
+		std::vector<Vertex> vertices;
+		std::vector<Texture> textures;
 		std::vector<glm::uint> indices, outlineIndices;
-		GLuint texture, textureID, modelProgramID, outlineProgramID, wireframeProgramID;
-		GLuint positionBuffer, colorBuffer, textureBuffer, normalBuffer, elementBuffer, outlineBuffer;
+		GLuint modelProgramID, outlineProgramID, wireframeProgramID;
+		GLuint positionBuffer, textureBuffer, normalBuffer, elementBuffer, outlineBuffer;
 
 		Mesh();
 		~Mesh();
@@ -21,10 +31,7 @@ namespace graphics {
 		void drawOutline(glm::mat4 &mvp);
 		void createOutline();
 		void bindBuffers();
-		void setUniform(const GLchar* uniformName, GLuint programID, float set);
-		void setUniform(const GLchar* uniformName, GLuint programID, glm::vec3 set);
-		void setUniform(const GLchar* uniformName, GLuint programID, glm::vec4 set);
-		void setUniform(const GLchar* uniformName, GLuint programID, glm::mat4 set);
+		
 		bool load(std::string path);
 		void copy(Mesh* target);
 	};

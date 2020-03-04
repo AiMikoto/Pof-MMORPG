@@ -8,7 +8,6 @@ namespace graphics {
 	extern int windowWidth, windowHeight;
 	extern bool windowResized, quit;
 	extern const char* windowName;
-	extern std::vector<GLuint> shaderProgramsIDs;
 	extern GLuint vertexArrayID;
 	extern GLuint vertexBuffer;
 

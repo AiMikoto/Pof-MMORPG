@@ -7,16 +7,13 @@ namespace gph = graphics;
 gph::Mesh::Mesh() { }
 
 gph::Mesh::~Mesh() {
-	glDeleteBuffers(1, &textureID);
-	glDeleteBuffers(1, &texture);
 	glDeleteBuffers(1, &positionBuffer);
 	glDeleteBuffers(1, &textureBuffer);
 	glDeleteBuffers(1, &normalBuffer);
 	glDeleteBuffers(1, &elementBuffer);
 	glDeleteBuffers(1, &outlineBuffer);
 	vertices.clear();
-	uvs.clear();
-	normals.clear();
+	textures.clear();
 	indices.clear();
 	outlineIndices.clear();
 }
@@ -40,14 +37,6 @@ void gph::Mesh::drawOutline(glm::mat4 &mvp) {}
 void gph::Mesh::createOutline() {}
 
 void gph::Mesh::bindBuffers() {}
-
-void gph::Mesh::setUniform(const GLchar* uniformName, GLuint programID, float set) {}
-
-void gph::Mesh::setUniform(const GLchar* uniformName, GLuint programID, glm::vec3 set) {}
-
-void gph::Mesh::setUniform(const GLchar* uniformName, GLuint programID, glm::vec4 set) {}
-
-void gph::Mesh::setUniform(const GLchar* uniformName, GLuint programID, glm::mat4 set) {}
 
 bool gph::Mesh::load(std::string path) {}
 

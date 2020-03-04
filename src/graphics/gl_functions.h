@@ -1,8 +1,6 @@
 #pragma once
 #include "graphics_files.h"
 #include <string>
-#include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
 #include "objects.h"
@@ -16,23 +14,5 @@ namespace graphics {
 	void updateCamera(GLFWwindow* window);
 	void drawScene(GameObject* mainScene);
 	void drawUI();
-	void cleanup(GameObject* mainScene);
-
-	struct ShaderException : _exception {
-		std::string info;
-
-		ShaderException(std::string info);
-	};
-
-	struct ShaderLoader {
-		GLuint vertexShaderID, fragmentShaderID;
-		std::string vertexShaderPath, fragmentShaderPath;
-
-		ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath);
-		~ShaderLoader();
-		std::string readShaderFile(std::string path);
-		GLuint loadShaders();
-		void compileShader(std::string shader, GLuint shaderID);
-		GLuint linkProgram();
-	};
+	void cleanup(GameObject* mainScene);	
 }
