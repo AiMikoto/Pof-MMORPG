@@ -66,7 +66,7 @@ add_dependencies(instance rsa_key)
 add_dependencies(client rsa_key)
 
 file(COPY dockerfiles DESTINATION .)
-add_custom_target(docker DEPENDS bin/instance.tar bin/server.tar)
+add_custom_target(docker DEPENDS bin/instance.tar bin/server.tar bin/database.tar)
 add_custom_command(OUTPUT bin/instance.tar
 	COMMAND docker build -t pof_instance -f ./dockerfiles/instance/Dockerfile .
 	COMMAND docker save pof_instance -o bin/instance.tar
@@ -74,5 +74,9 @@ add_custom_command(OUTPUT bin/instance.tar
 add_custom_command(OUTPUT bin/server.tar
 	COMMAND docker build -t pof_server -f ./dockerfiles/server/Dockerfile .
 	COMMAND docker save pof_server -o bin/server.tar
+)
+add_custom_command(OUTPUT bin/database.tar
+	COMMAND docker build -t pof_database -f ./dockerfiles/database/Dockerfile .
+	COMMAND docker save pof_server -o bin/database.tar
 )
 add_dependencies(docker instance server rsa_key)
