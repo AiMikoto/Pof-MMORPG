@@ -18,6 +18,12 @@ namespace graphics {
 	void drawUI();
 	void cleanup(GameObject* mainScene);
 
+	struct ShaderException : _exception {
+		std::string info;
+
+		ShaderException(std::string info);
+	};
+
 	struct ShaderLoader {
 		GLuint vertexShaderID, fragmentShaderID;
 		std::string vertexShaderPath, fragmentShaderPath;

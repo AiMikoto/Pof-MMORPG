@@ -99,7 +99,9 @@ std::string gph::ShaderLoader::readShaderFile(std::string path) {
 			res += line + "\n";
 		fileStream.close();
 	}
-	else throw "Impossible to open " + path;
+	else {
+		throw ShaderException(path);
+	}
 	return res;
 }
 
@@ -116,15 +118,12 @@ GLuint gph::ShaderLoader::loadShaders() {
 		std::cout << "Linking program" << std::endl;
 		return linkProgram();
 	}
-	catch (std::string e) {
-		std::cout << e << std::endl;
+	catch (ShaderException e) {
+		std::cout << e.info << std::endl;
 		std::cin.ignore();
 		glDeleteShader(vertexShaderID);
 		glDeleteShader(fragmentShaderID);
 		exit(1);
-	}
-	catch (std::vector<char> e) {
-		std::cout << &e[0] << std::endl;
 	}
 }
 
@@ -140,10 +139,10 @@ void gph::ShaderLoader::compileShader(std::string shader, GLuint shaderID) {
 			glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 			std::vector<char> shaderErrorMessage(infoLogLength + 1);
 			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
-			throw shaderErrorMessage;
+			throw ShaderException(std::string(shaderErrorMessage.begin(), shaderErrorMessage.end()));
 		}
 	}
-	catch (std::vector<char> e) {
+	catch (ShaderException e) {
 		throw e;
 	}
 }
@@ -161,13 +160,13 @@ GLuint gph::ShaderLoader::linkProgram() {
 			glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
 			std::vector<char> programErrorMessage(infoLogLength + 1);
 			glGetProgramInfoLog(programID, infoLogLength, NULL, &programErrorMessage[0]);
-			throw programErrorMessage;
+			throw ShaderException(std::string(programErrorMessage.begin(), programErrorMessage.end()));
 		}
 		glDeleteShader(vertexShaderID);
 		glDeleteShader(fragmentShaderID);
 		return programID;
 	}
-	catch (std::vector<char> e) {
+	catch (ShaderException e) {
 		throw e;
 	}
 }
@@ -203,4 +202,8 @@ void gph::cleanup(GameObject* mainScene) {
 	glDeleteBuffers(1, &vertexBuffer);
 	delete mainScene;
 	glfwTerminate();
+}
+
+gph::ShaderException::ShaderException(std::string info) {
+	this->info = info;
 }
