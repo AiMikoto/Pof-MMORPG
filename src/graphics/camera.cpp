@@ -5,7 +5,7 @@
 
 namespace gph = graphics;
 
-std::vector<gph::Camera*> cameras;
+std::vector<gph::Camera*> gph::cameras;
 
 gph::Camera::Camera() {
 	//set camera position and rotation
@@ -35,28 +35,29 @@ void gph::Camera::setup() {
 	isFixed = false;
 	isPerspective = true;
 	for (int i = 0; i < totalCameraMovements; i++) {
-		move[i] = false;
+		moveBuffer[i] = false;
 	}
+	this->transform->gameObject = this;
 }
 
 void gph::Camera::moveCamera(int direction) {
 	switch (direction) {
-	case(cameraMovements::forward):
+	case(cam::cameraMovements::forward):
 		transform->position += transform->forward() * deltaTime * moveSpeed;
 		break;
-	case(cameraMovements::backwards):
+	case(cam::cameraMovements::backwards):
 		transform->position -= transform->forward() * deltaTime * moveSpeed;
 		break;
-	case(cameraMovements::right):
+	case(cam::cameraMovements::right):
 		transform->position += transform->right() * deltaTime * moveSpeed;
 		break;
-	case(cameraMovements::left):
+	case(cam::cameraMovements::left):
 		transform->position -= transform->right() * deltaTime * moveSpeed;
 		break;
-	case(cameraMovements::up):
+	case(cam::cameraMovements::up):
 		transform->position += transform->up() * deltaTime * moveSpeed;
 		break;
-	case(cameraMovements::down):
+	case(cam::cameraMovements::down):
 		transform->position -= transform->up() * deltaTime * moveSpeed;
 		break;
 	}
@@ -69,15 +70,16 @@ void gph::Camera::rotateCamera(GLFWwindow* window) {
 	glfwGetFramebufferSize(window, &width, &height);
 
 	glm::dvec3 angles = glm::eulerAngles(transform->rotation);
-	angles.y += rotationSpeed * width / 2 - xpos;
+	angles.y = rotationSpeed * width / 2 - xpos;
 	if (angles.y > 2 * pi)
 		angles.y -= 2 * pi;
 	else if (angles.y < 0)
 		angles.y += 2 * pi;
-	angles.x += rotationSpeed * height / 2 - ypos;
+	angles.x = rotationSpeed * height / 2 - ypos;
 	if (angles.x > pi / 2)
 		angles.y -= pi /2;
 	else if (angles.y < 0)
 		angles.y += pi /2;
 	transform->rotation = glm::dquat(angles);
+	rotate = false;
 }

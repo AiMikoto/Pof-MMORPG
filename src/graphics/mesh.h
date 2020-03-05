@@ -3,6 +3,8 @@
 #include "objects.h"
 #include "light.h"
 #include "camera.h"
+#include "constants.h"
+#include "variables.h"
 
 namespace graphics {
 	struct Vertex {

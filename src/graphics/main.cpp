@@ -10,11 +10,15 @@ int main() {
 
 	glGenVertexArrays(1, &gph::vertexArrayID);
 	glGenBuffers(1, &gph::vertexBuffer);
+	glGenBuffers(1, &gph::elementBuffer);
 
 	glBindVertexArray(gph::vertexArrayID);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, gph::vertexBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(gph::triangleVertices), &gph::triangleVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(gph::cubeVertices), &gph::cubeVertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gph::vertexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(gph::cubeIndices), &gph::cubeIndices, GL_STATIC_DRAW);
 	
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -30,7 +34,6 @@ int main() {
 	float check = 0;
 	int fps = 0;
 	glfwSwapInterval(0);
-	std::cout << pi << std::endl;
 
 	while (!gph::quit) {
 		gph::update(window, mainScene, lastTime, check, fps);

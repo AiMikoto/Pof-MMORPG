@@ -4,6 +4,8 @@
 #include "glm/gtc/type_ptr.hpp"
 #include <vector>
 #include <string>
+#include "constants.h"
+#include "variables.h"
 
 namespace graphics {
 	struct Transform;

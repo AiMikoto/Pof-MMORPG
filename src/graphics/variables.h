@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "graphics_files.h"
 #include "constants.h"
 
 namespace graphics {
@@ -10,8 +9,9 @@ namespace graphics {
 	extern const char* windowName;
 	extern GLuint vertexArrayID;
 	extern GLuint vertexBuffer;
+	extern GLuint elementBuffer;
 
-	extern float triangleVertices[9];
-	extern uint triangleIndices[6];
+	extern float cubeVertices[24];
+	extern GLuint cubeIndices[36];
 	extern double deltaTime;
 }

@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include "objects.h"
+#include "constants.h"
+#include "variables.h"
 
 namespace graphics {
 	GLFWwindow * createGLFWContext(int width, int height, std::string name);
@@ -11,7 +13,7 @@ namespace graphics {
 	void update(GLFWwindow* window, GameObject* mainScene, double lastTime, float check, int fps);
 	void compileShader(std::string shader);
 	void loadShaders(std::vector<std::string> shadersPaths);
-	void updateCamera(GLFWwindow* window);
+	void updateCameras(GLFWwindow* window);
 	void drawScene(GameObject* mainScene);
 	void drawUI();
 	void cleanup(GameObject* mainScene);	

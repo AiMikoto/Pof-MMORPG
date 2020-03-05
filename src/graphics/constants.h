@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "graphics_files.h"
 
 using uint = unsigned int;
 using ushort = unsigned short;
@@ -20,9 +21,11 @@ namespace graphics {
 
 	const auto totalCameraMovements = 6;
 
-	enum cameraMovements {
-		forward, backwards, up, down, left, right
-	};	
+	namespace cam{
+		enum cameraMovements {
+			forward, backwards, up, down, left, right
+		};
+	}	
 
 	enum movementKeys {
 		forward = GLFW_KEY_W,

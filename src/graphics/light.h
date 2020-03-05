@@ -1,6 +1,7 @@
 #pragma once
 #include "objects.h"
 #include "constants.h"
+#include "variables.h"
 
 namespace graphics {
 	struct Light:GameObject {

@@ -1,6 +1,8 @@
 #pragma once
 #include "objects.h"
 #include "graphics_files.h"
+#include "constants.h"
+#include "variables.h"
 
 namespace graphics {
 	struct Camera : GameObject {

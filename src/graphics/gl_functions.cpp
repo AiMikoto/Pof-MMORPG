@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "shader.h"
 #include "camera.h"
+#include "mouse.h"
 
 namespace gph = graphics;
 
@@ -53,9 +54,9 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//glfwSetScrollCallback(window, scrollCallback);
-	//glfwSetCursorPosCallback(window, moveCursorCallback);
-	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
+	glfwSetScrollCallback(window, scrollCallback);
+	glfwSetCursorPosCallback(window, moveCursorCallback);
+	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyboardCallback);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -80,7 +81,8 @@ void gph::update(GLFWwindow* window, gph::GameObject* mainScene, double lastTime
 		glViewport(0, 0, windowWidth, windowHeight);
 		windowResized = false;
 	}
-	
+
+	updateCameras(window);
 	drawScene(mainScene);
 
 	glfwSwapBuffers(window);
@@ -102,17 +104,24 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 	}
 }
 
-void gph::updateCamera(GLFWwindow* window) {
-	for (int i = 0; i < totalCameraMovements; i++) {
-		if (cameras[0]->move[i])
-			cameras[0]->moveCamera(i);
+void gph::updateCameras(GLFWwindow* window) {
+	for (auto camera : cameras) {
+		if (camera->move) {
+			for (int i = 0; i < totalCameraMovements; i++) {
+				if (camera->moveBuffer[i])
+					camera->moveCamera(i);
+			}
+		}
+		if (camera->rotate) {
+			camera->rotateCamera(window);
+		}
 	}
 }
 
 void gph::drawScene(gph::GameObject* mainScene) {
 	glUseProgram(programIDmap[MODEL_SHADER]);
 	glBindVertexArray(vertexArrayID);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
 
 void gph::drawUI() { }
@@ -122,8 +131,14 @@ void gph::cleanup(GameObject* mainScene) {
 	for (auto value: programIDmap) {
 		glDeleteProgram(value.second);
 	}
+	programIDmap.clear();
+	for (auto camera : cameras) {
+		delete camera;
+	}
+	cameras.clear();
 	glDeleteVertexArrays(1, &vertexArrayID);
 	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteBuffers(1, &elementBuffer);
 	delete mainScene;
 	glfwTerminate();
 }

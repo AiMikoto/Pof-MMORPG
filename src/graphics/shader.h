@@ -5,6 +5,8 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include "constants.h"
+#include "variables.h"
 
 namespace graphics {
 	struct ShaderLoader {

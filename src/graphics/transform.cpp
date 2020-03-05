@@ -5,9 +5,7 @@ namespace gph = graphics;
 
 gph::Transform::Transform() { }
 
-gph::Transform::~Transform() {
-	delete gameObject;
-}
+gph::Transform::~Transform() { }
 
 gph::Transform::Transform(glm::dvec3 position, glm::dquat rotation, glm::dvec3 scale) {
 	this->position = position;
