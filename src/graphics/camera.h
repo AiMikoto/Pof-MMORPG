@@ -1,16 +1,23 @@
 #pragma once
 #include "objects.h"
+#include "graphics_files.h"
 
 namespace graphics {
-	struct Camera :GameObject {
+	struct Camera : GameObject {
 		glm::vec3 lookAt;
-		bool isFixed;
-		float cameraSpeed, rotationSpeed, defaultSpeed, maxSpeed, acceleration;
-		float horizontalAngle, verticalAngle;
+		bool isFixed, isPerspective;
+		double moveSpeed, rotationSpeed, defaultSpeed, maxSpeed, acceleration;
 		float nearClipDistance, farClipDistance, fieldOfView;
+		bool moveBuffer[totalCameraMovements];
+		bool move, rotate;
 
 		Camera();
 		~Camera();
-		Camera(Transform* transform);
+		Camera(Transform* transform, glm::vec3 lookAt);
+		void setup();
+		void moveCamera(int direction);
+		void rotateCamera(GLFWwindow* window);
 	};
+
+	extern std::vector<Camera*> cameras;
 }

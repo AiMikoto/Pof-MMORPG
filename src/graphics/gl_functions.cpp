@@ -1,7 +1,8 @@
 #include "gl_functions.h"
-#include "keyboard_functions.h"
+#include "keyboard.h"
 #include "utils.h"
 #include "shader.h"
+#include "camera.h"
 
 namespace gph = graphics;
 
@@ -57,6 +58,7 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 	//glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyboardCallback);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
 	return window;
 }
@@ -67,8 +69,12 @@ void gph::windowResizeCallback(GLFWwindow* window, int width, int height) {
 	windowResized = true;
 }
 
-void gph::update(GLFWwindow* window, gph::GameObject* mainScene, float lastTime, float check, int fps) {
+void gph::update(GLFWwindow* window, gph::GameObject* mainScene, double lastTime, float check, int fps) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	double currentTime = glfwGetTime();
+	deltaTime = currentTime - lastTime;
+	lastTime = currentTime;
 
 	if (windowResized) {
 		glViewport(0, 0, windowWidth, windowHeight);
@@ -96,7 +102,12 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 	}
 }
 
-void gph::updateCamera(GLFWwindow* window) { }
+void gph::updateCamera(GLFWwindow* window) {
+	for (int i = 0; i < totalCameraMovements; i++) {
+		if (cameras[0]->move[i])
+			cameras[0]->moveCamera(i);
+	}
+}
 
 void gph::drawScene(gph::GameObject* mainScene) {
 	glUseProgram(programIDmap[MODEL_SHADER]);

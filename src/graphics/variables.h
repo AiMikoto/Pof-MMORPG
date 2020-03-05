@@ -13,4 +13,5 @@ namespace graphics {
 
 	extern float triangleVertices[9];
 	extern uint triangleIndices[6];
+	extern double deltaTime;
 }

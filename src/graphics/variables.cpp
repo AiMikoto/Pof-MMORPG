@@ -9,6 +9,7 @@ bool gph::quit = false;
 bool gph::windowResized = false;
 GLuint gph::vertexArrayID;
 GLuint gph::vertexBuffer;
+double gph::deltaTime;
 
 //just as a test, will remove later when adding proper graphics
 float gph::triangleVertices[9] = {
