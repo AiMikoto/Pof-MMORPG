@@ -8,7 +8,7 @@ void sanitize(std::string& sequence)
 
 database *db_init()
 {
-  return new database("localhost", "postgres", "pof");
+  return new database("iarba.ga", "postgres", "pof");
 }
 
 database::database(std::string host, std::string user, std::string password)
