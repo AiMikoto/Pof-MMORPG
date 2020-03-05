@@ -20,9 +20,9 @@ int main() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	gph::GameObject* mainScene = new gph::GameObject();
-	gph::cameras.push_back(new gph::Camera(gph::CameraViewport(0, 0, gph::windowWidth / 2, gph::windowHeight / 2))); //our main camera
-	gph::cameras.push_back(new gph::Camera(gph::CameraViewport(gph::windowWidth / 2, gph::windowHeight / 2,
-		gph::windowWidth, gph::windowHeight))); //testing 2nd camera
+	gph::cameras.push_back(new gph::Camera(gph::CameraViewport(0, 0, gph::windowWidth, gph::windowHeight))); //our main camera
+	//gph::cameras.push_back(new gph::Camera(gph::CameraViewport(gph::windowWidth / 2, gph::windowHeight / 2,
+		//gph::windowWidth, gph::windowHeight))); //testing 2nd camera
 
 	std::vector<std::string> shaders = gph::charArrayToStringVector(gph::requiredShadersPath,
 		(size_t)gph::requiredShadersPathLength);

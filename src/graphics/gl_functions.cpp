@@ -126,7 +126,7 @@ void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 			cameras[0]->farClipDistance);
 		glm::mat4 view = glm::lookAt(glm::vec3(cameras[0]->transform->position),
 			cameras[0]->lookAt,
-			glm::vec3(cameras[0]->transform->up()));
+			glm::vec3(0, 1, 0));
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 mvp = projection * view * model;
 		GLuint matrixID = glGetUniformLocation(programIDmap[MODEL_SHADER], "mvp");

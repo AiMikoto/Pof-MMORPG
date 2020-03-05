@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "variables.h"
 #include <iostream>
+#include "mouse.h"
 
 namespace gph = graphics;
 
@@ -47,6 +48,8 @@ void gph::Camera::setup() {
 	farClipDistance = 45.0f;
 	isFixed = false;
 	isPerspective = true;
+	pitch = 0;
+	yaw = pi;
 	for (int i = 0; i < totalCameraMovements; i++) {
 		moveBuffer[i] = false;
 	}
@@ -57,22 +60,22 @@ void gph::Camera::setup() {
 void gph::Camera::moveCamera(int direction) {
 	switch (direction) {
 	case(cam::cameraMovements::forward):
-		transform->position += transform->forward() * deltaTime * moveSpeed;
+		transform->position += forward() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::backwards):
-		transform->position -= transform->forward() * deltaTime * moveSpeed;
+		transform->position -= forward() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::right):
-		transform->position += transform->right() * deltaTime * moveSpeed;
+		transform->position += right() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::left):
-		transform->position -= transform->right() * deltaTime * moveSpeed;
+		transform->position -= right() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::up):
-		transform->position += transform->up() * deltaTime * moveSpeed;
+		transform->position += up() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::down):
-		transform->position -= transform->up() * deltaTime * moveSpeed;
+		transform->position -= up() * deltaTime * moveSpeed;
 		break;
 	}
 	//std::cout << transform->position.x << ", " << transform->position.y << ", " << transform->position.z << std::endl;
@@ -84,24 +87,39 @@ void gph::Camera::rotateCamera(GLFWwindow* window) {
 	double xpos, ypos;
 	glfwGetCursorPos(window, &xpos, &ypos);
 	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
+	glfwGetWindowSize(window, &width, &height);
 
-	glm::dvec3 angles = glm::eulerAngles(transform->rotation);
-	std::cout << angles.x << ", " << angles.y << ", " << angles.z << std::endl;
-	angles.y += rotationSpeed * width / 2 - xpos;
-	if (angles.y > 2 * pi)
-		angles.y -= 2 * pi;
-	else if (angles.y < 0)
-		angles.y += 2 * pi;
-	angles.z += rotationSpeed * height / 2 - ypos;
-	if (angles.z > pi / 2)
-		angles.z -= pi /2;
-	else if (angles.z < 0)
-		angles.z += pi /2;
-	transform->rotation = glm::dquat(angles);
+	yaw += rotationSpeed * deltaTime * width / 2 - xpos;
+	if (yaw > 2 * pi)
+		yaw -= 2 * pi;
+	else if (yaw < 0)
+		yaw += 2 * pi;
+	pitch += rotationSpeed * deltaTime * height / 2 - ypos;
+	if (pitch > 2 * pi)
+		pitch -=  2 * pi;
+	else if (pitch < 0)
+		pitch += 2* pi;
+	double x = std::cos(yaw) * std::cos(pitch);
+	double y = std::sin(pitch);
+	double z = std::sin(yaw) * std::cos(pitch);
+	//transform->rotation = glm::dquat(glm::dvec3(x, y, z));
 	rotate = false;
+	updateLookAt();
+	cursorToMiddle(window);
 }
 
 void gph::Camera::updateLookAt() {
-	lookAt = transform->position + transform->forward();
+	lookAt = transform->position + forward();
+}
+
+glm::dvec3 gph::Camera::forward() {
+	return glm::dvec3(cos(pitch) * sin(yaw), sin(pitch), cos(pitch) * cos(yaw));
+}
+
+glm::dvec3 gph::Camera::right() {
+	return glm::dvec3(-cos(yaw), 0, sin(yaw));
+}
+
+glm::dvec3 gph::Camera::up() {
+	return glm::dvec3(0, cos(pitch), sin(pitch));
 }

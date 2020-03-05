@@ -20,7 +20,7 @@ namespace graphics {
 		float nearClipDistance, farClipDistance, fieldOfView;
 		bool moveBuffer[totalCameraMovements];
 		bool move, rotate;
-		double horizontalAngle, verticalAngle;
+		double yaw, pitch;
 		CameraViewport viewport;
 
 		Camera();
@@ -31,6 +31,9 @@ namespace graphics {
 		void moveCamera(int direction);
 		void rotateCamera(GLFWwindow* window);
 		void updateLookAt();
+		glm::dvec3 forward();
+		glm::dvec3 right();
+		glm::dvec3 up();
 	};
 
 	extern std::vector<Camera*> cameras;

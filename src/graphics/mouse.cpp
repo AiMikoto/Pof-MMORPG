@@ -9,8 +9,6 @@ void gph::moveCursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	int inputMode = glfwGetInputMode(window, GLFW_CURSOR);
 	if (inputMode == GLFW_CURSOR_HIDDEN) {
 		cameras[0]->rotate = true;
-		cursorToMiddle(window);
-		//std::cout << xpos << std::endl;
 	}
 }
 

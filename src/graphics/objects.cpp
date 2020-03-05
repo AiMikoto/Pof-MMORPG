@@ -14,7 +14,8 @@ gph::GameObject::~GameObject() {
 		delete c;
 	}
 	children.clear();
-	delete transform;
+	if(transform != nullptr)
+		delete transform;
 }
 
 gph::GameObject::GameObject(gph::GameObject* parent) {
