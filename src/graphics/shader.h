@@ -29,7 +29,7 @@ namespace graphics {
 		void setUniform(const GLchar* uniformName, GLuint programID, glm::mat4 set);
 	};
 
-	struct ShaderException : _exception {
+	struct ShaderException : std::exception {
 		std::string info;
 
 		ShaderException(std::string info);
