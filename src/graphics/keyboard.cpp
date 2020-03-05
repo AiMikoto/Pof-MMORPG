@@ -13,19 +13,15 @@ void gph::keyboardCallback(GLFWwindow* window, int key, int scancode, int action
 		break;
 	case movementKeys::forward:
 		cameras[0]->moveBuffer[cam::cameraMovements::forward] = pressOrRepeat;
-		cameras[0]->move = true;
 		break;
 	case movementKeys::backwards:
 		cameras[0]->moveBuffer[cam::cameraMovements::backwards] = pressOrRepeat;
-		cameras[0]->move = true;
 		break;
 	case movementKeys::right:
 		cameras[0]->moveBuffer[cam::cameraMovements::right] = pressOrRepeat;
-		cameras[0]->move = true;
 		break;
 	case movementKeys::left:
 		cameras[0]->moveBuffer[cam::cameraMovements::left] = pressOrRepeat;
-		cameras[0]->move = true;
 		break;
 	}
 

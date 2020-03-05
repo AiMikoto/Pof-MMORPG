@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "shader.h"
 #include "camera.h"
+#include "transform.h"
 #include "mouse.h"
 
 namespace gph = graphics;
@@ -40,14 +41,9 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 		std::cin.ignore();
 		exit(-1);
 	}
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0, 0, 0, 1.0f);
 	glViewport(0, 0, windowWidth, windowHeight);
 
-	// Enable depth test
-	glEnable(GL_DEPTH_TEST);
-	// Accept fragment if it closer to the camera than the former one
-	glDepthFunc(GL_LESS);
-	// Cull triangles which normal is not towards the camera
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
@@ -70,9 +66,7 @@ void gph::windowResizeCallback(GLFWwindow* window, int width, int height) {
 	windowResized = true;
 }
 
-void gph::update(GLFWwindow* window, gph::GameObject* mainScene, double lastTime, float check, int fps) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+void gph::update(GLFWwindow* window, gph::GameObject* mainScene, double& lastTime, double& check, int fps) {
 	double currentTime = glfwGetTime();
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
@@ -83,7 +77,7 @@ void gph::update(GLFWwindow* window, gph::GameObject* mainScene, double lastTime
 	}
 
 	updateCameras(window);
-	drawScene(mainScene);
+	drawScene(window, mainScene);
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
@@ -106,11 +100,9 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 
 void gph::updateCameras(GLFWwindow* window) {
 	for (auto camera : cameras) {
-		if (camera->move) {
-			for (int i = 0; i < totalCameraMovements; i++) {
-				if (camera->moveBuffer[i])
-					camera->moveCamera(i);
-			}
+		for (int i = 0; i < totalCameraMovements; i++) {
+			if (camera->moveBuffer[i])
+				camera->moveCamera(i);
 		}
 		if (camera->rotate) {
 			camera->rotateCamera(window);
@@ -118,10 +110,30 @@ void gph::updateCameras(GLFWwindow* window) {
 	}
 }
 
-void gph::drawScene(gph::GameObject* mainScene) {
+void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 	glUseProgram(programIDmap[MODEL_SHADER]);
-	glBindVertexArray(vertexArrayID);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	for (auto camera : cameras) {
+		glScissor(camera->viewport.x, camera->viewport.y, camera->viewport.width, camera->viewport.height);
+		glEnable(GL_SCISSOR_TEST);
+		glViewport(camera->viewport.x, camera->viewport.y, camera->viewport.width, camera->viewport.height);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glm::mat4 projection = glm::perspective(glm::radians(cameras[0]->fieldOfView),
+			float(camera->viewport.width) / camera->viewport.height,
+			cameras[0]->nearClipDistance,
+			cameras[0]->farClipDistance);
+		glm::mat4 view = glm::lookAt(glm::vec3(cameras[0]->transform->position),
+			cameras[0]->lookAt,
+			glm::vec3(cameras[0]->transform->up()));
+		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 mvp = projection * view * model;
+		GLuint matrixID = glGetUniformLocation(programIDmap[MODEL_SHADER], "mvp");
+		glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+		glBindVertexArray(vertexArrayID);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+	}	
 }
 
 void gph::drawUI() { }
@@ -138,7 +150,6 @@ void gph::cleanup(GameObject* mainScene) {
 	cameras.clear();
 	glDeleteVertexArrays(1, &vertexArrayID);
 	glDeleteBuffers(1, &vertexBuffer);
-	glDeleteBuffers(1, &elementBuffer);
 	delete mainScene;
 	glfwTerminate();
 }

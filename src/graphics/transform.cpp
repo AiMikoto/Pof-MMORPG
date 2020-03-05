@@ -14,13 +14,13 @@ gph::Transform::Transform(glm::dvec3 position, glm::dquat rotation, glm::dvec3 s
 }
 
 glm::dvec3 gph::Transform::forward() {
-	return rotation * glm::dvec3(0, 0, -1);
+	return glm::normalize(rotation * glm::dvec3(0, 0, -1));
 }
 
 glm::dvec3 gph::Transform::up() {
-	return rotation * glm::dvec3(0, 1, 0);
+	return glm::normalize(rotation * glm::dvec3(0, 1, 0));
 }
 
 glm::dvec3 gph::Transform::right() {
-	return rotation * glm::dvec3(1, 0, 0);
+	return glm::normalize(rotation * glm::dvec3(1, 0, 0));
 }

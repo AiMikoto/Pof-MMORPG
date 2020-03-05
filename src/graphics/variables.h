@@ -9,9 +9,8 @@ namespace graphics {
 	extern const char* windowName;
 	extern GLuint vertexArrayID;
 	extern GLuint vertexBuffer;
-	extern GLuint elementBuffer;
 
-	extern float cubeVertices[24];
-	extern GLuint cubeIndices[36];
+	extern float triangleVertices[9];
+	extern GLuint triangleIndices[6];
 	extern double deltaTime;
 }

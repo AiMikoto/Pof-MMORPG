@@ -7,8 +7,9 @@ void gph::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {}
 
 void gph::moveCursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	int inputMode = glfwGetInputMode(window, GLFW_CURSOR);
-	if (inputMode == GLFW_CURSOR_DISABLED) {
+	if (inputMode == GLFW_CURSOR_HIDDEN) {
 		cameras[0]->rotate = true;
+		cursorToMiddle(window);
 		//std::cout << xpos << std::endl;
 	}
 }
@@ -19,11 +20,11 @@ void gph::mouseButtonCallback(GLFWwindow* window, int button, int state, int mod
 		switch (state) {
 		case GLFW_PRESS:
 			int inputMode = glfwGetInputMode(window, GLFW_CURSOR);
-			if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+			if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN)
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			else {
 				cursorToMiddle(window);
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 			}
 			break;
 		}
