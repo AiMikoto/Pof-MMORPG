@@ -118,6 +118,7 @@ void client::handle_map_change_request_cb(call c)
     BOOST_LOG_TRIVIAL(trace) << "server approved map change";
     // if authorised, card will be transferred to new instance
     ucl.remove(uname);
+    username = "";
     call move;
     move.tree().put(OPCODE, OP_MOVE);
     move.tree().put("target.host", c.tree().get<std::string>("target.host"));

@@ -36,13 +36,14 @@ void server::cleanup()
       BOOST_LOG_TRIVIAL(trace) << "checking client";
       if(c -> get_ping() == -1)
       {
+        BOOST_LOG_TRIVIAL(info) << "cleaning client";
         if(ucl.contains(c -> username))
         {
+          BOOST_LOG_TRIVIAL(info) << "saving usercard";
           user_card uc = ucl.get(c -> username);
           ucl.remove(c -> username);
           db -> uc_save(c -> username, uc);
         }
-        BOOST_LOG_TRIVIAL(info) << "cleaning client";
         clients.erase(it);
         delete c;
         BOOST_LOG_TRIVIAL(info) << "cleaned client";
