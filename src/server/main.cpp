@@ -8,7 +8,6 @@
 #include "server/instances.h"
 
 database *db;
-
 boost::asio::io_context ioc;
 
 int main(int argc, char **argv)

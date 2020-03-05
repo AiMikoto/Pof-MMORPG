@@ -40,16 +40,12 @@ void client::handle_auth(call c)
   call answer;
   answer.tree().put(OPCODE, OP_AUTH);
   int status = false;
-  db -> auth(username, password, &status);
-  if(status) // TODO: use username and password to confirm authentification
+  user_card uc = db -> auth(username, password, &status);
+  if(status)
   {
     answer.tree().put("status", true);
     safe_write(answer);
-    user_card uc;
-    // TODO: load user card
     std::string token = boost::lexical_cast<std::string>(generator());
-    uc.tree().put("user.name", username);
-    uc.tree().put("user.token", token);
     call uc_transfer;
     uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);
     uc_transfer.tree().put_child("data", uc.tree());

@@ -4,12 +4,13 @@
 #include <cstdlib>
 #include <iostream>
 #include <mutex>
+#include "server/ioc.h"
 
 boost::asio::io_context ioc;
+database *db;
 
 int main(int argc, char **argv)
 {
-  boost::asio::io_context ioc;
   std::string pri = "keys/private_key.pem";
   int port = 7000;
   // parsing arguments;
@@ -33,6 +34,8 @@ int main(int argc, char **argv)
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
   log_init("instance");
+  BOOST_LOG_TRIVIAL(trace) << "initialising database";
+  db = new database("localhost", "postgres", "pof");
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pri);
   BOOST_LOG_TRIVIAL(trace) << "creating server";

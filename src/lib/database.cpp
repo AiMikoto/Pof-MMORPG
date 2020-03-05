@@ -1,9 +1,9 @@
 #include "lib/database.h"
 #include "lib/crypto.h"
-#include <cstdio>
 
 void sanitize(std::string& sequence)
 {
+  // TODO: add sanitisation
 }
 
 database::database(std::string host, std::string user, std::string password)
@@ -19,6 +19,22 @@ database::database(std::string host, std::string user, std::string password)
 database::~database()
 {
   PQfinish(conn);
+}
+
+void database::uc_add(std::string username, std::string password, user_card uc)
+{
+  sanitize(username);
+  std::string query = "INSERT INTO userinfo(usercard, username, passwordhash) VALUES(\'" + uc.save() + "\', \'" + username + "\', \'" + sha256(password) + "\')";
+  PGresult *res = PQexec(conn, query.c_str());
+  PQclear(res);
+}
+
+void database::uc_save(std::string username, user_card uc)
+{
+  sanitize(username);
+  std::string query = "UPDATE userinfo SET usercard = \'" + uc.save() + "\' WHERE username = \'" + username + "\'";
+  PGresult *res = PQexec(conn, query.c_str());
+  PQclear(res);
 }
 
 // return usercard

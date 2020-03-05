@@ -4,6 +4,7 @@
 #include "instance/server.h"
 #include "include/common_macro.h"
 #include "instance/ioc.h"
+#include "instance/game.h"
 
 server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(ioc, endpoint)
 {
@@ -35,12 +36,17 @@ void server::cleanup()
       BOOST_LOG_TRIVIAL(trace) << "checking client";
       if(c -> get_ping() == -1)
       {
-	// TODO: remove user card if present
+        if(ucl.contains(c -> username))
+        {
+          user_card uc = ucl.get(c -> username);
+          ucl.remove(c -> username);
+          db -> uc_save(c -> username, uc);
+        }
         BOOST_LOG_TRIVIAL(info) << "cleaning client";
         clients.erase(it);
         delete c;
         BOOST_LOG_TRIVIAL(info) << "cleaned client";
-	it--;
+        it--;
       }
     }
   }
