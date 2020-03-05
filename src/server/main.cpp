@@ -42,7 +42,7 @@ int main(int argc, char **argv)
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
   BOOST_LOG_TRIVIAL(trace) << "initialising database";
-  db = new database("localhost", "postgres", "pof");
+  db = db_init();
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pub, pri);
   BOOST_LOG_TRIVIAL(trace) << "creating instances";

@@ -6,6 +6,11 @@ void sanitize(std::string& sequence)
   // TODO: add sanitisation
 }
 
+database *db_init()
+{
+  return new database("localhost", "postgres", "pof");
+}
+
 database::database(std::string host, std::string user, std::string password)
 {
   std::string query = "host=" + host + " port=5432 user=" + user + " dbname=pof password=" + password + "";

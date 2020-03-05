@@ -17,4 +17,6 @@ private:
   PGconn *conn;
 };
 
+database *db_init();
+
 #endif
