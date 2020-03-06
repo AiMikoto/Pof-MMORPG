@@ -10,12 +10,13 @@
 namespace graphics {
 	struct Transform;
 
-	struct GameObject {
+	class GameObject {
+public:
 		std::string name, tag;
 		size_t id;
 		GameObject* parent;
 		std::vector<GameObject*> children;
-		Transform* transform;
+		Transform* transform = NULL;
 
 		GameObject();
 		~GameObject();

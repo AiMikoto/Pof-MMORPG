@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "transform.h"
 #include "mouse.h"
+#include "lib/log.h"
 
 namespace gph = graphics;
 
@@ -13,32 +14,31 @@ namespace gph = graphics;
 GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 	windowWidth = width;
 	windowHeight = height;
+  BOOST_LOG_TRIVIAL(trace) << "Attempting to initialise GLFW";
 	if (!glfwInit())
 	{
-		std::cout << "Failed to initialize GLFW" << std::endl;
-		std::cin.ignore();
+    BOOST_LOG_TRIVIAL(error) << "Failed to initialize GLFW";
 		exit(-1);
 	}
+  BOOST_LOG_TRIVIAL(trace) << "Configuring GLFW";
 	glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // We want OpenGL 4.0
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL 
 
-	// Open a window and create its OpenGL context
+  BOOST_LOG_TRIVIAL(trace) << "Open a window and create its OpenGL context";
 	GLFWwindow* window = glfwCreateWindow(width, height, name.data(), NULL, NULL);
 	if (window == NULL)
 	{
-		std::cout << "Failed to open GLFW window!" << std::endl;
-		glfwTerminate();
-		std::cin.ignore();
+    BOOST_LOG_TRIVIAL(error) << "Failed to open GLFW window!";
 		exit(-1);
 	}
 	glfwMakeContextCurrent(window);
+  BOOST_LOG_TRIVIAL(trace) << "Attempting to initialise GLAD";
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		std::cin.ignore();
+    BOOST_LOG_TRIVIAL(error) << "Failed to initialize GLAD";
 		exit(-1);
 	}
 	glClearColor(0, 0, 0, 1.0f);
@@ -49,6 +49,7 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  BOOST_LOG_TRIVIAL(trace) << "Setting callbacks for GLFW";
 
 	glfwSetScrollCallback(window, scrollCallback);
 	glfwSetCursorPosCallback(window, moveCursorCallback);
@@ -61,6 +62,7 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 }
 
 void gph::windowResizeCallback(GLFWwindow* window, int width, int height) {
+  BOOST_LOG_TRIVIAL(trace) << "Window resized";
 	windowWidth = width;
 	windowHeight = height;
 	windowResized = true;
@@ -139,17 +141,26 @@ void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 void gph::drawUI() { }
 
 void gph::cleanup(GameObject* mainScene) {
-	std::cout << "Cleaning up..." << std::endl;
+  BOOST_LOG_TRIVIAL(trace) << "Cleaning up";
 	for (auto value: programIDmap) {
+    BOOST_LOG_TRIVIAL(trace) << "deleting programID";
 		glDeleteProgram(value.second);
 	}
+  BOOST_LOG_TRIVIAL(trace) << "cleansing programID";
 	programIDmap.clear();
 	for (auto camera : cameras) {
+    BOOST_LOG_TRIVIAL(trace) << "deleting camera";
 		delete camera;
 	}
+  BOOST_LOG_TRIVIAL(trace) << "cleansing cameras";
 	cameras.clear();
+  BOOST_LOG_TRIVIAL(trace) << "deleting vertex array";
 	glDeleteVertexArrays(1, &vertexArrayID);
+  BOOST_LOG_TRIVIAL(trace) << "deleting vertex buffer";
 	glDeleteBuffers(1, &vertexBuffer);
+  BOOST_LOG_TRIVIAL(trace) << "deleting scene";
 	delete mainScene;
+  BOOST_LOG_TRIVIAL(trace) << "terminating GLFW";
 	glfwTerminate();
+  BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
 }
