@@ -1,4 +1,3 @@
-#include "objects.h"
 #include "transform.h"
 
 namespace gph = graphics;

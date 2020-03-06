@@ -3,13 +3,13 @@
 #include <string>
 #include <map>
 #include "graphics_files.h"
-#include <cmath>
+#include <boost/math/constants/constants.hpp>
 
 using uint = unsigned int;
 using ushort = unsigned short;
 using uchar = unsigned char;
 using llong = long long;
-const double pi = acos(-1);
+const double pi = boost::math::constants::pi<double>();
 
 namespace graphics {
 	//Too bad we're not using c++ 20, or we could just use vectors and strings in constexpr,

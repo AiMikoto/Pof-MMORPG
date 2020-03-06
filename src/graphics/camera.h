@@ -14,7 +14,6 @@ namespace graphics {
 	};
 
 	struct Camera : GameObject {
-		glm::vec3 lookAt;
 		bool isFixed, isPerspective;
 		double moveSpeed, rotationSpeed, defaultSpeed, maxSpeed, acceleration;
 		float nearClipDistance, farClipDistance, fieldOfView;
@@ -26,14 +25,16 @@ namespace graphics {
 		Camera();
 		~Camera();
 		Camera(CameraViewport viewport);
-		Camera(Transform* transform, CameraViewport viewport);
+		Camera(Transform transform, CameraViewport viewport);
 		void setup();
 		void moveCamera(int direction);
 		void rotateCamera(GLFWwindow* window);
-		void updateLookAt();
+		glm::vec3 lookAt();
+	private:
 		glm::dvec3 forward();
 		glm::dvec3 right();
 		glm::dvec3 up();
+		void updateRotation();
 	};
 
 	extern std::vector<Camera*> cameras;

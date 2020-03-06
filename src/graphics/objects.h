@@ -6,16 +6,17 @@
 #include <string>
 #include "graphics/constants.h"
 #include "graphics/variables.h"
+#include "graphics/transform.h"
 
 namespace graphics {
-	struct Transform;
 
-	struct GameObject {
+	class GameObject {
+public:
 		std::string name, tag;
 		size_t id;
 		GameObject* parent;
 		std::vector<GameObject*> children;
-		Transform* transform;
+		Transform transform;
 
 		GameObject();
 		~GameObject();
