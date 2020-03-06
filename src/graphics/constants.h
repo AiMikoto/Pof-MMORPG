@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include "graphics_files.h"
+#include <cmath>
 
 using uint = unsigned int;
 using ushort = unsigned short;

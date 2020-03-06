@@ -43,6 +43,11 @@ target_link_libraries(database ${PostgreSQL_LIBRARIES})
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call user_card crypto database)
 add_library(protocol STATIC src/lib/protocol.cpp)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol user_card crypto database)
+add_library(physics STATIC src/common/entity.cpp)
+target_link_libraries(physics glfw)
+target_link_libraries(physics glm)
+target_link_libraries(physics assimp)
+target_link_libraries(physics OpenGL::GL)
 
 # idk how to set this for windows
 set(OPENSSL openssl)
