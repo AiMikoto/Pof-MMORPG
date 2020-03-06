@@ -4,6 +4,7 @@
 #include "variables.h"
 #include <iostream>
 #include "mouse.h"
+#include "lib/log.h"
 
 namespace gph = graphics;
 
@@ -29,20 +30,20 @@ gph::Camera::Camera(gph::CameraViewport viewport) {
 	this->viewport = viewport;
 }
 
-gph::Camera::Camera(Transform* transform, gph::CameraViewport viewport) {
+gph::Camera::Camera(Transform transform, gph::CameraViewport viewport) {
 	setup();
 	this->transform = transform;
 	this->viewport = viewport;	
 }
 
 void gph::Camera::setup() {
-	transform = new Transform(glm::dvec3(0, 0, 3),
+	transform = Transform(glm::dvec3(0, 0, 3),
 		glm::dquat(glm::dvec3(0, 0, 0)),
 		glm::dvec3(0, 0, 0));
 	moveSpeed = defaultSpeed = 5.0f;
 	maxSpeed = 10.0f;
 	acceleration = 0;
-	rotationSpeed = 0.5f;
+	rotationSpeed = 1;
 	fieldOfView = 45.0f;
 	nearClipDistance = 0.1f;
 	farClipDistance = 45.0f;
@@ -53,33 +54,30 @@ void gph::Camera::setup() {
 	for (int i = 0; i < totalCameraMovements; i++) {
 		moveBuffer[i] = false;
 	}
-	this->transform->gameObject = this;
-	updateLookAt();
+	updateRotation();
 }
 
 void gph::Camera::moveCamera(int direction) {
 	switch (direction) {
 	case(cam::cameraMovements::forward):
-		transform->position += forward() * deltaTime * moveSpeed;
+		transform.position += forward() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::backwards):
-		transform->position -= forward() * deltaTime * moveSpeed;
+		transform.position -= forward() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::right):
-		transform->position += right() * deltaTime * moveSpeed;
+		transform.position += right() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::left):
-		transform->position -= right() * deltaTime * moveSpeed;
+		transform.position -= right() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::up):
-		transform->position += up() * deltaTime * moveSpeed;
+		transform.position += up() * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::down):
-		transform->position -= up() * deltaTime * moveSpeed;
+		transform.position -= up() * deltaTime * moveSpeed;
 		break;
 	}
-	//std::cout << transform->position.x << ", " << transform->position.y << ", " << transform->position.z << std::endl;
-	updateLookAt();
 	move = false;
 }
 
@@ -99,17 +97,13 @@ void gph::Camera::rotateCamera(GLFWwindow* window) {
 		pitch -=  2 * pi;
 	else if (pitch < 0)
 		pitch += 2* pi;
-	double x = std::cos(yaw) * std::cos(pitch);
-	double y = std::sin(pitch);
-	double z = std::sin(yaw) * std::cos(pitch);
-	//transform->rotation = glm::dquat(glm::dvec3(x, y, z));
+	updateRotation();
 	rotate = false;
-	updateLookAt();
 	cursorToMiddle(window);
 }
 
-void gph::Camera::updateLookAt() {
-	lookAt = transform->position + forward();
+glm::vec3 gph::Camera::lookAt() {
+	return transform.position + forward();
 }
 
 glm::dvec3 gph::Camera::forward() {
@@ -122,4 +116,11 @@ glm::dvec3 gph::Camera::right() {
 
 glm::dvec3 gph::Camera::up() {
 	return glm::dvec3(0, cos(pitch), sin(pitch));
+}
+
+void gph::Camera::updateRotation() {
+	double x = std::cos(yaw) * std::cos(pitch);
+	double y = std::sin(pitch);
+	double z = std::sin(yaw) * std::cos(pitch);
+	transform.rotation = glm::dquat(glm::dvec3(x, y, z));
 }

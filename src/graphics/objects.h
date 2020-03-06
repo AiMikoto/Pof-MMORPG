@@ -6,9 +6,9 @@
 #include <string>
 #include "constants.h"
 #include "variables.h"
+#include "transform.h"
 
 namespace graphics {
-	struct Transform;
 
 	class GameObject {
 public:
@@ -16,7 +16,7 @@ public:
 		size_t id;
 		GameObject* parent;
 		std::vector<GameObject*> children;
-		Transform* transform = NULL;
+		Transform transform;
 
 		GameObject();
 		~GameObject();

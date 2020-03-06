@@ -8,12 +8,9 @@
 #include "variables.h"
 
 namespace graphics {
-	struct GameObject;
-
 	struct Transform {
 		glm::dvec3 position, scale;
 		glm::dquat rotation;
-		GameObject* gameObject;
 
 		Transform();
 		~Transform();

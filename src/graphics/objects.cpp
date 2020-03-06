@@ -17,9 +17,6 @@ gph::GameObject::~GameObject() {
 	}
   BOOST_LOG_TRIVIAL(trace) << "clearing children";
 	children.clear();
-  BOOST_LOG_TRIVIAL(trace) << "clearing transform";
-	if(transform != NULL)
-		delete transform;
 }
 
 gph::GameObject::GameObject(gph::GameObject* parent) {
