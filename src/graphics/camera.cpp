@@ -42,7 +42,7 @@ void gph::Camera::setup() {
 	moveSpeed = defaultSpeed = 5.0f;
 	maxSpeed = 10.0f;
 	acceleration = 0;
-	rotationSpeed = 0.005f;
+	rotationSpeed = 0.5f;
 	fieldOfView = 45.0f;
 	nearClipDistance = 0.1f;
 	farClipDistance = 45.0f;
@@ -89,12 +89,12 @@ void gph::Camera::rotateCamera(GLFWwindow* window) {
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 
-	yaw += rotationSpeed * deltaTime * width / 2 - xpos;
+	yaw += rotationSpeed * deltaTime * (width / 2 - xpos);
 	if (yaw > 2 * pi)
 		yaw -= 2 * pi;
 	else if (yaw < 0)
 		yaw += 2 * pi;
-	pitch += rotationSpeed * deltaTime * height / 2 - ypos;
+	pitch += rotationSpeed * deltaTime * (height / 2 - ypos);
 	if (pitch > 2 * pi)
 		pitch -=  2 * pi;
 	else if (pitch < 0)
