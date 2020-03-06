@@ -1,8 +1,22 @@
 #include "user_card.h"
+#include <boost/property_tree/json_parser.hpp>
 
 boost::property_tree::ptree& user_card::tree()
 {
   return _tree;
+}
+
+void user_card::load(std::string json)
+{
+  std::stringstream ss(json);
+  boost::property_tree::json_parser::read_json(ss, _tree);
+}
+
+std::string user_card::save()
+{
+  std::stringstream ss;
+  boost::property_tree::json_parser::write_json(ss, _tree);
+  return ss.str();
 }
 
 void user_card_library::add(user_card uc)

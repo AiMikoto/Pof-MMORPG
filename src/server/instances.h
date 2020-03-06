@@ -7,6 +7,7 @@
 #include "include/maps.h"
 #include "include/regions.h"
 #include "common/user_card.h"
+#include "lib/database.h"
 
 extern rsa_crypto *g_rsa;
 extern aes_crypto *g_aes;

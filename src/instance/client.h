@@ -10,6 +10,7 @@ class client:public protocol
 public:
   client(boost::asio::ip::tcp::socket *sock);
   ~client();
+  std::string username;
 private:
   void validate_authority(std::string token);
   void uc_transfer(call c);
@@ -17,7 +18,6 @@ private:
   void handle_map_change_request(call c);
   void handle_map_change_request_cb(call c);
   void handle_cmd(call c);
-  std::string username;
 };
 
 #endif // INSTANCE_CLIENT_H

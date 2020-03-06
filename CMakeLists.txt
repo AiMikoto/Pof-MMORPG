@@ -21,7 +21,8 @@ find_package(Boost 1.72 COMPONENTS system thread log log_setup REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(OpenSSL REQUIRED)
-include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS})
+find_package(PostgreSQL REQUIRED)
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${PostgreSQL_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
@@ -31,9 +32,11 @@ add_library(log STATIC src/lib/log.cpp)
 add_library(crypto STATIC src/lib/crypto.cpp)
 target_link_libraries(crypto OpenSSL::SSL)
 add_library(call STATIC src/lib/call.cpp)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call user_card crypto)
+add_library(database STATIC src/lib/database.cpp)
+target_link_libraries(database ${PostgreSQL_LIBRARIES})
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call user_card crypto database)
 add_library(protocol STATIC src/lib/protocol.cpp)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol user_card crypto)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol user_card crypto database)
 
 # idk how to set this for windows
 set(OPENSSL openssl)
@@ -66,7 +69,7 @@ add_dependencies(instance rsa_key)
 add_dependencies(client rsa_key)
 
 file(COPY dockerfiles DESTINATION .)
-add_custom_target(docker DEPENDS bin/instance.tar bin/server.tar)
+add_custom_target(docker DEPENDS bin/instance.tar bin/server.tar bin/database.tar)
 add_custom_command(OUTPUT bin/instance.tar
 	COMMAND docker build -t pof_instance -f ./dockerfiles/instance/Dockerfile .
 	COMMAND docker save pof_instance -o bin/instance.tar
@@ -74,5 +77,9 @@ add_custom_command(OUTPUT bin/instance.tar
 add_custom_command(OUTPUT bin/server.tar
 	COMMAND docker build -t pof_server -f ./dockerfiles/server/Dockerfile .
 	COMMAND docker save pof_server -o bin/server.tar
+)
+add_custom_command(OUTPUT bin/database.tar
+	COMMAND docker build -t pof_database -f ./dockerfiles/database/Dockerfile .
+	COMMAND docker save pof_database -o bin/database.tar
 )
 add_dependencies(docker instance server rsa_key)

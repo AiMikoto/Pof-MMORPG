@@ -7,6 +7,8 @@
 class user_card
 {
 public:
+  void load(std::string json);
+  std::string save();
   boost::property_tree::ptree& tree();
   void *aux; // hook for whatever you fancy
 private:

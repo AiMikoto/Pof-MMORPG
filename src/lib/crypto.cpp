@@ -2,7 +2,25 @@
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/err.h>
+#include <openssl/sha.h>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
+
+std::string sha256(std::string input)
+{
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  SHA256_CTX sha;
+  SHA256_Init(&sha);
+  SHA256_Update(&sha, input.c_str(), input.size());
+  SHA256_Final(hash, &sha);
+  std::stringstream ss;
+  for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+  {
+    ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
+  }
+  return ss.str();
+}
 
 aes_crypto::aes_crypto(std::string key, std::string iv)
 {
