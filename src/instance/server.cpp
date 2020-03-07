@@ -42,6 +42,7 @@ void server::cleanup()
           BOOST_LOG_TRIVIAL(info) << "saving usercard";
           user_card uc = ucl.get(c -> username);
           ucl.remove(c -> username);
+          // TODO: unsubscribe client from irc
           db -> uc_save(c -> username, uc);
         }
         clients.erase(it);

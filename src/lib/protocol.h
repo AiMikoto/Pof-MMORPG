@@ -20,6 +20,7 @@
 #define OP_TERMINATE "term"
 #define OP_REQUEST_CHANGE_MAP "req_change_map"
 #define OP_REQUEST_CHANGE_MAP_CB "ans_change_map"
+#define OP_IRC "irc"
 
 class protocol
 {

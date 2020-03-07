@@ -21,6 +21,7 @@ private:
   void change_map_cb(std::mutex *lock, bool *status, call c);
   void uc_transfer(call c);
   void move_cb(call c);
+  void irc_cb(call c);
 };
 
 instance *instance_builder(std::string host, int port);

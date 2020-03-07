@@ -74,9 +74,11 @@ void client::handle_auth(call c)
         uclp.remove(username);
         uc.aux = (void *) this;
         ucl.add(uc);
+        // TODO: subscribe user to irc
         answer.tree().put("status", true);
         ept.remove(OP_AUTH_TOKEN);
         ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&client::handle_map_change_request, this, _1));
+        ept.add(OP_IRC, boost::bind(&client::handle_irc_request, this, _1));
         // TODO: populate calls
         break;
       }
@@ -118,6 +120,7 @@ void client::handle_map_change_request_cb(call c)
     BOOST_LOG_TRIVIAL(trace) << "server approved map change";
     // if authorised, card will be transferred to new instance
     ucl.remove(uname);
+    // TODO: unsubscribe client from irc
     username = "";
     call move;
     move.tree().put(OPCODE, OP_MOVE);
@@ -145,4 +148,9 @@ void client::handle_cmd(call c)
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
+}
+
+void client::handle_irc_request(call c)
+{
+  // TODO: go through ucl, if target matches ucl, send to client
 }
