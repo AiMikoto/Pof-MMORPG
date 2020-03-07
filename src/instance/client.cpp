@@ -6,6 +6,8 @@
 #include "include/common_macro.h"
 #include <exception>
 #include "instance/game.h"
+#include "instance/misc.h"
+#include "lib/chat.h"
 
 client *master;
 
@@ -152,5 +154,6 @@ void client::handle_cmd(call c)
 
 void client::handle_irc_request(call c)
 {
+  message m(c.tree().get_child("payload"));
   // TODO: go through ucl, if target matches ucl, send to client
 }
