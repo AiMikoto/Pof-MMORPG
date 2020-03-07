@@ -3,10 +3,11 @@
 
 #include <queue>
 #include <string>
+#include <boost/property_tree/ptree.hpp>
 
 enum chat_target
 {
-  local,
+  local = 0,
   party,
   guild,
   world
@@ -16,6 +17,8 @@ class message
 {
 public:
   message(chat_target target, std::string payload);
+  message(boost::property_tree::ptree tree);
+  boost::property_tree::ptree encode();
   chat_target target = local;
   std::string payload = "";
 };

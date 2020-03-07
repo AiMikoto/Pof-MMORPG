@@ -3,6 +3,7 @@
 #include "lib/log.h"
 
 user_card_library ucl;
+chat_log cl;
 
 void move(std::string host, int port)
 {

@@ -129,6 +129,14 @@ bool instance::change_map(std::string instance_uuid)
   return status;
 }
 
+void instance::send_message(message m)
+{
+  call c;
+  c.tree().put(OPCODE, OP_IRC);
+  c.tree().put_child("payload", m.encode());
+  safe_write(c);
+}
+
 void instance::change_map_cb(std::mutex *lock, bool *status, call c)
 {
   ept.remove(OP_REQUEST_CHANGE_MAP);
@@ -156,5 +164,6 @@ void instance::move_cb(call c)
 void instance::irc_cb(call c)
 {
   BOOST_LOG_TRIVIAL(info) << "received message";
-  // TODO: handle message
+  message m(c.tree().get_child("payload"));
+  cl.add(m);
 }

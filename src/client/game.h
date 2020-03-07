@@ -2,16 +2,18 @@
 #define CLIENT_GAME_H
 
 #include "common/user_card.h"
+#include "lib/chat.h"
 #include <mutex>
 
 extern user_card_library ucl;
 
-// extern game *g;
+extern chat_log cl;
 
 extern std::mutex init_l;
 
 extern std::string username;
 
 void move(std::string host, int port);
+
 
 #endif // CLIENT_GAME_H
