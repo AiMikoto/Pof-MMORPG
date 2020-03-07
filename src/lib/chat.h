@@ -19,8 +19,9 @@ public:
   message(chat_target target, std::string payload);
   message(boost::property_tree::ptree tree);
   boost::property_tree::ptree encode();
-  chat_target target = local;
-  std::string payload = "";
+  chat_target target;
+  std::string payload;
+  std::string uuid;
 };
 
 class chat_log
