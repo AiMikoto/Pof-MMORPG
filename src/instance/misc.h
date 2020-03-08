@@ -4,6 +4,6 @@
 #include "common/user_card.h"
 #include "lib/call.h"
 
-void send_message(user_card uc, call c);
+void send_message(user_card& uc, call c);
 
 #endif // INSTANCE_MISC_H

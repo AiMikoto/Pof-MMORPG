@@ -54,3 +54,11 @@ user_card& user_card_library::get(std::string name)
 {
   return library[name];
 }
+
+void user_card_library::apply(applied a)
+{
+  for(auto it:library)
+  {
+    a(it.second);
+  }
+}

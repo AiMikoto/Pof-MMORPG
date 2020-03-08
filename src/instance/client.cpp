@@ -155,5 +155,5 @@ void client::handle_cmd(call c)
 void client::handle_irc_request(call c)
 {
   message m(c.tree().get_child("payload"));
-  // TODO: go through ucl, if target matches ucl, send to client
+  ucl.apply(boost::bind(send_message, _1, c));
 }
