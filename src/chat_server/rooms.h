@@ -19,7 +19,7 @@ private:
 
 extern std::map<std::string, room *> rooms;
 
-void give_message(call c);
+void give_message(std::string target, call c);
 
 void sub(std::string target, client *c);
 

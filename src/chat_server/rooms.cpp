@@ -1,5 +1,6 @@
 #include "chat_server/rooms.h"
 #include "lib/log.h"
+#include "lib/chat.h"
 
 std::map<std::string, room*> rooms;
 
@@ -13,7 +14,7 @@ void room::send(call c)
 {
   for(sub:subs)
   {
-    sub -> write_safe(c);
+    sub -> safe_write(c);
   }
 }
 
@@ -33,18 +34,27 @@ void room::unsubscribe(client *c)
   }
 }
 
-void give_message(call c)
+void give_message(std::string target, call c)
 {
+  if(rooms.find(target) != rooms.end())
+  {
+    rooms[target] -> send(c);
+  }
 }
 
 void sub(std::string target, client *c)
 {
-  // TODO: verify that room exists, and if not, create it
+  if(rooms.find(target) == rooms.end())
+  {
+    rooms[target] = new room(target);
+  }
   rooms[target] -> subscribe(c);
 }
 
 void unsub(std::string target, client *c)
 {
-  // TODO: verify that room exists
-  rooms[target] -> unsubscribe(c);
+  if(rooms.find(target) != rooms.end())
+  {
+    rooms[target] -> unsubscribe(c);
+  }
 }
