@@ -117,7 +117,7 @@ void client::handle_map_change_request_cb(call c)
     // if authorised, card will be transferred to new instance
     ucl.remove(uname);
     // TODO: unsubscribe client from irc
-    username = "";
+    that -> username = "";
     call move;
     move.tree().put(OPCODE, OP_MOVE);
     move.tree().put("target.host", c.tree().get<std::string>("target.host"));
@@ -166,6 +166,7 @@ void client::handle_cmd(call c)
     sub_world.tree().put("meta.target", "w_world");
     chat -> safe_write(sub_world);
     chat -> start();
+    return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }
