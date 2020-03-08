@@ -66,6 +66,14 @@ public_instance::public_instance(std::string auth_tok, std::string hostname, int
   init.tree().put("aes.iv", g_aes -> iv);
   this -> in -> safe_write(init); // uses RSA
   this -> in -> replace_crypto(g_aes); // chance crypto to aes
+  call chat_init;
+  chat_init.tree().put(OPCODE, OP_CMD);
+  chat_init.tree().put("authority.token", this -> auth_tok);
+  chat_init.tree().put("command", "irc");
+  chat_init.tree().put("target.host", "localhost");
+  chat_init.tree().put("target.port", 1231);
+  chat_init.tree().put("target.token", "lion");
+  this -> in -> safe_write(chat_init);
   this -> in -> start();
   // TODO: connect to instance and load map
 }

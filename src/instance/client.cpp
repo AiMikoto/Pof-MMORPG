@@ -147,16 +147,27 @@ void client::handle_cmd(call c)
   {
     std::string hostname = c.tree().get<std::string>("target.host");
     int port = c.tree().get<int>("target.port");
+    std::string token = c.tree().get<std::string>("target.token");
     boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
     boost::asio::ip::tcp::resolver resolver(ioc);
     boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), hostname, std::to_string(port));
     boost::asio::connect(*sock, endpoint);
     chat = new chatter(sock);
+    call init;
+    init.tree().put(OPCODE, OP_CMD);
+    init.tree().put("authority.token", token);
+    init.tree().put("command", "hello");
+    init.tree().put("aes.key", g_aes -> key);
+    init.tree().put("aes.iv", g_aes -> iv);
+    chat -> safe_write(init); // uses RSA
+    chat -> replace_crypto(g_aes); // chance crypto to aes
+    chat -> start();
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }
 
 void client::handle_irc_request(call c)
 {
+  chat_target target = static_cast<chat_target>(c.tree().get<int>("target"));
   ucl.apply(boost::bind(send_message, _1, c));
 }
