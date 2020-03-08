@@ -6,6 +6,7 @@
 #include "include/common_macro.h"
 #include <exception>
 #include "lib/chat.h"
+#include "chat_server/rooms.h"
 
 std::string my_tok = "lion"; // TODO: export this
 
@@ -58,12 +59,19 @@ void client::handle_cmd(call c)
 
 void client::handle_irc_request(call c)
 {
+  std::string target_room = c.tree().get<std::string>("meta.target");
+  c.tree().erase("meta");
+  give_message(target_room, c);
 }
 
 void client::handle_subscribe(call c)
 {
+  std::string target_room = c.tree().get<std::string>("meta.target");
+  sub(target_room, this);
 }
 
 void client::handle_unsubscribe(call c)
 {
+  std::string target_room = c.tree().get<std::string>("meta.target");
+  unsub(target_room, this);
 }
