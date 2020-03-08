@@ -32,10 +32,14 @@ boost::property_tree::ptree message::encode()
 
 void chat_log::add(message m)
 {
-  // TODO: verify that the UUID is not already stored
-  chat.push(m);
+  if(!uuid_trie.has(m.uuid))
+  {
+    chat.push(m);
+    uuid_trie.add(m.uuid);
+  }
   if(chat.size() > CHAT_LIMIT)
   {
+    uuid_trie.remove(chat.front().uuid);
     chat.pop();
   }
 }

@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <boost/property_tree/ptree.hpp>
+#include "lib/uuid.h"
 
 enum chat_target
 {
@@ -31,6 +32,7 @@ public:
   std::queue<message> get();
 private:
   std::queue<message> chat;
+  trie uuid_trie;
 };
 
 #endif // LIB_CHAT_H
