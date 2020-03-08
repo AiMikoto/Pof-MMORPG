@@ -9,6 +9,8 @@
 #include "instance/misc.h"
 #include "lib/chat.h"
 #include "instance/crypto.h"
+#include "instance/ioc.h"
+#include "instance/chat_client.h"
 
 client *master;
 
@@ -143,7 +145,7 @@ void client::handle_cmd(call c)
   }
   if(command == "irc")
   {
-    std::string host = c.tree().get<std::string>("target.host");
+    std::string hostname = c.tree().get<std::string>("target.host");
     int port = c.tree().get<int>("target.port");
     boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
     boost::asio::ip::tcp::resolver resolver(ioc);
