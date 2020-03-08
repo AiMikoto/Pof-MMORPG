@@ -9,14 +9,9 @@
 #include "server/instances.h"
 #include "include/maps.h"
 #include "include/regions.h"
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/lexical_cast.hpp>
+#include "lib/uuid.h"
 #include "server/ioc.h"
 #include "server/crypto.h"
-
-boost::uuids::random_generator generator;
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa)
 {
@@ -46,7 +41,7 @@ void client::handle_auth(call c)
   {
     answer.tree().put("status", true);
     safe_write(answer);
-    std::string token = boost::lexical_cast<std::string>(generator());
+    std::string token = get_uuid();
     uc.tree().put("user.token", token);
     call uc_transfer;
     uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);

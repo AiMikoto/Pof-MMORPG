@@ -7,21 +7,17 @@
 #include "client/ioc.h"
 #include "common/user_card.h"
 #include "client/game.h"
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/lexical_cast.hpp>
+#include "lib/uuid.h"
 
 rsa_crypto *g_rsa;
 aes_crypto *g_aes;
-boost::uuids::random_generator generator;
 
 void init_crypto(std::string pub)
 {
-  std::string uuid1 = boost::lexical_cast<std::string>(generator());
-  std::string uuid2 = boost::lexical_cast<std::string>(generator());
+  std::string uuid1 = get_uuid();
+  std::string uuid2 = get_uuid();
   std::string uuid3 = uuid1 + uuid2;
-  std::string uuid4 = boost::lexical_cast<std::string>(generator());
+  std::string uuid4 = get_uuid();
   g_aes = new aes_crypto(uuid3.substr(0, 32), uuid4.substr(0, 16));
   BIO *keybio = BIO_new(BIO_s_file());
   BIO_read_filename(keybio, pub.c_str());
