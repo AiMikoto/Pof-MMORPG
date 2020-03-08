@@ -88,4 +88,8 @@ add_custom_command(OUTPUT bin/database.tar
 	COMMAND docker build -t pof_database -f ./dockerfiles/database/Dockerfile .
 	COMMAND docker save pof_database -o bin/database.tar
 )
+add_custom_command(OUTPUT bin/char_server.tar
+	COMMAND docker build -t pof_chat_server -f ./dockerfiles/chat_server/Dockerfile .
+	COMMAND docker save pof_chat_server -o bin/chat_server.tar
+)
 add_dependencies(docker instance server rsa_key)
