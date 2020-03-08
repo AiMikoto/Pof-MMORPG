@@ -3,6 +3,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
+#include "lib/log.h"
 
 #define CHAT_LIMIT 1000
 
@@ -26,6 +27,7 @@ boost::property_tree::ptree message::encode()
   boost::property_tree::ptree t;
   t.put("target", target);
   t.put("payload", payload);
+  return t;
 }
 
 void chat_log::add(message m)

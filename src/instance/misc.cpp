@@ -1,10 +1,11 @@
 #include "instance/misc.h"
 #include "instance/client.h"
 #include "lib/chat.h"
+#include <cstdio>
 
 void send_message(user_card& uc, call c)
 {
-  chat_target target = static_cast<chat_target>(c.tree().get<int>("target"));
+  chat_target target = static_cast<chat_target>(c.tree().get<int>("payload.target"));
   bool approve = false;
   if(target == local)
   {

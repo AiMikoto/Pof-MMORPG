@@ -161,6 +161,10 @@ void client::handle_cmd(call c)
     init.tree().put("aes.iv", g_aes -> iv);
     chat -> safe_write(init); // uses RSA
     chat -> replace_crypto(g_aes); // chance crypto to aes
+    call sub_world;
+    sub_world.tree().put(OPCODE, OP_IRC_S);
+    sub_world.tree().put("meta.target", "w_world");
+    chat -> safe_write(sub_world);
     chat -> start();
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -168,6 +172,26 @@ void client::handle_cmd(call c)
 
 void client::handle_irc_request(call c)
 {
-  chat_target target = static_cast<chat_target>(c.tree().get<int>("target"));
+  chat_target target = static_cast<chat_target>(c.tree().get<int>("payload.target"));
+  bool super = false;
+  if(target == world)
+  {
+    super = true;
+    c.tree().put("meta.target", "w_world");
+  }
+  if(target == party)
+  {
+    super = true;
+    c.tree().put("meta.target", "replace me");
+  }
+  if(target == guild)
+  {
+    super = true;
+    c.tree().put("meta.target", "replace me");
+  }
+  if(super)
+  {
+    chat -> safe_write(c);
+  }
   ucl.apply(boost::bind(send_message, _1, c));
 }

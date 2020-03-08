@@ -15,5 +15,6 @@ extern std::string username;
 
 void move(std::string host, int port);
 
+void send_message(chat_target target, std::string payload);
 
 #endif // CLIENT_GAME_H
