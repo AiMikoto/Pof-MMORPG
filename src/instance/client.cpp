@@ -141,6 +141,16 @@ void client::handle_cmd(call c)
     ept.add(OP_UC_TRANS_ALL, boost::bind(&client::uc_transfer, this, _1));
     return;
   }
+  if(command == "irc")
+  {
+    std::string host = c.tree().get<std::string>("target.host");
+    int port = c.tree().get<int>("target.port");
+    boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
+    boost::asio::ip::tcp::resolver resolver(ioc);
+    boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), hostname, std::to_string(port));
+    boost::asio::connect(*sock, endpoint);
+    chat = new chatter(sock);
+  }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }
 
