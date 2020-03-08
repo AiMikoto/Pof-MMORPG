@@ -146,6 +146,5 @@ void client::handle_cmd(call c)
 
 void client::handle_irc_request(call c)
 {
-  message m(c.tree().get_child("payload"));
   ucl.apply(boost::bind(send_message, _1, c));
 }
