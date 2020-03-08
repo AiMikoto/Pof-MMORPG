@@ -21,6 +21,8 @@
 #define OP_REQUEST_CHANGE_MAP "req_change_map"
 #define OP_REQUEST_CHANGE_MAP_CB "ans_change_map"
 #define OP_IRC "irc"
+#define OP_IRC_S "irc_sub"
+#define OP_IRC_U "irc_unsub"
 
 class protocol
 {
