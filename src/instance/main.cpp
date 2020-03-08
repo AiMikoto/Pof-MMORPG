@@ -4,13 +4,15 @@
 #include <cstdlib>
 #include <iostream>
 #include <mutex>
-#include "server/ioc.h"
+#include "instance/ioc.h"
+#include "instance/crypto.h"
 
 boost::asio::io_context ioc;
 database *db;
 
 int main(int argc, char **argv)
 {
+  std::string pub = "keys/public_key.pem";
   std::string pri = "keys/private_key.pem";
   int port = 7000;
   // parsing arguments;
@@ -21,6 +23,11 @@ int main(int argc, char **argv)
   }
   for(int i = 1; i < argc; i++)
   {
+    if(args[i] == "-pub")
+    {
+      pub = args[++i];
+      continue;
+    }
     if(args[i] == "-priv")
     {
       pri = args[++i];
@@ -37,7 +44,7 @@ int main(int argc, char **argv)
   BOOST_LOG_TRIVIAL(trace) << "initialising database";
   db = db_init();
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
-  init_crypto(pri);
+  init_crypto(pub, pri);
   BOOST_LOG_TRIVIAL(trace) << "creating server";
   server s(port);
   // block current thread

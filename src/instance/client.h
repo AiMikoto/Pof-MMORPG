@@ -3,8 +3,6 @@
 
 #include "lib/protocol.h"
 
-void init_crypto(std::string priv);
-
 class client:public protocol
 {
 public:
