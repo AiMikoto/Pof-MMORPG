@@ -14,6 +14,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 #include "server/ioc.h"
+#include "server/crypto.h"
 
 boost::uuids::random_generator generator;
 

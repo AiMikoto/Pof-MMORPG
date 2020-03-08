@@ -6,6 +6,7 @@
 #include <mutex>
 #include "server/ioc.h"
 #include "server/instances.h"
+#include "server/crypto.h"
 
 database *db;
 boost::asio::io_context ioc;

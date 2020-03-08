@@ -9,10 +9,6 @@
 #include "common/user_card.h"
 #include "lib/database.h"
 
-extern rsa_crypto *g_rsa;
-extern aes_crypto *g_aes;
-void init_crypto(std::string pub, std::string priv);
-
 // all instances have a static hostname and a port assigned to then
 // a single hostname can be shared by multiple instances as long as
 // the combination of hostname and port is unique

@@ -43,7 +43,7 @@ void client::handle_cmd(call c)
 {
   validate_authority(c.tree().get<std::string>("authority.token"));
   std::string command = c.tree().get<std::string>("command");
-  if(command == "init")
+  if(command == "hello")
   { // uses RSA
     std::string key = c.tree().get<std::string>("aes.key");
     std::string iv = c.tree().get<std::string>("aes.iv");
