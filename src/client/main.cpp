@@ -70,9 +70,11 @@ int main(int argc, char **argv)
   BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
   init_l.unlock();
   std::mutex m;
-  boost::this_thread::sleep(boost::posix_time::seconds(15));
+  boost::this_thread::sleep(boost::posix_time::seconds(25));
   BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
   current_instance -> change_map(MAP_FLATLANDS, REG_EU);
+  boost::this_thread::sleep(boost::posix_time::seconds(25));
+  send_message(world, "fluffy kittens");
   m.lock();
   BOOST_LOG_TRIVIAL(error) << "client finished successfully";
   m.lock();

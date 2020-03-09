@@ -26,9 +26,11 @@ void server::routine()
 
 void server::cleanup()
 {
+  int ticks = 0;
+  int refresh_rate = 2;
   forever
   {
-    boost::this_thread::sleep( boost::posix_time::seconds(2));
+    boost::this_thread::sleep( boost::posix_time::seconds(refresh_rate));
     BOOST_LOG_TRIVIAL(trace) << "cleaning up";
     for(auto it = clients.begin(); it != clients.end(); it++)
     {
@@ -42,12 +44,40 @@ void server::cleanup()
           BOOST_LOG_TRIVIAL(info) << "saving usercard";
           user_card uc = ucl.get(c -> username);
           ucl.remove(c -> username);
+          // TODO: unsubscribe client from irc
           db -> uc_save(c -> username, uc);
         }
         clients.erase(it);
         delete c;
         BOOST_LOG_TRIVIAL(info) << "cleaned client";
         it--;
+      }
+    }
+    if(is_loaded())
+    {
+      if(ticks == 300 / refresh_rate)
+      {
+        BOOST_LOG_TRIVIAL(trace) << "deactivating instance";
+        call c;
+        c.tree().put(OPCODE, OP_INSTANCE_MANAGEMENT_DEACTIVATE);
+        master -> safe_write(c);
+      }
+      if(ticks == 360 / refresh_rate)
+      {
+        unload();
+        ticks = 0;
+      }
+      ticks++;
+      BOOST_LOG_TRIVIAL(trace) << "tick " << ticks;
+      if(ucl.size())
+      {
+        if(ticks > 300 / refresh_rate)
+        {
+          call c;
+          c.tree().put(OPCODE, OP_INSTANCE_MANAGEMENT_REACTIVATE);
+          master -> safe_write(c);
+        }
+        ticks = 0;
       }
     }
   }

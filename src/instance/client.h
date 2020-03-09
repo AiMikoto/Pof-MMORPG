@@ -3,8 +3,6 @@
 
 #include "lib/protocol.h"
 
-void init_crypto(std::string priv);
-
 class client:public protocol
 {
 public:
@@ -18,6 +16,9 @@ private:
   void handle_map_change_request(call c);
   void handle_map_change_request_cb(call c);
   void handle_cmd(call c);
+  void handle_irc_request(call c);
 };
+
+extern client *master;
 
 #endif // INSTANCE_CLIENT_H
