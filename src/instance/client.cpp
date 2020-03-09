@@ -12,7 +12,7 @@
 #include "instance/ioc.h"
 #include "instance/chat_client.h"
 
-client *master;
+client *master = NULL;
 
 std::string my_tok = "fish"; // TODO: export this
 
@@ -167,6 +167,14 @@ void client::handle_cmd(call c)
     chat -> safe_write(sub_world);
     chat -> start();
     return;
+  }
+  if(command == "load")
+  {
+    if(is_loaded())
+    {
+      unload();
+    }
+    load();
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }

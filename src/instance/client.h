@@ -19,4 +19,6 @@ private:
   void handle_irc_request(call c);
 };
 
+extern client *master;
+
 #endif // INSTANCE_CLIENT_H

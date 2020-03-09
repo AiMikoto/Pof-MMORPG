@@ -28,6 +28,7 @@ public:
   bool contains(user_card uc);
   user_card& get(std::string name);
   void apply(applied a);
+  int size();
 private:
   std::map<std::string, user_card> library;
 };

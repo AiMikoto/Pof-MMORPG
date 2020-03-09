@@ -62,3 +62,8 @@ void user_card_library::apply(applied a)
     a(it.second);
   }
 }
+
+int user_card_library::size()
+{
+  return library.size();
+}

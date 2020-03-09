@@ -26,9 +26,11 @@ void server::routine()
 
 void server::cleanup()
 {
+  int ticks = 0;
+  int refresh_rate = 2;
   forever
   {
-    boost::this_thread::sleep( boost::posix_time::seconds(2));
+    boost::this_thread::sleep( boost::posix_time::seconds(refresh_rate));
     BOOST_LOG_TRIVIAL(trace) << "cleaning up";
     for(auto it = clients.begin(); it != clients.end(); it++)
     {
@@ -49,6 +51,27 @@ void server::cleanup()
         delete c;
         BOOST_LOG_TRIVIAL(info) << "cleaned client";
         it--;
+      }
+    }
+    if(is_loaded())
+    {
+      if(ticks == 300 / refresh_rate)
+      {
+        BOOST_LOG_TRIVIAL(trace) << "deactivating instance";
+        call c;
+        c.tree().put(OPCODE, OP_INSTANCE_MANAGEMENT_DEACTIVATE);
+        master -> safe_write(c);
+        // TODO: inform master of deactivation
+      }
+      if(ticks == 360 / refresh_rate)
+      {
+        unload();
+        ticks = 0;
+      }
+      ticks++;
+      if(ucl.size())
+      {
+        ticks = 0;
       }
     }
   }
