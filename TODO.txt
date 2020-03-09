@@ -1,6 +1,5 @@
 server:
 
 instance:
-improve database update response time
 
 client:
