@@ -1,9 +1,9 @@
 #ifndef LIB_DATABASE_H
 #define LIB_DATABASE_H
 
-#include <libpq-fe.h>
 #include <string>
 #include "common/user_card.h"
+#include <pqxx/pqxx>
 
 class database
 {
@@ -14,7 +14,7 @@ public:
   void uc_save(std::string username, user_card uc);
   user_card auth(std::string username, std::string password, int *status);
 private:
-  PGconn *conn;
+  pqxx::connection *conn;
 };
 
 database *db_init();
