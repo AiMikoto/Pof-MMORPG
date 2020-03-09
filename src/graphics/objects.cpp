@@ -4,7 +4,7 @@
 
 namespace gph = graphics;
 
-std::map<size_t, gph::GameObject*> gameObjects;
+std::map<size_t, gph::GameObject*> gph::gameObjects;
 
 gph::GameObject::GameObject() {
 	setup();

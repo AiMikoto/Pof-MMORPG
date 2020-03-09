@@ -21,4 +21,8 @@ namespace graphics {
 	void drawScene(GLFWwindow* window, GameObject* mainScene);
 	void drawUI();
 	void cleanup(GameObject* mainScene);
+	void loadTextures();
+	uint loadTexture(std::string path);
+
+	extern std::vector<uint> textures;
 }

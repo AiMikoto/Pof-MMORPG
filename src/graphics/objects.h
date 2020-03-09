@@ -29,5 +29,5 @@ namespace graphics {
 		size_t generateID();
 	};
 
-	std::map<size_t, GameObject*> gameObject;
+	extern std::map<size_t, GameObject*> gameObjects;
 }

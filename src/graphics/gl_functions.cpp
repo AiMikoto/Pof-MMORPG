@@ -5,8 +5,12 @@
 #include "transform.h"
 #include "mouse.h"
 #include "lib/log.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "lib/stb_image.h"
 
 namespace gph = graphics;
+
+std::vector<uint> gph::textures;
 
 GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 	windowWidth = width;
@@ -38,11 +42,9 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
     BOOST_LOG_TRIVIAL(error) << "Failed to initialize GLAD";
 		exit(-1);
 	}
-	glClearColor(0, 0, 0, 1.0f);
-	glViewport(0, 0, windowWidth, windowHeight);
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -120,10 +122,10 @@ void gph::setBackgroundColor(float r, float g, float b, float a) {
 void gph::setViewport(GLFWwindow* window, Camera* camera) {
 	int x, y, width, height;
 	glfwGetWindowSize(window, &width, &height);
-	x = std::round(camera->viewport.startX * width);
-	y = std::round(camera->viewport.startY * height);
-	width = std::round(camera->viewport.endX * width);
-	height = std::round(camera->viewport.endY * height);
+	x = int(std::round(camera->viewport.startX * width));
+	y = int(std::round(camera->viewport.startY * height));
+	width = int(std::round(camera->viewport.endX * width));
+	height = int(std::round(camera->viewport.endY * height));
 	glScissor(x, y, width, height);
 	glEnable(GL_SCISSOR_TEST);
 	glViewport(x, y, width, height);
@@ -134,14 +136,18 @@ void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 	glDepthFunc(GL_LESS);
 	Shader* current = shaderMap[MODEL_SHADER];
 	current->use();
+	#pragma omp parralel for
 	for (auto camera : cameras) {
 		setViewport(window, camera);
 		setBackgroundColor(colors::bgColor);
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 mvp = camera->projection(window) * camera->view() * model;
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		current->setInt("textureSampler", 0);
 		current->setMat4("mvp", mvp);
 		glBindVertexArray(vertexArrayID);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}	
 }
 
@@ -157,9 +163,45 @@ void gph::cleanup(GameObject* mainScene) {
 		delete camera;
 	}
 	cameras.clear();
+	for (auto t : textures) {
+		glDeleteTextures(1, &t);
+	}
 	glDeleteVertexArrays(1, &vertexArrayID);
-	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteBuffers(1, &vertexBufferID);
+	glDeleteBuffers(1, &elementBufferID);
+	glDeleteBuffers(1, &textureBufferID);
 	delete mainScene;
 	glfwTerminate();
 	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
+}
+
+void gph::loadTextures() {
+	textures.push_back(loadTexture("../src/graphics/textures/aisip.png"));
+}
+
+uint gph::loadTexture(std::string path) {
+	uint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	uchar* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		BOOST_LOG_TRIVIAL(trace) << "Failed to load texture at: " << path;
+	}
+	stbi_image_free(data);
+	return textureID;
 }

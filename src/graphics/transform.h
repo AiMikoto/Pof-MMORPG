@@ -19,5 +19,7 @@ namespace graphics {
 		glm::dvec3 forward();
 		glm::dvec3 right();
 		glm::dvec3 up();
+
+		glm::mat4 model();
 	};
 }

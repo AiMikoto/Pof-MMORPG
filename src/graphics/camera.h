@@ -12,6 +12,7 @@ namespace graphics {
 	};
 
 	class Camera : GameObject {
+	public:
 		bool isFixed, isPerspective;
 		double moveSpeed, rotationSpeed, defaultSpeed, maxSpeed, acceleration;
 		float nearClipDistance, farClipDistance, fieldOfView;
@@ -19,6 +20,7 @@ namespace graphics {
 		bool move, rotate;
 		double yaw, pitch;
 		CameraViewport viewport;
+		std::vector<size_t> objectsInView;
 
 		Camera();
 		Camera(CameraViewport viewport, bool isPerspective = true, bool isFixed = false);

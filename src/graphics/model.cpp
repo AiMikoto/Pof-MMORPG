@@ -22,8 +22,32 @@ gph::Mesh::~Mesh() {
 	outlineIndices.clear();
 }
 
-void gph::Mesh::draw(Shader* shader, bool drawOutline) {
+void gph::Mesh::draw(Shader* shader) {
+	uint currentDiffuse = 1;
+	uint currentSpecular = 1;
+	uint currentNormal = 1;
+	uint currentHeight = 1;
+	for (int i = 0; i < textures.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		std::string current;
+		std::string type = textures[i].type;
+		if (type == "texture_diffuse")
+			current = std::to_string(currentDiffuse++);
+		else if (type == "texture_specular")
+			current = std::to_string(currentSpecular++);
+		else if (type == "texture_normal")
+			current = std::to_string(currentNormal++);
+		else if (type == "texture_height")
+			current = std::to_string(currentHeight++);
+		shader->setInt((type + current).c_str(), i);
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+	}
 
+	glBindVertexArray(vertexArrayID);
+	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void gph::Mesh::copy(Mesh* target) {}

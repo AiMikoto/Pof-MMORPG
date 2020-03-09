@@ -24,12 +24,11 @@ namespace graphics {
 		std::vector<Vertex> vertices;
 		std::vector<Texture> textures;
 		std::vector<uint> indices, outlineIndices;
-		uchar drawMode;
-
+		int drawMode;
 
 		Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, std::vector<uint> indices);
 		~Mesh();
-		void draw(Shader* shader, bool drawOutline = false);
+		void draw(Shader* shader);
 		void copy(Mesh* target);
 	private:
 		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;

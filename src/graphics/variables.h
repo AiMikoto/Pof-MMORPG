@@ -8,9 +8,10 @@ namespace graphics {
 	extern bool windowResized, quit;
 	extern const char* windowName;
 	extern GLuint vertexArrayID;
-	extern GLuint vertexBuffer;
+	extern GLuint vertexBufferID, textureBufferID, elementBufferID;
 
-	extern float triangleVertices[9];
-	extern GLuint triangleIndices[6];
+	extern float vertices[12];
+	extern float uvs[8];
+	extern uint indices[6];
 	extern double deltaTime;
 }
