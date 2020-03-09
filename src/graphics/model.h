@@ -29,8 +29,7 @@ namespace graphics {
 
 		Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, std::vector<uint> indices);
 		~Mesh();
-		void draw(glm::mat4 &modelMatrix, glm::mat4 &viewMatrix, glm::mat4 &projectionMatrix, Camera* camera, std::vector<Light*> lights,
-			bool drawOutline = false, glm::mat4 modelOutlineMatrix = glm::mat4(), bool drawWireFrame = false);
+		void draw(Shader* shader, bool drawOutline = false);
 		void copy(Mesh* target);
 	private:
 		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;

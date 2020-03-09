@@ -22,11 +22,8 @@ gph::Mesh::~Mesh() {
 	outlineIndices.clear();
 }
 
-void gph::Mesh::draw(glm::mat4 &modelMatrix, glm::mat4 &viewMatrix, glm::mat4 &projectionMatrix, Camera* camera, std::vector<Light*> lights,
-	bool drawOutline, glm::mat4 modelOutlineMatrix, bool drawWireFrame) {
+void gph::Mesh::draw(Shader* shader, bool drawOutline) {
 
-	glm::mat4 mvp = projectionMatrix * viewMatrix * modelMatrix;
-	glm::mat4 outlineMVP = projectionMatrix * viewMatrix * modelOutlineMatrix;
 }
 
 void gph::Mesh::copy(Mesh* target) {}

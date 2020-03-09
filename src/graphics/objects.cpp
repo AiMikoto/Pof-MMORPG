@@ -4,10 +4,17 @@
 
 namespace gph = graphics;
 
+std::map<size_t, gph::GameObject*> gameObjects;
+
 gph::GameObject::GameObject() {
+	setup();
+}
+
+void gph::GameObject::setup() {
 	this->name = "";
 	this->tag = "";
 	this->id = generateID();
+	gameObjects[this->id] = this;
 }
 
 gph::GameObject::~GameObject() {
@@ -20,28 +27,26 @@ gph::GameObject::~GameObject() {
 }
 
 gph::GameObject::GameObject(gph::GameObject* parent) {
-  BOOST_LOG_TRIVIAL(trace) << "unused";
+	setup();
 	this->parent = parent;
 }
 
 gph::GameObject::GameObject(std::vector<GameObject*> children) {
-  BOOST_LOG_TRIVIAL(trace) << "unused";
+	setup();
 	this->children = children;
 }
 
 gph::GameObject::GameObject(gph::GameObject* parent, std::vector<GameObject*> children) {
-  BOOST_LOG_TRIVIAL(trace) << "unused";
+	setup();
 	this->children = children;
 	this->parent = parent;
 }
 
 void gph::GameObject::add_child(GameObject * child) {
-  BOOST_LOG_TRIVIAL(trace) << "unused";
 	this->children.push_back(child);
 }
 
 void gph::GameObject::add_children(std::vector<GameObject*> children) {
-  BOOST_LOG_TRIVIAL(trace) << "unused";
 	this->children.insert(this->children.end(), children.begin(), children.end());
 }
 

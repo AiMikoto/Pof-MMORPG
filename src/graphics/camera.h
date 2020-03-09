@@ -11,7 +11,7 @@ namespace graphics {
 		CameraViewport(float startX, float startY, float endX, float endY);
 	};
 
-	struct Camera : GameObject {
+	class Camera : GameObject {
 		bool isFixed, isPerspective;
 		double moveSpeed, rotationSpeed, defaultSpeed, maxSpeed, acceleration;
 		float nearClipDistance, farClipDistance, fieldOfView;
