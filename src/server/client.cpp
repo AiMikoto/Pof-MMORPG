@@ -47,7 +47,7 @@ void client::handle_auth(call c)
     uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);
     uc_transfer.tree().put_child("data", uc.tree());
     safe_write(uc_transfer);
-    instance_info *target_instance = pins[REG_EU][MAP_FLATLANDS];
+    instance_info *target_instance = get_pub_in(REG_EU, MAP_FLATLANDS);
     target_instance -> transfer_user_card(uc);
     call move;
     move.tree().put(OPCODE, OP_MOVE);

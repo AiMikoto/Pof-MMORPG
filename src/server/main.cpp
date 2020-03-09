@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pub, pri);
   BOOST_LOG_TRIVIAL(trace) << "creating instances";
-  populate_pins();
+  populate_dins();
   BOOST_LOG_TRIVIAL(trace) << "creating server";
   server s(port);
   BOOST_LOG_TRIVIAL(trace) << "blocking thread";

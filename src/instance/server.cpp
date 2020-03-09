@@ -69,6 +69,7 @@ void server::cleanup()
         ticks = 0;
       }
       ticks++;
+      BOOST_LOG_TRIVIAL(trace) << "tick " << ticks;
       if(ucl.size())
       {
         ticks = 0;

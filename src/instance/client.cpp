@@ -98,6 +98,16 @@ void client::handle_auth(call c)
 void client::handle_map_change_request(call c)
 {
   BOOST_LOG_TRIVIAL(trace) << "client requested map change";
+  bool pub = c.tree().get<bool>("target.public");
+  if(pub)
+  {
+    c.tree().get<int>("target.region");
+    c.tree().get<std::string>("target.map");
+  }
+  else
+  {
+    c.tree().get<int>("target.instance_id");
+  }
   c.tree().put_child("card", ucl.get(username).tree());
   master -> safe_write(c);
 }
@@ -175,6 +185,7 @@ void client::handle_cmd(call c)
       unload();
     }
     load();
+    return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }

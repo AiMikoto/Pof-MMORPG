@@ -95,7 +95,6 @@ void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
 
 bool instance::change_map(map_t map, region_t region)
 {
-  // TODO: make this obsolete.
   std::mutex lock;
   bool status;
   call c;
@@ -103,6 +102,7 @@ bool instance::change_map(map_t map, region_t region)
   c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP);
   c.tree().put("target.map", map);
   c.tree().put("target.region", region);
+  c.tree().put("target.public", true);
   safe_write(c);
   lock.lock();
   lock.lock();
@@ -118,6 +118,7 @@ bool instance::change_map(std::string instance_uuid)
   ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::change_map_cb, this, &lock, &status, _1));
   c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP);
   c.tree().put("target.uuid", instance_uuid);
+  c.tree().put("target.public", false);
   safe_write(c);
   lock.lock();
   lock.lock();

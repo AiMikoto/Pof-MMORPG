@@ -5,59 +5,77 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 #include "server/crypto.h"
+#include "lib/log.h"
 
-std::map<region_t, std::map<map_t, public_instance*>> pins;
+std::map<instance_id_t, instance_info *> fins;
+std::map<instance_id_t, instance_info *> pins;
+std::map<instance_id_t, instance_info *> ains;
 
-instance *instance_builder(instance_info ini)
-{
-  boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
-  boost::asio::ip::tcp::resolver resolver(ioc);
-  boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), ini.hostname, std::to_string(ini.port));
-  boost::asio::connect(*sock, endpoint);
-  return new instance(sock);
-}
+instance_id_t instance_counter = 0;
 
 instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, -1)
 {
   ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::handle_map_change_request, this, _1));
 }
 
+instance_info *get_active_instance(instance_id_t id)
+{
+  if(pins.find(id) != pins.end())
+  {
+    BOOST_LOG_TRIVIAL(trace) << "reactivating instance";
+    ains[id] = pins[id];
+    pins.erase(id);
+  }
+  if(ains.find(id) != ains.end())
+  {
+    return ains[id];
+  }
+  return NULL;
+}
+
 void instance::handle_map_change_request(call c)
 {
-  region_t reg = c.tree().get<region_t>("target.region");
-  map_t map = c.tree().get<map_t>("target.map");
+  bool pub = c.tree().get<bool>("target.public");
+  instance_info *insi;
+  if(pub)
+  {
+    region_t reg = c.tree().get<region_t>("target.region");
+    map_t map = c.tree().get<map_t>("target.map");
+    insi = get_pub_in(reg, map);
+  }
+  else
+  {
+    instance_id_t id = c.tree().get<instance_id_t>("target.instance_id");
+    insi = get_active_instance(id);
+  }
   user_card uc;
   uc.tree() = c.tree().get_child("card");
-  instance_info *instance = pins[reg][map];
-  instance -> transfer_user_card(uc);
   c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP_CB);
-  c.tree().put("status", true);
-  c.tree().put("target.host", instance -> hostname);
-  c.tree().put("target.port", instance -> port);
+  if(insi)
+  {
+    c.tree().put("status", true);
+    c.tree().put("target.host", insi -> hostname);
+    c.tree().put("target.port", insi -> port);
+    insi -> transfer_user_card(uc);
+  }
+  else
+  {
+    c.tree().put("status", false);
+  }
   this -> safe_write(c);
 }
 
-instance_info::instance_info(std::string auth_tok, std::string hostname, int port)
+instance_info::instance_info(region_t reg, std::string auth_tok, std::string hostname, int port)
 {
+  this -> reg = reg;
   this -> auth_tok = auth_tok;
   this -> hostname = hostname;
   this -> port = port;
-}
-
-void instance_info::transfer_user_card(user_card uc)
-{
-  call uc_transfer;
-  uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);
-  uc_transfer.tree().put_child("data", uc.tree());
-  uc_transfer.tree().put("authority.token", this -> auth_tok);
-  this -> in -> safe_write(uc_transfer);
-}
-
-public_instance::public_instance(std::string auth_tok, std::string hostname, int port, region_t channel, map_t map):instance_info(auth_tok, hostname, port)
-{
-  this -> channel = channel;
-  this -> map = map;
-  this -> in = instance_builder(*this);
+  boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
+  boost::asio::ip::tcp::resolver resolver(ioc);
+  boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), this -> hostname, std::to_string(this -> port));
+  boost::asio::connect(*sock, endpoint);
+  this -> in = new instance(sock);
   call init;
   init.tree().put(OPCODE, OP_CMD);
   init.tree().put("authority.token", this -> auth_tok);
@@ -75,12 +93,54 @@ public_instance::public_instance(std::string auth_tok, std::string hostname, int
   chat_init.tree().put("target.token", "lion");
   this -> in -> safe_write(chat_init);
   this -> in -> start();
-  // TODO: connect to instance and load map
 }
 
-void populate_pins()
+void instance_info::transfer_user_card(user_card uc)
 {
-  // TODO: spawn servers
-  public_instance *pi = new public_instance("fish", "localhost", 7000, REG_EU, MAP_FLATLANDS);
-  pins[REG_EU][MAP_FLATLANDS] = pi;
+  call uc_transfer;
+  uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);
+  uc_transfer.tree().put_child("data", uc.tree());
+  uc_transfer.tree().put("authority.token", this -> auth_tok);
+  this -> in -> safe_write(uc_transfer);
+}
+
+std::map<region_t, std::map<map_t, instance_id_t>> pub_ins;
+
+instance_id_t instance_allocate(region_t reg, map_t map)
+{
+  BOOST_LOG_TRIVIAL(trace) << "creating public instance";
+  instance_id_t insid;
+  instance_info *insi;
+  for(auto it = fins.begin(); it != fins.end(); it++)
+  {
+    if(it -> second -> reg == reg)
+    {
+      insid = it -> first;
+      insi = it -> second;
+      break;
+    }
+  }
+  fins.erase(insid);
+  ains[insid] = insi;
+  call c;
+  c.tree().put(OPCODE, OP_CMD);
+  c.tree().put("authority.token", insi-> auth_tok);
+  c.tree().put("command", "load");
+  c.tree().put("map", map);
+  insi -> in -> safe_write(c);
+  return insid;
+}
+
+instance_info *get_pub_in(region_t reg, map_t map)
+{
+  if((pub_ins.find(reg) == pub_ins.end()) || (pub_ins[reg].find(map) == pub_ins[reg].end()))
+  {
+    pub_ins[reg][map] = instance_allocate(reg, map);
+  }
+  return get_active_instance(pub_ins[reg][map]);
+}
+
+void populate_dins()
+{
+  fins[instance_counter++] = new instance_info(REG_EU, "fish", "localhost", 7000);
 }
