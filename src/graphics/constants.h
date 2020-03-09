@@ -22,6 +22,13 @@ namespace graphics {
 
 	const auto totalCameraMovements = 6;
 
+	namespace colors {
+		const glm::vec4 red = glm::vec4(1, 0, 0, 1);
+		const glm::vec4 green = glm::vec4(0, 1, 0, 1);
+		const glm::vec4 blue = glm::vec4(0, 0, 1, 1);
+		const glm::vec4 bgColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
+	};
+
 	namespace cam{
 		enum cameraMovements {
 			forward, backwards, up, down, left, right

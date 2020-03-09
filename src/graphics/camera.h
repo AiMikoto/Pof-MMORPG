@@ -6,11 +6,9 @@
 
 namespace graphics {
 	struct CameraViewport {
-		int x, y, width, height;
-
+		float startX, startY, endX, endY; // percentages relative to the window's widht/height
 		CameraViewport();
-		~CameraViewport();
-		CameraViewport(int x, int y, int width, int height);
+		CameraViewport(float startX, float startY, float endX, float endY);
 	};
 
 	struct Camera : GameObject {
@@ -23,14 +21,16 @@ namespace graphics {
 		CameraViewport viewport;
 
 		Camera();
+		Camera(CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
+		Camera(Transform transform, CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
 		~Camera();
-		Camera(CameraViewport viewport);
-		Camera(Transform transform, CameraViewport viewport);
-		void setup();
 		void moveCamera(int direction);
 		void rotateCamera(GLFWwindow* window);
 		glm::vec3 lookAt();
+		glm::mat4 projection(GLFWwindow* window);
+		glm::mat4 view();
 	private:
+		void setup();
 		glm::dvec3 forward();
 		glm::dvec3 right();
 		glm::dvec3 up();

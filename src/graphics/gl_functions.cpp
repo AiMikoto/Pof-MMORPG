@@ -2,14 +2,11 @@
 #include "keyboard.h"
 #include "utils.h"
 #include "shader.h"
-#include "camera.h"
 #include "transform.h"
 #include "mouse.h"
 #include "lib/log.h"
 
 namespace gph = graphics;
-
-
 
 GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 	windowWidth = width;
@@ -49,7 +46,7 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  BOOST_LOG_TRIVIAL(trace) << "Setting callbacks for GLFW";
+	BOOST_LOG_TRIVIAL(trace) << "Setting callbacks for GLFW";
 
 	glfwSetScrollCallback(window, scrollCallback);
 	glfwSetCursorPosCallback(window, moveCursorCallback);
@@ -62,7 +59,6 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 }
 
 void gph::windowResizeCallback(GLFWwindow* window, int width, int height) {
-  BOOST_LOG_TRIVIAL(trace) << "Window resized";
 	windowWidth = width;
 	windowHeight = height;
 	windowResized = true;
@@ -74,7 +70,6 @@ void gph::update(GLFWwindow* window, gph::GameObject* mainScene, double& lastTim
 	lastTime = currentTime;
 
 	if (windowResized) {
-		glViewport(0, 0, windowWidth, windowHeight);
 		windowResized = false;
 	}
 
@@ -93,10 +88,10 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 		exit(-1);
 	}
 	for (size_t i = 0; i < shadersPath.size(); i += 2) {
-		ShaderLoader shaderLoader = ShaderLoader(shadersPath[i], shadersPath[i + 1]);
+		Shader* shader = new Shader(shadersPath[i], shadersPath[i + 1]);
 		std::string name = split(shadersPath[i], '.')[0];
 		std::vector<std::string> res = split(name, '/');
-		programIDmap[res[res.size() - 1]] = shaderLoader.loadShaders();
+		shaderMap[res[res.size() - 1]] = shader;
 	}
 }
 
@@ -112,27 +107,39 @@ void gph::updateCameras(GLFWwindow* window) {
 	}
 }
 
+void gph::setBackgroundColor(glm::vec4 color) {
+	glClearColor(color.r, color.g, color.b, color.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void gph::setBackgroundColor(float r, float g, float b, float a) {
+	glClearColor(r, g, b, a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void gph::setViewport(GLFWwindow* window, Camera* camera) {
+	int x, y, width, height;
+	glfwGetWindowSize(window, &width, &height);
+	x = std::round(camera->viewport.startX * width);
+	y = std::round(camera->viewport.startY * height);
+	width = std::round(camera->viewport.endX * width);
+	height = std::round(camera->viewport.endY * height);
+	glScissor(x, y, width, height);
+	glEnable(GL_SCISSOR_TEST);
+	glViewport(x, y, width, height);
+}
+
 void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	glUseProgram(programIDmap[MODEL_SHADER]);
+	Shader* current = shaderMap[MODEL_SHADER];
+	current->use();
 	for (auto camera : cameras) {
-		glScissor(camera->viewport.x, camera->viewport.y, camera->viewport.width, camera->viewport.height);
-		glEnable(GL_SCISSOR_TEST);
-		glViewport(camera->viewport.x, camera->viewport.y, camera->viewport.width, camera->viewport.height);
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glm::mat4 projection = glm::perspective(glm::radians(camera->fieldOfView),
-			float(camera->viewport.width) / camera->viewport.height,
-			camera->nearClipDistance,
-			camera->farClipDistance);
-		glm::mat4 view = glm::lookAt(glm::vec3(camera->transform.position),
-			camera->lookAt(),
-			glm::vec3(0, 1, 0));
+		setViewport(window, camera);
+		setBackgroundColor(colors::bgColor);
 		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 mvp = projection * view * model;
-		GLuint matrixID = glGetUniformLocation(programIDmap[MODEL_SHADER], "mvp");
-		glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+		glm::mat4 mvp = camera->projection(window) * camera->view() * model;
+		current->setMat4("mvp", mvp);
 		glBindVertexArray(vertexArrayID);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}	
@@ -141,26 +148,18 @@ void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 void gph::drawUI() { }
 
 void gph::cleanup(GameObject* mainScene) {
-  BOOST_LOG_TRIVIAL(trace) << "Cleaning up";
-	for (auto value: programIDmap) {
-    BOOST_LOG_TRIVIAL(trace) << "deleting programID";
-		glDeleteProgram(value.second);
+	BOOST_LOG_TRIVIAL(trace) << "Cleaning up";
+	for (auto i : shaderMap) {
+		delete i.second;
 	}
-  BOOST_LOG_TRIVIAL(trace) << "cleansing programID";
-	programIDmap.clear();
+	shaderMap.clear();
 	for (auto camera : cameras) {
-    BOOST_LOG_TRIVIAL(trace) << "deleting camera";
 		delete camera;
 	}
-  BOOST_LOG_TRIVIAL(trace) << "cleansing cameras";
 	cameras.clear();
-  BOOST_LOG_TRIVIAL(trace) << "deleting vertex array";
 	glDeleteVertexArrays(1, &vertexArrayID);
-  BOOST_LOG_TRIVIAL(trace) << "deleting vertex buffer";
 	glDeleteBuffers(1, &vertexBuffer);
-  BOOST_LOG_TRIVIAL(trace) << "deleting scene";
 	delete mainScene;
-  BOOST_LOG_TRIVIAL(trace) << "terminating GLFW";
 	glfwTerminate();
-  BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
+	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
 }

@@ -8,9 +8,9 @@ namespace gph = graphics;
 int main() 
 {
   log_init("graphics");
-  BOOST_LOG_TRIVIAL(trace) << "Creating window";
+	BOOST_LOG_TRIVIAL(trace) << "Creating window";
 	GLFWwindow* window = gph::createGLFWContext(gph::windowWidth, gph::windowHeight, gph::windowName);
-  BOOST_LOG_TRIVIAL(trace) << "Window created";
+	BOOST_LOG_TRIVIAL(trace) << "Window created";
 
 
 	glGenVertexArrays(1, &gph::vertexArrayID);
@@ -24,12 +24,12 @@ int main()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-  BOOST_LOG_TRIVIAL(trace) << "Creating scene";
+	BOOST_LOG_TRIVIAL(trace) << "Creating scene";
 	gph::GameObject* mainScene = new gph::GameObject();
-  BOOST_LOG_TRIVIAL(trace) << "Creating camera";
-	gph::cameras.push_back(new gph::Camera(gph::CameraViewport(0, 0, gph::windowWidth, gph::windowHeight)));
+	BOOST_LOG_TRIVIAL(trace) << "Creating camera";
+	gph::cameras.push_back(new gph::Camera());
 
-  BOOST_LOG_TRIVIAL(trace) << "Creating shaders";
+	BOOST_LOG_TRIVIAL(trace) << "Creating shaders";
 	std::vector<std::string> shaders = gph::charArrayToStringVector(gph::requiredShadersPath,
 		(size_t)gph::requiredShadersPathLength);
 	gph::loadShaders(shaders);
@@ -39,11 +39,10 @@ int main()
 	int fps = 0;
 	glfwSwapInterval(0);
 
-  BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
+	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!gph::quit) {
 		gph::update(window, mainScene, lastTime, check, fps);
 	}
-  BOOST_LOG_TRIVIAL(trace) << "Attempting cleanup";
 	gph::cleanup(mainScene);
 	return 0;
 }

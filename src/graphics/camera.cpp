@@ -10,13 +10,18 @@ namespace gph = graphics;
 
 std::vector<gph::Camera*> gph::cameras;
 
-gph::CameraViewport::CameraViewport() {}
-gph::CameraViewport::~CameraViewport() {}
-gph::CameraViewport::CameraViewport(int x, int y, int width, int height) {
-	this->x = x;
-	this->y = y;
-	this->width = width;
-	this->height = height;
+gph::CameraViewport::CameraViewport() {
+	this->startX = 0;
+	this->startY = 0;
+	this->endX = 1;
+	this->endY = 1;
+}
+
+gph::CameraViewport::CameraViewport(float startX, float startY, float endX, float endY) {
+	this->startX = startX;
+	this->startY = startY;
+	this->endX = endX;
+	this->endY = endY;
 }
 
 gph::Camera::Camera() {
@@ -25,15 +30,19 @@ gph::Camera::Camera() {
 
 gph::Camera::~Camera() { }
 
-gph::Camera::Camera(gph::CameraViewport viewport) {
+gph::Camera::Camera(gph::CameraViewport viewport, bool isPerspective, bool isFixed) {
 	setup();
 	this->viewport = viewport;
+	this->isPerspective = isPerspective;
+	this->isFixed = isFixed;
 }
 
-gph::Camera::Camera(Transform transform, gph::CameraViewport viewport) {
+gph::Camera::Camera(gph::Transform transform, gph::CameraViewport viewport, bool isPerspective, bool isFixed) {
 	setup();
 	this->transform = transform;
 	this->viewport = viewport;	
+	this->isPerspective = isPerspective;
+	this->isFixed = isFixed;
 }
 
 void gph::Camera::setup() {
@@ -46,9 +55,9 @@ void gph::Camera::setup() {
 	rotationSpeed = 1;
 	fieldOfView = 45.0f;
 	nearClipDistance = 0.1f;
-	farClipDistance = 45.0f;
-	isFixed = false;
+	farClipDistance = 100.0f;
 	isPerspective = true;
+	isFixed = false;
 	pitch = 0;
 	yaw = pi;
 	for (int i = 0; i < totalCameraMovements; i++) {
@@ -123,4 +132,17 @@ void gph::Camera::updateRotation() {
 	double y = std::sin(pitch);
 	double z = std::sin(yaw) * std::cos(pitch);
 	transform.rotation = glm::dquat(glm::dvec3(x, y, z));
+}
+
+glm::mat4 gph::Camera::projection(GLFWwindow* window) {
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	if(isPerspective)
+		return glm::perspective(glm::radians(fieldOfView),
+			((viewport.endX - viewport.startX) * width) / ((viewport.endY - viewport.startY) * height),
+			nearClipDistance, farClipDistance);
+}
+
+glm::mat4 gph::Camera::view() {
+	return glm::lookAt(glm::vec3(transform.position), lookAt(), glm::vec3(0, 1, 0));
 }

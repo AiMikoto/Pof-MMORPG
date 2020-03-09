@@ -21,21 +21,36 @@ namespace graphics {
 		GLuint linkProgram();
 	};
 
-	struct Shader {
-		Shader();
-		~Shader();
-		void draw();
-		void setUniform(const GLchar* uniformName, GLuint programID, float set);
-		void setUniform(const GLchar* uniformName, GLuint programID, glm::vec3 set);
-		void setUniform(const GLchar* uniformName, GLuint programID, glm::vec4 set);
-		void setUniform(const GLchar* uniformName, GLuint programID, glm::mat4 set);
-	};
-
 	struct ShaderException : std::exception {
 		std::string info;
 
 		ShaderException(std::string info);
 	};
 
-	extern std::map<std::string, GLuint> programIDmap;
+	class Shader {
+	public:
+		GLuint programID;		
+		
+		Shader();
+		Shader(std::string vertexShaderPath, std::string fragmentShaderPath);
+		~Shader();		
+		void use();
+		void draw();
+		void setBool(std::string name, bool value);
+		void setInt(std::string name, int value);
+		void setFloat(std::string name, float value);
+		void setVec2(std::string name, glm::vec2 value);
+		void setVec2(std::string name, float x, float y);
+		void setVec3(std::string name, glm::vec3 value);
+		void setVec3(std::string name, float x, float y, float z);
+		void setVec4(std::string name, glm::vec4 value);
+		void setVec4(std::string name, float x, float y, float z, float w);
+		void setMat2(std::string name, glm::mat2 mat);
+		void setMat3(std::string name, glm::mat3 mat);
+		void setMat4(std::string name, glm::mat4 mat);
+	private:
+		void load(std::string vertexShaderPath, std::string fragmentShaderPath);
+	};	
+
+	extern std::map<std::string, Shader*> shaderMap;
 }

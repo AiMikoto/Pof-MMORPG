@@ -2,7 +2,7 @@
 
 namespace gph = graphics;
 
-std::map<std::string, GLuint> gph::programIDmap;
+std::map<std::string, gph::Shader*> gph::shaderMap;
 
 gph::ShaderLoader::ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath) {
 	this->vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -103,14 +103,70 @@ gph::ShaderException::ShaderException(std::string info) {
 
 gph::Shader::Shader() {}
 
-gph::Shader::~Shader() {}
+gph::Shader::Shader(std::string vertexShaderPath, std::string fragmentShaderPath) {
+	load(vertexShaderPath, fragmentShaderPath);
+	std::cout << programID << std::endl;
+}
+
+gph::Shader::~Shader() {
+	glDeleteProgram(programID);
+}
+
+void gph::Shader::load(std::string vertexShaderPath, std::string fragmentShaderPath) {
+	ShaderLoader loader(vertexShaderPath, fragmentShaderPath);
+	programID = loader.loadShaders();
+}
+
+void gph::Shader::use() {
+	glUseProgram(programID);
+}
 
 void gph::Shader::draw() {}
 
-void gph::Shader::setUniform(const GLchar* uniformName, GLuint programID, float set) {}
+void gph::Shader::setBool(std::string name, bool value) {
+	glUniform1i(glGetUniformLocation(programID, name.c_str()), (int)value);
+}
 
-void gph::Shader::setUniform(const GLchar* uniformName, GLuint programID, glm::vec3 set) {}
+void gph::Shader::setInt(std::string name, int value) {
+	glUniform1i(glGetUniformLocation(programID, name.c_str()), value);
+}
 
-void gph::Shader::setUniform(const GLchar* uniformName, GLuint programID, glm::vec4 set) {}
+void gph::Shader::setFloat(std::string name, float value) {
+	glUniform1f(glGetUniformLocation(programID, name.c_str()), value);
+}
 
-void gph::Shader::setUniform(const GLchar* uniformName, GLuint programID, glm::mat4 set) {}
+void gph::Shader::setVec2(std::string name, glm::vec2 value) {
+	glUniform2fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
+}
+
+void gph::Shader::setVec2(std::string name, float x, float y) {
+	glUniform2f(glGetUniformLocation(programID, name.c_str()), x, y);
+}
+
+void gph::Shader::setVec3(std::string name, glm::vec3 value) {
+	glUniform3fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
+}
+
+void gph::Shader::setVec3(std::string name, float x, float y, float z) {
+	glUniform3f(glGetUniformLocation(programID, name.c_str()), x, y, z);
+}
+
+void gph::Shader::setVec4(std::string name, glm::vec4 value) {
+	glUniform4fv(glGetUniformLocation(programID, name.c_str()), 1, &value[0]);
+}
+
+void gph::Shader::setVec4(std::string name, float x, float y, float z, float w) {
+	glUniform4f(glGetUniformLocation(programID, name.c_str()), x, y, z, w);
+}
+
+void gph::Shader::setMat2(std::string name, glm::mat2 mat) {
+	glUniformMatrix2fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+
+void gph::Shader::setMat3(std::string name, glm::mat3 mat) {
+	glUniformMatrix3fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+
+void gph::Shader::setMat4(std::string name, glm::mat4 mat) {
+	glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}

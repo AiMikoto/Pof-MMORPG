@@ -1,7 +1,5 @@
 #pragma once
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include "graphics_files.h"
 #include <vector>
 #include <string>
 #include "constants.h"

@@ -8,7 +8,8 @@
 #include "variables.h"
 
 namespace graphics {
-	struct Transform {
+	class Transform {
+	public:
 		glm::dvec3 position, scale;
 		glm::dquat rotation;
 
