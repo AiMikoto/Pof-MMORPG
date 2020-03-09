@@ -35,7 +35,7 @@ void database::uc_add(std::string username, std::string password, user_card uc)
 }
 
 void database::uc_save(std::string username, user_card uc)
-{
+{ // TODO: optimise this
   sanitize(username);
   std::string query = "UPDATE userinfo SET usercard = \'" + uc.save() + "\' WHERE username = \'" + username + "\'";
   PGresult *res = PQexec(conn, query.c_str());

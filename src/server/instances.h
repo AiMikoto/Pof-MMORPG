@@ -14,15 +14,18 @@
 class instance:public protocol
 {
 public:
-  instance(boost::asio::ip::tcp::socket *sock);
+  instance(boost::asio::ip::tcp::socket *sock, instance_id_t id);
 private:
   void handle_map_change_request(call c);
+  void handle_deactivate(call c);
+  void handle_reactivate(call c);
+  instance_id_t id;
 };
 
 class instance_info
 {
 public:
-  instance_info(region_t reg, std::string auth_tok, std::string hostname, int port);
+  instance_info(region_t reg, std::string auth_tok, std::string hostname, int port, instance_id_t id);
   void transfer_user_card(user_card uc);
   region_t reg;
   std::string auth_tok;

@@ -13,16 +13,19 @@ std::map<instance_id_t, instance_info *> ains;
 
 instance_id_t instance_counter = 0;
 
-instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, -1)
+instance::instance(boost::asio::ip::tcp::socket *sock, instance_id_t id):protocol(sock, g_rsa, -1)
 {
+  this -> id = id;
   ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::handle_map_change_request, this, _1));
+  ept.add(OP_INSTANCE_MANAGEMENT_DEACTIVATE, boost::bind(&instance::handle_deactivate, this, _1));
+  ept.add(OP_INSTANCE_MANAGEMENT_REACTIVATE, boost::bind(&instance::handle_reactivate, this, _1));
 }
 
 instance_info *get_active_instance(instance_id_t id)
 {
   if(pins.find(id) != pins.end())
   {
-    BOOST_LOG_TRIVIAL(trace) << "reactivating instance";
+    BOOST_LOG_TRIVIAL(trace) << "reactivating instance " << id;
     ains[id] = pins[id];
     pins.erase(id);
   }
@@ -65,7 +68,36 @@ void instance::handle_map_change_request(call c)
   this -> safe_write(c);
 }
 
-instance_info::instance_info(region_t reg, std::string auth_tok, std::string hostname, int port)
+void handle_free(instance_id_t id)
+{
+  boost::this_thread::sleep(boost::posix_time::seconds(30));
+  if(pins.find(id) != pins.end())
+  {
+  BOOST_LOG_TRIVIAL(trace) << "freeing instance " << id;
+    fins[id] = pins[id];
+    pins.erase(id);
+  }
+}
+
+void instance::handle_deactivate(call c)
+{
+  BOOST_LOG_TRIVIAL(trace) << "deactivating instance " << id;
+  pins[id] = ains[id];
+  ains.erase(id);
+  boost::thread t_cleanup(boost::bind(handle_free, id));
+}
+
+void instance::handle_reactivate(call c)
+{
+  if(pins.find(id) != pins.end())
+  {
+    BOOST_LOG_TRIVIAL(trace) << "reactivating instance " << id;
+    ains[id] = pins[id];
+    pins.erase(id);
+  }
+}
+
+instance_info::instance_info(region_t reg, std::string auth_tok, std::string hostname, int port, instance_id_t id)
 {
   this -> reg = reg;
   this -> auth_tok = auth_tok;
@@ -75,7 +107,7 @@ instance_info::instance_info(region_t reg, std::string auth_tok, std::string hos
   boost::asio::ip::tcp::resolver resolver(ioc);
   boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), this -> hostname, std::to_string(this -> port));
   boost::asio::connect(*sock, endpoint);
-  this -> in = new instance(sock);
+  this -> in = new instance(sock, id);
   call init;
   init.tree().put(OPCODE, OP_CMD);
   init.tree().put("authority.token", this -> auth_tok);
@@ -137,10 +169,14 @@ instance_info *get_pub_in(region_t reg, map_t map)
   {
     pub_ins[reg][map] = instance_allocate(reg, map);
   }
+  if(fins.find(pub_ins[reg][map]) != fins.end())
+  {
+    pub_ins[reg][map] = instance_allocate(reg, map);
+  }
   return get_active_instance(pub_ins[reg][map]);
 }
 
 void populate_dins()
 {
-  fins[instance_counter++] = new instance_info(REG_EU, "fish", "localhost", 7000);
+  fins[instance_counter++] = new instance_info(REG_EU, "fish", "localhost", 7000, instance_counter);
 }

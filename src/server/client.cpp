@@ -30,7 +30,6 @@ void client::handle_auth(call c)
   std::string password = c.tree().get<std::string>("login.password");
   std::string key = c.tree().get<std::string>("aes.key");
   std::string iv = c.tree().get<std::string>("aes.iv");
-  BOOST_LOG_TRIVIAL(trace) << "creating aes object";
   aes = new aes_crypto(key, iv);
   replace_crypto(aes);
   call answer;

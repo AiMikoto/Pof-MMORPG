@@ -61,7 +61,6 @@ void server::cleanup()
         call c;
         c.tree().put(OPCODE, OP_INSTANCE_MANAGEMENT_DEACTIVATE);
         master -> safe_write(c);
-        // TODO: inform master of deactivation
       }
       if(ticks == 360 / refresh_rate)
       {
@@ -72,6 +71,12 @@ void server::cleanup()
       BOOST_LOG_TRIVIAL(trace) << "tick " << ticks;
       if(ucl.size())
       {
+        if(ticks > 300 / refresh_rate)
+        {
+          call c;
+          c.tree().put(OPCODE, OP_INSTANCE_MANAGEMENT_REACTIVATE);
+          master -> safe_write(c);
+        }
         ticks = 0;
       }
     }

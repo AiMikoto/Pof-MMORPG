@@ -1,9 +1,6 @@
 server:
-maintains 3 pools: free pool, pending pool, and active pool
-when a client connects to a instance, it first checks if it's in the active pool. if not, initialise an instance from free pool.
-when an instance deactivates, move it from active pool to pending pool.
-if a client connects to an instance in the pending pool, move it back to active pool. if an instance sat in the pending pool for more than 30 seconds, move it to free pool.
 
 instance:
+improve database update response time
 
 client:

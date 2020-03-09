@@ -24,7 +24,7 @@
 #define OP_IRC_S "irc_sub"
 #define OP_IRC_U "irc_unsub"
 #define OP_INSTANCE_MANAGEMENT_DEACTIVATE "ins_de"
-#define OP_INSTANCE_MANAGEMENT_ACTIVATE "ins_ac"
+#define OP_INSTANCE_MANAGEMENT_REACTIVATE "ins_re"
 
 class protocol
 {
