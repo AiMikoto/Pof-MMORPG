@@ -85,7 +85,7 @@ void test_BIG_rsa_encryption_decryption()
 int main()
 {
   test_aes_encryption_decryption();
-  test_rsa_encryption_decryption();
+//  test_rsa_encryption_decryption();
   test_BIG_rsa_encryption_decryption();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
