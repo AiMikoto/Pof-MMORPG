@@ -2,7 +2,11 @@
 
 namespace gph = graphics;
 
-gph::Transform::Transform() { }
+gph::Transform::Transform() {
+	this->position = glm::dvec3(0, 0, 0);
+	this->rotation = glm::quat(1, 0, 0, 0);
+	this->scale = glm::vec3(1, 1, 1);
+}
 
 gph::Transform::~Transform() { }
 

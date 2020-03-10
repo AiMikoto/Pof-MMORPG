@@ -52,11 +52,7 @@ void gph::GameObject::add_children(std::vector<llong> childrenIDs) {
 	}
 }
 
-void gph::GameObject::draw(Shader* shader, GameObject* camera, GLFWwindow* window) {
-	for (auto i : this->childrenIDs) {
-		gameObjects[i]->draw(shader, camera, window);
-	}
-}
+void gph::GameObject::draw(Shader* shader, GameObject* camera, GLFWwindow* window) {}
 
 void gph::GameObject::generateID() {
 	this->id = gameObjects.size();

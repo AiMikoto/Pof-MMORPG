@@ -50,7 +50,7 @@ namespace graphics {
 		void setMat4(std::string name, glm::mat4 mat);
 	private:
 		void load(std::string vertexShaderPath, std::string fragmentShaderPath);
-	};	
+	};
 
-	extern std::map<std::string, Shader*> shaderMap;
+	extern std::map<int, Shader*> shaderMap;
 }

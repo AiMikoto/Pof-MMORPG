@@ -88,9 +88,7 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 	}
 	for (size_t i = 0; i < shadersPath.size(); i += 2) {
 		Shader* shader = new Shader(shadersPath[i], shadersPath[i + 1]);
-		std::string name = split(shadersPath[i], '.')[0];
-		std::vector<std::string> res = split(name, '/');
-		shaderMap[res[res.size() - 1]] = shader;
+		shaderMap[i/2] = shader;
 	}
 }
 
@@ -131,21 +129,25 @@ void gph::setViewport(GLFWwindow* window, Camera* camera) {
 void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
-	Shader* current = shaderMap[MODEL_SHADER];
+	Shader* current = shaderMap[shaderTypes::modelShader];
 	current->use();
-	#pragma omp parralel for
+#pragma omp parralel for
 	for (auto camera : cameras) {
 		setViewport(window, camera);
 		setBackgroundColor(colors::bgColor);
-		glm::mat4 model = glm::mat4(1.0f);
+		/*glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 mvp = camera->projection(window) * camera->view() * model;
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textures.begin()->second->id);
 		current->setInt("textureSampler", 0);
 		current->setMat4("mvp", mvp);
 		glBindVertexArray(vertexArrayID);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	}	
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);*/
+		//mainScene->draw(current, camera, window);
+		for (auto mesh : meshes) {
+			mesh->draw(current, camera, window);
+		}
+	}
 }
 
 void gph::drawUI() { }

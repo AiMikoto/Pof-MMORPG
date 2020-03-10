@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "camera.h"
 #include "lib/log.h"
+#include "model.h"
 
 namespace gph = graphics;
 
@@ -29,18 +30,27 @@ int main() {
 
 	glEnableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, gph::vertexBufferID);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, gph::vertexBufferID);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	glBindVertexArray(0);
 
 	BOOST_LOG_TRIVIAL(trace) << "Creating scene";
 	gph::GameObject* mainScene = new gph::GameObject();
 	BOOST_LOG_TRIVIAL(trace) << "Creating camera";
 	gph::cameras.push_back(new gph::Camera());
+	mainScene->add_child(gph::cameras[0]->id);
 
 	BOOST_LOG_TRIVIAL(trace) << "Creating shaders";
 	std::vector<std::string> shaders = gph::charArrayToStringVector(gph::requiredShadersPath,
 		(size_t)gph::requiredShadersPathLength);
 	gph::loadShaders(shaders);
-	gph::loadTextures();
+	gph::Model* model = new gph::Model("../src/graphics/objects/cube.obj", false);
+	mainScene->add_child(model->id);
+	//gph::loadTextures();
 
 	double lastTime = glfwGetTime();
 	double check = 0;

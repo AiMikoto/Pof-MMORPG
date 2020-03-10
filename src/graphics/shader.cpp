@@ -3,7 +3,7 @@
 
 namespace gph = graphics;
 
-std::map<std::string, gph::Shader*> gph::shaderMap;
+std::map<int, gph::Shader*> gph::shaderMap;
 
 gph::ShaderLoader::ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath) {
 	this->vertexShaderID = glCreateShader(GL_VERTEX_SHADER);

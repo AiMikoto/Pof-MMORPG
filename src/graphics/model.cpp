@@ -93,6 +93,7 @@ void gph::Mesh::draw(Shader* shader, Camera* camera, GLFWwindow* window) {
 		uint type = textures[i]->type;
 		switch (type) {
 		case aiTextureType_DIFFUSE:
+			current = "diffuseSampler" + std::to_string(currentDiffuse++);
 			break;
 		case aiTextureType_SPECULAR:
 			break;
@@ -105,8 +106,10 @@ void gph::Mesh::draw(Shader* shader, Camera* camera, GLFWwindow* window) {
 		case aiTextureType_NORMALS:
 			break;
 		}
-		shader->setInt((current).c_str(), index);
-		glBindTexture(GL_TEXTURE_2D, textures[i]->id);
+		if (current != "") {
+			shader->setInt(current, index);
+			glBindTexture(GL_TEXTURE_2D, i);
+		}
 		index++;
 	}
 
@@ -171,6 +174,7 @@ gph::Model::~Model() {}
 
 void gph::Model::loadModel(std::string path) {
 	Assimp::Importer importer;
+	BOOST_LOG_TRIVIAL(trace) << "Started loading model: " << path;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
@@ -193,8 +197,9 @@ llong gph::Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices = loadMeshVertices(mesh, scene);
 	std::vector<uint> indices = loadMeshIndices(mesh, scene);
 	std::vector<uint> textureIDs = loadTextures(mesh, scene);
-	Mesh* processedMesh = new Mesh(vertices, indices, textureIDs);
+	Mesh* processedMesh = new Mesh(vertices, textureIDs, indices);
 	meshes.push_back(processedMesh);
+	return processedMesh->id;
 }
 
 std::vector<gph::Vertex> gph::Model::loadMeshVertices(aiMesh *mesh, const aiScene *scene) {
@@ -252,13 +257,16 @@ std::vector<uint> gph::Model::loadMaterialTextures(aiMaterial *mat, aiTextureTyp
 		mat->GetTexture(type, i, &path);
 		bool skip = false;
 		for (auto texture : textures) {
-			if (std::strcmp(texture.second->path.data(), path.C_Str()) == 0) {
+			if (texture.second->path == std::string(path.C_Str())) {
 				meshTextures.push_back(texture.second->id);
 				skip = true;
 				break;
 			}
 		}
-		if (!skip) new Texture(path.C_Str(), type); //textures are automatically placed in the map when instantiated
+		if (!skip) {
+			Texture* texture = new Texture(path.C_Str(), type); //textures are automatically placed in the map when instantiated
+			meshTextures.push_back(texture->id);
+		}
 	}
 	return meshTextures;
 }

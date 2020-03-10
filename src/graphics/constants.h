@@ -18,10 +18,9 @@ namespace graphics {
 	//Too bad we're not using c++ 20, or we could just use vectors and strings in constexpr,
 	//I need this ugly workaround, oh well...
 
-	constexpr auto MODEL_SHADER = "model";
 	const uint requiredShadersPathLength = 2;
 	constexpr const char* const requiredShadersPath[] = 
-		{ "../src/graphics/shaders/model.vertexshader", "../src/graphics/shaders/model.fragmentshader"};
+		{ "../src/graphics/shaders/model.vs", "../src/graphics/shaders/model.fs"};
 
 	const auto totalCameraMovements = 6;
 
@@ -42,6 +41,10 @@ namespace graphics {
 		enum types {
 			object, mesh, camera, light
 		};
+	};
+
+	enum shaderTypes {
+		modelShader
 	};
 
 	enum movementKeys {
