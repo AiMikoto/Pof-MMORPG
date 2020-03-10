@@ -146,8 +146,8 @@ void gph::Mesh::bindBuffers() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), &indices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, outlineIndicesBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), &outlineIndices[0], GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, outlineIndicesBufferID);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), &outlineIndices[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -175,6 +175,7 @@ gph::Model::~Model() {}
 void gph::Model::loadModel(std::string path) {
 	Assimp::Importer importer;
 	BOOST_LOG_TRIVIAL(trace) << "Started loading model: " << path;
+	directory = path.substr(0, path.find_last_of('/'));
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
@@ -212,10 +213,10 @@ std::vector<gph::Vertex> gph::Model::loadMeshVertices(aiMesh *mesh, const aiScen
 		if (mesh->mTextureCoords[0])
 			// this doesn't allow us to process models with more than a pair of texture coordinates/vertex
 			vertex.textureCoordinates = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-		else
-			vertex.textureCoordinates = glm::vec2(0, 0);
-		vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
-		vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+		if (mesh->mTangents)
+			vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+		if(mesh->mBitangents)
+			vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
 		vertices.push_back(vertex);
 	}
 	return vertices;
@@ -264,7 +265,7 @@ std::vector<uint> gph::Model::loadMaterialTextures(aiMaterial *mat, aiTextureTyp
 			}
 		}
 		if (!skip) {
-			Texture* texture = new Texture(path.C_Str(), type); //textures are automatically placed in the map when instantiated
+			Texture* texture = new Texture(directory + "/" + path.C_Str(), type); //textures are automatically placed in the map when instantiated
 			meshTextures.push_back(texture->id);
 		}
 	}

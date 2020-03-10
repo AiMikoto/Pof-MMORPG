@@ -16,7 +16,6 @@ namespace graphics {
 		llong id, parentID;
 		std::vector<llong> childrenIDs;
 		Transform transform;
-		bool update;
 		uint type;
 
 		GameObject();

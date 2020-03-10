@@ -14,6 +14,5 @@ out vec2 uvs;
 void main() {
 	uvs = textureCoordinates;
     gl_Position = mvp * vec4(position, 1.0);
-    vertexColor = vec4(0, 0.3, 0.8, 1.0); // make a light blue triangle peepoHappy
-	
+    vertexColor = vec4(0, 0.3, 0.8, 1.0); // make a light blue triangle peepoHappy	
 }

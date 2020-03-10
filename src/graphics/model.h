@@ -56,6 +56,7 @@ namespace graphics {
 		Model(std::string path, bool gammaCorrection);
 		~Model();
 	private:
+		std::string directory;
 		void loadModel(std::string path);
 		void processNode(aiNode *node, const aiScene *scene);
 		llong processMesh(aiMesh *mesh, const aiScene *scene);

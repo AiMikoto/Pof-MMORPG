@@ -8,6 +8,6 @@ uniform sampler2D diffuseSampler1;
 out vec4 fragmentColor;
 
 void main() {
-    //fragmentColor = texture(diffuseSampler1, uvs);
-	fragmentColor = vertexColor;
+    fragmentColor = texture(diffuseSampler1, uvs);
+	//fragmentColor = vertexColor;
 }

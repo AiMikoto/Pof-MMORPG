@@ -40,8 +40,8 @@ GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 		exit(-1);
 	}
 
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -86,7 +86,7 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 		std::cin.ignore();
 		exit(-1);
 	}
-	for (size_t i = 0; i < shadersPath.size(); i += 2) {
+	for (int i = 0; i < shadersPath.size(); i += 2) {
 		Shader* shader = new Shader(shadersPath[i], shadersPath[i + 1]);
 		shaderMap[i/2] = shader;
 	}

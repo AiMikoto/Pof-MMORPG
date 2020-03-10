@@ -14,7 +14,6 @@ void gph::GameObject::setup() {
 	this->parentID = -1;
 	this->name = "";
 	this->tag = "";
-	this->update = false;
 	generateID();
 }
 
@@ -26,20 +25,17 @@ gph::GameObject::~GameObject() {
 gph::GameObject::GameObject(llong parentID) {
 	setup();
 	this->parentID = parentID;
-	this->update = true;
 }
 
 gph::GameObject::GameObject(std::vector<llong> childrenIDs) {
 	setup();
 	this->childrenIDs = childrenIDs;
-	this->update = true;
 }
 
 gph::GameObject::GameObject(llong parentID, std::vector<llong> childrenIDs) {
 	setup();
 	this->childrenIDs = childrenIDs;
 	this->parentID = parentID;
-	this->update = true;
 }
 
 void gph::GameObject::add_child(llong child) {
@@ -63,7 +59,7 @@ void gph::GameObject::updateTransform() {
 	if (parentID != -1) {
 		transform.position += gameObjects[parentID]->transform.position;
 		transform.rotation *= gameObjects[parentID]->transform.rotation;
-		transform.scale	   *= gameObjects[parentID]->transform.scale;
+		transform.scale *= gameObjects[parentID]->transform.scale;
 	}
 	for (auto i : childrenIDs) {
 		gameObjects[i]->updateTransform();
