@@ -22,12 +22,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(Boost 1.72 COMPONENTS system thread log log_setup REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
 find_package(OpenSSL REQUIRED)
-include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES})
 
 add_library(chat STATIC src/lib/chat.cpp)
 add_library(uuid STATIC src/lib/uuid.cpp)
@@ -38,9 +37,9 @@ target_link_libraries(crypto OpenSSL::SSL)
 add_library(call STATIC src/lib/call.cpp)
 add_library(database STATIC src/lib/database.cpp)
 target_link_libraries(database pqxx pq)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call user_card crypto database chat uuid)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call user_card crypto database chat uuid)
 add_library(protocol STATIC src/lib/protocol.cpp)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} log call protocol user_card crypto database chat uuid)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol user_card crypto database chat uuid)
 
 # idk how to set this for windows
 set(OPENSSL openssl)
