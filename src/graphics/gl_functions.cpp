@@ -167,7 +167,6 @@ void gph::cleanup(GameObject* mainScene) {
 	glDeleteVertexArrays(1, &vertexArrayID);
 	glDeleteBuffers(1, &vertexBufferID);
 	glDeleteBuffers(1, &elementBufferID);
-	glDeleteBuffers(1, &textureBufferID);
 	delete mainScene;
 	glfwTerminate();
 	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
