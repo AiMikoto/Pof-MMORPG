@@ -28,11 +28,11 @@ namespace graphics {
 	class Mesh:GameObject {
 	public:
 		std::vector<Vertex> vertices;
-		std::vector<Texture> textures;
+		std::vector<uint> textureIndices;
 		std::vector<uint> indices, outlineIndices;
 		int drawMode;
 
-		Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, std::vector<uint> indices);
+		Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIndices, std::vector<uint> indices);
 		~Mesh();
 		void draw(Shader* shader);
 		void copy(Mesh* target);

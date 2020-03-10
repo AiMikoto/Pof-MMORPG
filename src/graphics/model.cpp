@@ -45,9 +45,9 @@ void gph::Texture::load() {
 	stbi_image_free(data);
 }
 
-gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<Texture> textures, std::vector<uint> indices) {
+gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIndices, std::vector<uint> indices) {
 	this->vertices = vertices;
-	this->textures = textures;
+	this->textureIndices = textureIndices;
 	this->indices = indices;
 	setup();
 }
@@ -68,10 +68,11 @@ void gph::Mesh::draw(Shader* shader) {
 	uint currentSpecular = 1;
 	uint currentNormal = 1;
 	uint currentHeight = 1;
-	for (int i = 0; i < textures.size(); i++) {
+	int index = 0;
+	for (auto i: this->textureIndices) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		std::string current;
-		std::string type = textures[i].type;
+		std::string type = textures[i]->type;
 		if (type == "texture_diffuse")
 			current = std::to_string(currentDiffuse++);
 		else if (type == "texture_specular")
@@ -80,8 +81,9 @@ void gph::Mesh::draw(Shader* shader) {
 			current = std::to_string(currentNormal++);
 		else if (type == "texture_height")
 			current = std::to_string(currentHeight++);
-		shader->setInt((type + current).c_str(), i);
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		shader->setInt((type + current).c_str(), index);
+		glBindTexture(GL_TEXTURE_2D, textures[i]->id);
+		index++;
 	}
 
 	glBindVertexArray(vertexArrayID);
