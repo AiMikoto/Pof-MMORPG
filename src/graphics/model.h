@@ -17,6 +17,12 @@ namespace graphics {
 		uint id;
 		std::string type;
 		std::string path;
+
+		Texture();
+		Texture(std::string path);
+		~Texture();
+	private:
+		void load();
 	};
 
 	class Mesh:GameObject {
@@ -37,4 +43,6 @@ namespace graphics {
 		void bindBuffers();
 		void createOutline();
 	};
+
+	extern std::vector<Texture*> textures;
 }

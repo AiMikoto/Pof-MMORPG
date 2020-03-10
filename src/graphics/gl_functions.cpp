@@ -5,12 +5,9 @@
 #include "transform.h"
 #include "mouse.h"
 #include "lib/log.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "lib/stb_image.h"
+#include "model.h"
 
 namespace gph = graphics;
-
-std::vector<uint> gph::textures;
 
 GLFWwindow * gph::createGLFWContext(int width, int height, std::string name) {
 	windowWidth = width;
@@ -143,7 +140,7 @@ void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 mvp = camera->projection(window) * camera->view() * model;
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		glBindTexture(GL_TEXTURE_2D, textures[0]->id);
 		current->setInt("textureSampler", 0);
 		current->setMat4("mvp", mvp);
 		glBindVertexArray(vertexArrayID);
@@ -164,8 +161,9 @@ void gph::cleanup(GameObject* mainScene) {
 	}
 	cameras.clear();
 	for (auto t : textures) {
-		glDeleteTextures(1, &t);
+		delete t;
 	}
+	textures.clear();
 	glDeleteVertexArrays(1, &vertexArrayID);
 	glDeleteBuffers(1, &vertexBufferID);
 	glDeleteBuffers(1, &elementBufferID);
@@ -176,32 +174,7 @@ void gph::cleanup(GameObject* mainScene) {
 }
 
 void gph::loadTextures() {
-	textures.push_back(loadTexture("../src/graphics/textures/aisip.png"));
+	textures.push_back(new Texture("../src/graphics/textures/aisip.png"));
 }
 
-uint gph::loadTexture(std::string path) {
-	uint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	uchar* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		BOOST_LOG_TRIVIAL(trace) << "Failed to load texture at: " << path;
-	}
-	stbi_image_free(data);
-	return textureID;
-}
