@@ -12,7 +12,7 @@ room::room(std::string name)
 
 void room::send(call c)
 {
-  for(sub:subs)
+  for(auto sub:subs)
   {
     sub -> safe_write(c);
   }
