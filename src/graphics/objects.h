@@ -24,6 +24,7 @@ namespace graphics {
 		GameObject(GameObject* parent, std::vector<GameObject*> children);
 		void add_child(GameObject* child);
 		void add_children(std::vector<GameObject*> children);
+		virtual void draw();
 	private:
 		void setup();
 		size_t generateID();

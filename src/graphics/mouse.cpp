@@ -6,25 +6,21 @@ namespace gph = graphics;
 void gph::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {}
 
 void gph::moveCursorCallback(GLFWwindow* window, double xpos, double ypos) {
-	int inputMode = glfwGetInputMode(window, GLFW_CURSOR);
-	if (inputMode == GLFW_CURSOR_HIDDEN) {
+	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN) {
 		cameras[0]->rotate = true;
 	}
 }
 
 void gph::mouseButtonCallback(GLFWwindow* window, int button, int state, int mods) {
 	switch (button) {
-	case GLFW_MOUSE_BUTTON_1:
+	case GLFW_MOUSE_BUTTON_2:
 		switch (state) {
 		case GLFW_PRESS:
-			int inputMode = glfwGetInputMode(window, GLFW_CURSOR);
-			if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN)
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			else {
-				cursorToMiddle(window);
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			}
+			cursorToMiddle(window);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 			break;
+		case GLFW_RELEASE:
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 		break;
 	}

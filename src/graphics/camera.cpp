@@ -69,16 +69,16 @@ void gph::Camera::setup() {
 void gph::Camera::moveCamera(int direction) {
 	switch (direction) {
 	case(cam::cameraMovements::forward):
-		transform.position += forward() * deltaTime * moveSpeed;
+		transform.position += forward() * glm::dvec3(1,0,1) * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::backwards):
-		transform.position -= forward() * deltaTime * moveSpeed;
+		transform.position -= forward()* glm::dvec3(1, 0, 1) * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::right):
-		transform.position += right() * deltaTime * moveSpeed;
+		transform.position += right()* glm::dvec3(1, 0, 1) * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::left):
-		transform.position -= right() * deltaTime * moveSpeed;
+		transform.position -= right()* glm::dvec3(1, 0, 1) * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::up):
 		transform.position += up() * deltaTime * moveSpeed;
