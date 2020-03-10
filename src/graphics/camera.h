@@ -11,7 +11,7 @@ namespace graphics {
 		CameraViewport(float startX, float startY, float endX, float endY);
 	};
 
-	class Camera : GameObject {
+	class Camera : public GameObject {
 	public:
 		bool isFixed, isPerspective;
 		double moveSpeed, rotationSpeed, defaultSpeed, maxSpeed, acceleration;

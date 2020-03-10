@@ -6,29 +6,32 @@
 #include "constants.h"
 #include "variables.h"
 #include "transform.h"
+#include "shader.h"
 
 namespace graphics {
 
 	class GameObject {
 	public:
 		std::string name, tag;
-		size_t id;
-		GameObject* parent;
-		std::vector<GameObject*> children;
+		llong id, parentID;
+		std::vector<llong> childrenIDs;
 		Transform transform;
+		bool update;
+		uint type;
 
 		GameObject();
 		~GameObject();
-		GameObject(GameObject* parent);
-		GameObject(std::vector<GameObject*> children);
-		GameObject(GameObject* parent, std::vector<GameObject*> children);
-		void add_child(GameObject* child);
-		void add_children(std::vector<GameObject*> children);
-		virtual void draw();
+		GameObject(llong parentID);
+		GameObject(std::vector<llong> childrenIDs);
+		GameObject(llong parentID, std::vector<llong> childrenIDs);
+		void add_child(llong child);
+		void add_children(std::vector<llong> children);
+		virtual void draw(Shader* shader, GameObject* camera, GLFWwindow* window);
+		void updateTransform();
 	private:
 		void setup();
-		size_t generateID();
+		void generateID();
 	};
 
-	extern std::map<size_t, GameObject*> gameObjects;
+	extern std::map<llong, GameObject*> gameObjects;
 }

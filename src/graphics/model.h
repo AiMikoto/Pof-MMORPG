@@ -6,6 +6,10 @@
 #include "constants.h"
 #include "variables.h"
 #include "shader.h"
+#include <map>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace graphics {
 	struct Vertex {
@@ -15,26 +19,27 @@ namespace graphics {
 
 	struct Texture {
 		uint id;
-		std::string type;
+		uint type;
 		std::string path;
 
 		Texture();
 		Texture(std::string path);
+		Texture(std::string path, uint type);
 		~Texture();
 	private:
 		void load();
 	};
 
-	class Mesh:GameObject {
+	class Mesh : public GameObject {
 	public:
 		std::vector<Vertex> vertices;
-		std::vector<uint> textureIndices;
+		std::vector<uint> textureIDs;
 		std::vector<uint> indices, outlineIndices;
 		int drawMode;
 
-		Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIndices, std::vector<uint> indices);
+		Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std::vector<uint> indices);
 		~Mesh();
-		void draw(Shader* shader);
+		void draw(Shader* shader, Camera* camera, GLFWwindow* window);
 		void copy(Mesh* target);
 	private:
 		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
@@ -44,5 +49,22 @@ namespace graphics {
 		void createOutline();
 	};
 
-	extern std::vector<Texture*> textures;
+	class Model : public GameObject {
+	public:
+		bool gammaCorrection;
+
+		Model(std::string path, bool gammaCorrection);
+		~Model();
+	private:
+		void loadModel(std::string path);
+		void processNode(aiNode *node, const aiScene *scene);
+		llong processMesh(aiMesh *mesh, const aiScene *scene);
+		std::vector<Vertex> loadMeshVertices(aiMesh *mesh, const aiScene *scene);
+		std::vector<uint> loadMeshIndices(aiMesh *mesh, const aiScene *scene);
+		std::vector<uint> loadTextures(aiMesh *mesh, const aiScene *scene);
+		std::vector<uint> loadMaterialTextures(aiMaterial *mat, aiTextureType type);
+	};
+
+	extern std::map<uint, Texture*> textures;
+	extern std::vector<Mesh*> meshes;
 }

@@ -4,54 +4,72 @@
 
 namespace gph = graphics;
 
-std::map<size_t, gph::GameObject*> gph::gameObjects;
+std::map<llong, gph::GameObject*> gph::gameObjects;
 
 gph::GameObject::GameObject() {
 	setup();
 }
 
 void gph::GameObject::setup() {
+	this->parentID = -1;
 	this->name = "";
 	this->tag = "";
-	this->id = generateID();
-	gameObjects[this->id] = this;
+	this->update = false;
+	generateID();
 }
 
 gph::GameObject::~GameObject() {
-  BOOST_LOG_TRIVIAL(trace) << "deleting children";
-	for (auto c : children) {
-		delete c;
+	BOOST_LOG_TRIVIAL(trace) << "clearing children";
+	childrenIDs.clear();
+}
+
+gph::GameObject::GameObject(llong parentID) {
+	setup();
+	this->parentID = parentID;
+	this->update = true;
+}
+
+gph::GameObject::GameObject(std::vector<llong> childrenIDs) {
+	setup();
+	this->childrenIDs = childrenIDs;
+	this->update = true;
+}
+
+gph::GameObject::GameObject(llong parentID, std::vector<llong> childrenIDs) {
+	setup();
+	this->childrenIDs = childrenIDs;
+	this->parentID = parentID;
+	this->update = true;
+}
+
+void gph::GameObject::add_child(llong child) {
+	this->childrenIDs.push_back(child);
+}
+
+void gph::GameObject::add_children(std::vector<llong> childrenIDs) {
+	for (auto i : childrenIDs) {
+		this->add_child(i);
 	}
-  BOOST_LOG_TRIVIAL(trace) << "clearing children";
-	children.clear();
 }
 
-gph::GameObject::GameObject(gph::GameObject* parent) {
-	setup();
-	this->parent = parent;
+void gph::GameObject::draw(Shader* shader, GameObject* camera, GLFWwindow* window) {
+	for (auto i : this->childrenIDs) {
+		gameObjects[i]->draw(shader, camera, window);
+	}
 }
 
-gph::GameObject::GameObject(std::vector<GameObject*> children) {
-	setup();
-	this->children = children;
+void gph::GameObject::generateID() {
+	this->id = gameObjects.size();
+	gameObjects[this->id] = this;
 }
 
-gph::GameObject::GameObject(gph::GameObject* parent, std::vector<GameObject*> children) {
-	setup();
-	this->children = children;
-	this->parent = parent;
-}
-
-void gph::GameObject::add_child(GameObject * child) {
-	this->children.push_back(child);
-}
-
-void gph::GameObject::add_children(std::vector<GameObject*> children) {
-	this->children.insert(this->children.end(), children.begin(), children.end());
-}
-
-void gph::GameObject::draw() {}
-
-size_t gph::GameObject::generateID() {
-	return 0;
+void gph::GameObject::updateTransform() {
+	if (parentID != -1) {
+		transform.position += gameObjects[parentID]->transform.position;
+		transform.rotation *= gameObjects[parentID]->transform.rotation;
+		transform.scale	   *= gameObjects[parentID]->transform.scale;
+	}
+	for (auto i : childrenIDs) {
+		gameObjects[i]->updateTransform();
+	}
 }

@@ -64,6 +64,7 @@ void gph::Camera::setup() {
 		moveBuffer[i] = false;
 	}
 	updateRotation();
+	type = objectTypes::camera;
 }
 
 void gph::Camera::moveCamera(int direction) {

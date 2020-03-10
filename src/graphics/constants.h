@@ -9,6 +9,9 @@ using uint = unsigned int;
 using ushort = unsigned short;
 using uchar = unsigned char;
 using llong = long long;
+using ullong = unsigned long long;
+using ulong = unsigned long;
+using ldouble = long double;
 const double pi = boost::math::constants::pi<double>();
 
 namespace graphics {
@@ -35,6 +38,12 @@ namespace graphics {
 		};
 	}	
 
+	namespace objectTypes {
+		enum types {
+			object, mesh, camera, light
+		};
+	};
+
 	enum movementKeys {
 		forward = GLFW_KEY_W,
 		backwards = GLFW_KEY_S,
@@ -49,6 +58,8 @@ namespace graphics {
 	   -0.5f, -0.5f, 0.0f, 0, 0,
 	   -0.5f,  0.5f, 0.0f, 0, 1
 	};
+	//	   -0.5f, -0.5f, -0.5f,  0, 0, //v0 bottom
+	//-0.5f, -0.5f, -0.5f, 0, 1, //v1 bottom
 
 	const uint indices[] = {
 		0,1,3,

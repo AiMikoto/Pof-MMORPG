@@ -5,9 +5,8 @@
 
 namespace gph = graphics;
 
-int main() 
-{
-  log_init("graphics");
+int main() {
+	log_init("graphics");
 	BOOST_LOG_TRIVIAL(trace) << "Creating window";
 	GLFWwindow* window = gph::createGLFWContext(gph::windowWidth, gph::windowHeight, gph::windowName);
 	BOOST_LOG_TRIVIAL(trace) << "Window created";

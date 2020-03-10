@@ -140,7 +140,7 @@ void gph::drawScene(GLFWwindow* window, gph::GameObject* mainScene) {
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 mvp = camera->projection(window) * camera->view() * model;
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textures[0]->id);
+		glBindTexture(GL_TEXTURE_2D, textures.begin()->second->id);
 		current->setInt("textureSampler", 0);
 		current->setMat4("mvp", mvp);
 		glBindVertexArray(vertexArrayID);
@@ -155,25 +155,27 @@ void gph::cleanup(GameObject* mainScene) {
 	for (auto i : shaderMap) {
 		delete i.second;
 	}
-	shaderMap.clear();
-	for (auto camera : cameras) {
-		delete camera;
-	}
-	cameras.clear();
 	for (auto t : textures) {
-		delete t;
+		delete t.second;
+	}
+	for (auto go : gameObjects) {
+		delete go.second;
 	}
 	textures.clear();
+	gameObjects.clear();
+	shaderMap.clear();
+	cameras.clear();
+	meshes.clear();
 	glDeleteVertexArrays(1, &vertexArrayID);
 	glDeleteBuffers(1, &vertexBufferID);
 	glDeleteBuffers(1, &elementBufferID);
-	delete mainScene;
 	glfwTerminate();
 	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
 }
 
 void gph::loadTextures() {
-	textures.push_back(new Texture("../src/graphics/textures/aisip.png"));
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	Texture* t = new Texture("../src/graphics/textures/aisip.png");
 }
 
 

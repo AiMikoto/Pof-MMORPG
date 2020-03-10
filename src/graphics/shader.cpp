@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "lib/log.h"
 
 namespace gph = graphics;
 
@@ -37,11 +38,11 @@ GLuint gph::ShaderLoader::loadShaders() {
 		vertexShaderCode = readShaderFile(this->vertexShaderPath);
 		fragmentShaderCode = readShaderFile(this->fragmentShaderPath);
 
-		std::cout << "Compiling vertex shader: " << vertexShaderPath << std::endl;
+		BOOST_LOG_TRIVIAL(trace) << "Compiling vertex shader: " << vertexShaderPath;
 		compileShader(vertexShaderCode, vertexShaderID);
-		std::cout << "Compiling fragment shader: " << fragmentShaderPath << std::endl;
+		BOOST_LOG_TRIVIAL(trace) << "Compiling fragment shader: " << fragmentShaderPath;
 		compileShader(fragmentShaderCode, fragmentShaderID);
-		std::cout << "Linking program" << std::endl;
+		BOOST_LOG_TRIVIAL(trace) << "Linking program";
 		return linkProgram();
 	}
 	catch (ShaderException e) {
@@ -105,7 +106,6 @@ gph::Shader::Shader() {}
 
 gph::Shader::Shader(std::string vertexShaderPath, std::string fragmentShaderPath) {
 	load(vertexShaderPath, fragmentShaderPath);
-	std::cout << programID << std::endl;
 }
 
 gph::Shader::~Shader() {

@@ -4,7 +4,7 @@
 #include "variables.h"
 
 namespace graphics {
-	struct Light:GameObject {
+	struct Light : public GameObject {
 		glm::vec4 color;
 		float attenuation, ambientCoefficient, coneAngle;
 		glm::vec3 coneDirection;
