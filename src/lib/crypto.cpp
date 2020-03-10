@@ -36,8 +36,8 @@ std::string aes_crypto::encrypt(std::string data)
 {
   uint32_t size = data.length();
   // allocate buffer
-  const uint32_t buffer_size = size * 2;
-  unsigned char buffer[buffer_size];
+  uint32_t buffer_size = size * 2;
+  unsigned char *buffer = (unsigned char *)malloc(buffer_size);
   // initialise encryption operation
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (unsigned char *)key.c_str(), (unsigned char *)iv.c_str());
@@ -49,15 +49,17 @@ std::string aes_crypto::encrypt(std::string data)
   output_size += len;
   // clean-up
   EVP_CIPHER_CTX_free(ctx);
-  return std::string((char *)buffer, output_size);
+  std::string ret = std::string((char *)buffer, output_size);
+  free(buffer);
+  return ret;
 }
 
 std::string aes_crypto::decrypt(std::string data)
 {
   uint32_t size = data.length();
   // allocate buffer
-  const uint32_t buffer_size = size * 2;
-  unsigned char buffer[buffer_size];
+  uint32_t buffer_size = size * 2;
+  unsigned char *buffer = (unsigned char *)malloc(buffer_size);
   // initialise decryption operation
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (unsigned char *)key.c_str(), (unsigned char *)iv.c_str());
@@ -69,7 +71,9 @@ std::string aes_crypto::decrypt(std::string data)
   output_size += len;
   // clean-up
   EVP_CIPHER_CTX_free(ctx);
-  return std::string((char *)buffer, output_size);
+  std::string ret = std::string((char *)buffer, output_size);
+  free(buffer);
+  return ret;
 }
 
 rsa_crypto::rsa_crypto(BIO *enc, BIO *dec)
@@ -111,22 +115,26 @@ std::string rsa_crypto::encrypt(std::string data)
 {
   uint32_t size = data.length();
   // allocate buffer
-  const uint32_t buffer_size = RSA_size(key);
-  unsigned char buffer[buffer_size];
+  uint32_t buffer_size = RSA_size(key);
+  unsigned char *buffer = (unsigned char *)malloc(buffer_size);
   // encrypt
   uint32_t output_size = RSA_public_encrypt(size, (unsigned char *)data.c_str(), buffer, key, padding_convention);
   // clean-up
-  return std::string((char *)buffer, output_size);
+  std::string ret = std::string((char *)buffer, output_size);
+  free(buffer);
+  return ret;
 }
 
 std::string rsa_crypto::decrypt(std::string data)
 {
   uint32_t size = data.length();
   // allocate buffer
-  const uint32_t buffer_size = RSA_size(key);
-  unsigned char buffer[buffer_size];
+  uint32_t buffer_size = RSA_size(key);
+  unsigned char *buffer = (unsigned char *)malloc(buffer_size);
   // decrypt
   uint32_t output_size = RSA_private_decrypt(size, (unsigned char *)data.c_str(), buffer, key, padding_convention);
   // clean-up
-  return std::string((char *)buffer, output_size);
+  std::string ret = std::string((char *)buffer, output_size);
+  free(buffer);
+  return ret;
 }
