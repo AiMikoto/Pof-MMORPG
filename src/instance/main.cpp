@@ -3,7 +3,6 @@
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
-#include <mutex>
 #include "instance/ioc.h"
 #include "instance/crypto.h"
 #include <boost/thread/barrier.hpp>

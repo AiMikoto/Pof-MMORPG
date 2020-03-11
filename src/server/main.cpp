@@ -3,7 +3,6 @@
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
-#include <mutex>
 #include "server/ioc.h"
 #include "server/instances.h"
 #include "server/crypto.h"
