@@ -2,10 +2,7 @@
 #include "lib/log.h"
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/lexical_cast.hpp>
+#include "lib/uuid.h"
 #include "include/common_macro.h"
 #include <exception>
 
@@ -141,13 +138,12 @@ void protocol::routine()
 void protocol::latency_service()
 {
   boost::asio::io_context io;
-  boost::uuids::random_generator generator;
   forever
   {
     boost::asio::steady_timer t(io, boost::asio::chrono::seconds(ping_freq));
     t.wait();
     BOOST_LOG_TRIVIAL(trace) << "sending ping";
-    std::string uuid = boost::lexical_cast<std::string>(generator());
+    std::string uuid = get_uuid();
     call ping_c;
     ping_c.tree().put(OPCODE, OP_PING);
     ping_c.tree().put("ping.uuid", uuid);

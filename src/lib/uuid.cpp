@@ -1,4 +1,5 @@
 #include "lib/uuid.h"
+#pragma comment (lib, "bcrypt.lib")
 
 boost::uuids::random_generator generator;
 
