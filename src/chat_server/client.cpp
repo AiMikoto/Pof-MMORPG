@@ -54,7 +54,21 @@ void client::handle_cmd(call c)
     ept.add(OP_IRC_U, boost::bind(&client::handle_unsubscribe, this, _1));
     return;
   }
+  if(command == "rcon")
+  { // uses RSA
+    BOOST_LOG_TRIVIAL(warning) << "received rcon authentication";
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
+    ept.add(OP_RCON_SHUTDOWN, boost::bind(&client::handle_rcon_shutdown, this, _1));
+  }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
+}
+
+void client::handle_rcon_shutdown(call c)
+{
+  BOOST_LOG_TRIVIAL(trace) << "shutdown initiated";
 }
 
 void client::handle_irc_request(call c)

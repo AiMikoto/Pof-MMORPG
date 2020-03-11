@@ -28,7 +28,7 @@ protocol::protocol(boost::asio::ip::tcp::socket *sock, crypto *c, int ping_freq)
 
 protocol::~protocol()
 {
-  socket -> close();
+  this -> close();
   if(t_pinger)
   {
     t_pinger -> join();

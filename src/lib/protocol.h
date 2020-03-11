@@ -25,6 +25,7 @@
 #define OP_IRC_U "irc_unsub"
 #define OP_INSTANCE_MANAGEMENT_DEACTIVATE "ins_de"
 #define OP_INSTANCE_MANAGEMENT_REACTIVATE "ins_re"
+#define OP_RCON_SHUTDOWN "rcon_shutdown"
 
 class protocol
 {
