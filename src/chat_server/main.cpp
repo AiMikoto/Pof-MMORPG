@@ -3,8 +3,8 @@
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
-#include <mutex>
 #include "chat_server/ioc.h"
+#include <boost/thread/barrier.hpp>
 
 boost::asio::io_context ioc;
 
@@ -39,9 +39,8 @@ int main(int argc, char **argv)
   server s(port);
   // block current thread
   BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
-  std::mutex m;
-  m.lock();
-  m.lock();
+  boost::barrier b(2);
+  b.wait();
   free(args);
   return 0;
 }
