@@ -10,10 +10,8 @@ set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(dep/glfw)
 add_subdirectory(dep/glm)
 add_subdirectory(dep/assimp)
-
 add_subdirectory(dep/glfw)
 add_subdirectory(dep/libpqxx)
 
