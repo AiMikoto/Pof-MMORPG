@@ -18,7 +18,7 @@ int main(int argc, char **argv)
   std::string pri = "keys/private_key.pem";
   int port = 7777;
   // parsing arguments;
-  std::string args[argc];
+  std::string *args = new std::string[argc];
   for(int i = 0; i < argc; i++)
   {
     args[i] = std::string(argv[i]);
