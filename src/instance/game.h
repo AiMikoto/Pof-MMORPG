@@ -6,4 +6,10 @@
 extern user_card_library ucl;
 extern user_card_library uclp;
 
+void unload();
+
+void load();
+
+bool is_loaded();
+
 #endif // INSTANCE_GAME_H

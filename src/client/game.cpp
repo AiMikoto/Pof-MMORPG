@@ -3,6 +3,7 @@
 #include "lib/log.h"
 
 user_card_library ucl;
+chat_log cl;
 
 void move(std::string host, int port)
 {
@@ -20,4 +21,13 @@ void move(std::string host, int port)
   current_instance -> authenticate_token(username, tok);
   // TODO: take down loading screen
   BOOST_LOG_TRIVIAL(trace) << "finished instance movement";
+}
+
+void send_message(chat_target target, std::string payload)
+{
+  message m(target, payload);
+  call c;
+  c.tree().put(OPCODE, OP_IRC);
+  c.tree().put_child("payload", m.encode());
+  current_instance -> safe_write(c);
 }

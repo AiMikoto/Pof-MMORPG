@@ -10,10 +10,9 @@ RUN cd /home \
   && rm -rf home/boost_1_72_0.tar.gz home/boost_1_72_0
 
 RUN mkdir /pof
-COPY bin/instance /pof/instance
+COPY bin/chat_server /pof/chat_server
 COPY keys/private_key.pem /pof/private_key.pem
-COPY keys/public_key.pem /pof/public_key.pem
 
-EXPOSE 7000
+EXPOSE 1231
 
-CMD ["/pof/instance", "-port", "7000", "-pub", "/pof/public_key.pem", "-priv", "/pof/private_key.pem"]
+CMD ["/pof/chat_server", "-port", "1231", "-priv", "/pof/private_key.pem"]

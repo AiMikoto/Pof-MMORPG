@@ -13,6 +13,8 @@ set(INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
 add_subdirectory(dep/glfw)
 add_subdirectory(dep/glm)
 add_subdirectory(dep/assimp)
+
+add_subdirectory(dep/glfw)
 add_subdirectory(dep/libpqxx)
 
 file(GLOB SERVER_SOURCES "src/server/*.cpp")

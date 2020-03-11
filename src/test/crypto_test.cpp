@@ -36,7 +36,7 @@ void test_rsa_encryption_decryption()
   BIO *dec_key = BIO_new(BIO_s_mem());
   BIO *enc_key = BIO_new(BIO_s_mem());
   PEM_write_bio_RSAPrivateKey(dec_key, keypair, NULL, NULL, 0, NULL, NULL);
-  PEM_write_bio_RSAPublicKey(enc_key, keypair);
+  PEM_write_bio_RSA_PUBKEY(enc_key, keypair);
   crypto *c = new rsa_crypto(enc_key, dec_key);
   std::string text = "chocoturtle";
   std::string enc = c -> encrypt(text);
@@ -64,7 +64,7 @@ void test_BIG_rsa_encryption_decryption()
   BIO *dec_key = BIO_new(BIO_s_mem());
   BIO *enc_key = BIO_new(BIO_s_mem());
   PEM_write_bio_RSAPrivateKey(dec_key, keypair, NULL, NULL, 0, NULL, NULL);
-  PEM_write_bio_RSAPublicKey(enc_key, keypair);
+  PEM_write_bio_RSA_PUBKEY(enc_key, keypair);
   crypto *c = new rsa_crypto(enc_key, dec_key);
   std::string text = "soft cuddly teddy bears wearing pink jackets";
   std::string enc = c -> encrypt(text);

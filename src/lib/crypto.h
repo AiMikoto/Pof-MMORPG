@@ -4,6 +4,8 @@
 #include <string>
 #include <openssl/pem.h>
 
+std::string sha256(std::string input);
+
 class crypto
 {
 public:

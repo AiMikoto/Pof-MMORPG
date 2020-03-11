@@ -6,6 +6,7 @@
 #include "client/game.h"
 #include "include/maps.h"
 #include "include/regions.h"
+#include <boost/thread/barrier.hpp>
 
 #define LOGIN_SV_HOST "localhost"
 #define LOGIN_SV_PORT 7777
@@ -24,7 +25,7 @@ int main(int argc, char **argv)
   std::string password = "";
   username = "";
   // parsing arguments;
-  std::string args[argc];
+  std::string *args = new std::string[argc];
   for(int i = 0; i < argc; i++)
   {
     args[i] = std::string(argv[i]);
@@ -69,12 +70,13 @@ int main(int argc, char **argv)
   }
   BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
   init_l.unlock();
-  std::mutex m;
-  boost::this_thread::sleep(boost::posix_time::seconds(15));
+  boost::this_thread::sleep(boost::posix_time::seconds(25));
   BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
   current_instance -> change_map(MAP_FLATLANDS, REG_EU);
-  m.lock();
+  boost::this_thread::sleep(boost::posix_time::seconds(25));
+  send_message(world, "fluffy kittens");
+  boost::barrier b(2);
   BOOST_LOG_TRIVIAL(error) << "client finished successfully";
-  m.lock();
+  b.wait();
   return 0;
 }

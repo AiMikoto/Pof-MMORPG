@@ -9,12 +9,9 @@
 #include "server/instances.h"
 #include "include/maps.h"
 #include "include/regions.h"
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/lexical_cast.hpp>
-
-boost::uuids::random_generator generator;
+#include "lib/uuid.h"
+#include "server/ioc.h"
+#include "server/crypto.h"
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa)
 {
@@ -33,25 +30,23 @@ void client::handle_auth(call c)
   std::string password = c.tree().get<std::string>("login.password");
   std::string key = c.tree().get<std::string>("aes.key");
   std::string iv = c.tree().get<std::string>("aes.iv");
-  BOOST_LOG_TRIVIAL(trace) << "creating aes object";
   aes = new aes_crypto(key, iv);
   replace_crypto(aes);
   call answer;
   answer.tree().put(OPCODE, OP_AUTH);
-  if(true) // TODO: use username and password to confirm authentification
+  int status = false;
+  user_card uc = db -> auth(username, password, &status);
+  if(status)
   {
     answer.tree().put("status", true);
     safe_write(answer);
-    user_card uc;
-    // TODO: load user card
-    std::string token = boost::lexical_cast<std::string>(generator());
-    uc.tree().put("user.name", username);
+    std::string token = get_uuid();
     uc.tree().put("user.token", token);
     call uc_transfer;
     uc_transfer.tree().put(OPCODE, OP_UC_TRANS_ALL);
     uc_transfer.tree().put_child("data", uc.tree());
     safe_write(uc_transfer);
-    instance_info *target_instance = pins[REG_EU][MAP_FLATLANDS];
+    instance_info *target_instance = get_pub_in(REG_EU, MAP_FLATLANDS);
     target_instance -> transfer_user_card(uc);
     call move;
     move.tree().put(OPCODE, OP_MOVE);

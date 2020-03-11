@@ -3,10 +3,12 @@
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
-#include <mutex>
 #include "server/ioc.h"
 #include "server/instances.h"
+#include "server/crypto.h"
+#include <boost/thread/barrier.hpp>
 
+database *db;
 boost::asio::io_context ioc;
 
 int main(int argc, char **argv)
@@ -16,7 +18,7 @@ int main(int argc, char **argv)
   std::string pri = "keys/private_key.pem";
   int port = 7777;
   // parsing arguments;
-  std::string args[argc];
+  std::string *args = new std::string[argc];
   for(int i = 0; i < argc; i++)
   {
     args[i] = std::string(argv[i]);
@@ -40,15 +42,16 @@ int main(int argc, char **argv)
     }
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
+  BOOST_LOG_TRIVIAL(trace) << "initialising database";
+  db = db_init();
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pub, pri);
   BOOST_LOG_TRIVIAL(trace) << "creating instances";
-  populate_pins();
+  populate_dins();
   BOOST_LOG_TRIVIAL(trace) << "creating server";
   server s(port);
   BOOST_LOG_TRIVIAL(trace) << "blocking thread";
-  std::mutex m;
-  m.lock();
-  m.lock();
+  boost::barrier b(2);
+  b.wait();
   return 0;
 }
