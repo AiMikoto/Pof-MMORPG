@@ -9,3 +9,8 @@ void init_crypto(std::string priv)
   BIO_read_filename(keybio, priv.c_str());
   g_rsa = new rsa_crypto(NULL, keybio);
 }
+
+void destroy_crypto()
+{
+  delete g_rsa;
+}

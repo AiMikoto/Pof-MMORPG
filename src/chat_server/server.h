@@ -11,13 +11,13 @@ class server
 public:
   server(int port);
   ~server();
-  void accept();
   boost::asio::ip::tcp::endpoint endpoint;
   boost::asio::ip::tcp::acceptor acceptor;
-  boost::barrier bar;
   boost::barrier acceptor_barrier;
   std::vector<client*> clients;
   bool shutdown;
+  boost::thread *t_routine;
+  boost::thread *t_cleanup;
 };
 
 void routine(server *that);

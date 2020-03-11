@@ -1,5 +1,5 @@
-#ifndef CHAT_SERVER_SHUTDOWN_H
-#define CHAT_SERVER_SHUTDOWN_H
+#ifndef INSTANCE_SHUTDOWN_H
+#define INSTANCE_SHUTDOWN_H
 
 #include <boost/thread/barrier.hpp>
 

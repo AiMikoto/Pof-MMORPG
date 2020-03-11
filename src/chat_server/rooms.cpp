@@ -46,6 +46,7 @@ void chat_destroy()
     BOOST_LOG_TRIVIAL(trace) << "purging room " << room.first;
     delete room.second;
   }
+  rooms.clear();
 }
 
 void give_message(std::string target, call c)

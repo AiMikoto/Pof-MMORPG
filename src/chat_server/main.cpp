@@ -49,13 +49,15 @@ int main(int argc, char **argv)
   chat_init(); 
   BOOST_LOG_TRIVIAL(trace) << "creating server";
   server *s = new server(port);
-  // block current thread
   BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
   main_barrier.wait();
   BOOST_LOG_TRIVIAL(trace) << "cleaning up server";
   delete s;
   BOOST_LOG_TRIVIAL(trace) << "destroying chat rooms";
   chat_destroy();
+  BOOST_LOG_TRIVIAL(trace) << "destroying keys";
+  destroy_crypto();
+  BOOST_LOG_TRIVIAL(trace) << "deleting argument array";
   delete[] args;
   return 0;
 }
