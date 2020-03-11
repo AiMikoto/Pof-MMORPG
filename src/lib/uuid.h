@@ -36,7 +36,7 @@ public:
   void add(std::string uuid);
   void remove(std::string uuid);
 private:
-  struct trie_node *root;
+  trie_node *root;
 };
 
 #endif
