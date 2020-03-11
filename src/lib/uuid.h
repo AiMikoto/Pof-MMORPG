@@ -22,7 +22,7 @@ public:
   void add(const char *path);
   void remove(const char *path);
 private:
-  struct trie_node *nodes[ALPHA_SIZE];
+  trie_node *nodes[ALPHA_SIZE];
   int weight;
   bool flag;
 };
