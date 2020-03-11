@@ -48,10 +48,10 @@ instance::~instance()
 
 bool instance::authenticate(std::string username, std::string password)
 {
-  std::mutex lock;
+  boost::barrier bar(2);
   bool status;
   call c;
-  ept.add(OP_AUTH, boost::bind(&instance::authenticate_cb, this, &lock, &status, _1));
+  ept.add(OP_AUTH, boost::bind(&instance::authenticate_cb, this, &bar, &status, _1));
   c.tree().put(OPCODE, OP_AUTH);
   c.tree().put("login.username", username);
   c.tree().put("login.password", password);
@@ -60,18 +60,16 @@ bool instance::authenticate(std::string username, std::string password)
   safe_write(c); // uses RSA
   replace_crypto(g_aes); // chance crypto to aes
   start();
-  lock.lock();
-  lock.lock();
-  lock.unlock();
+  bar.wait();
   return status;
 }
 
 bool instance::authenticate_token(std::string username, std::string tok)
 {
-  std::mutex lock;
+  boost::barrier bar(2);
   bool status;
   call c;
-  ept.add(OP_AUTH_TOKEN, boost::bind(&instance::authenticate_cb, this, &lock, &status, _1));
+  ept.add(OP_AUTH_TOKEN, boost::bind(&instance::authenticate_cb, this, &bar, &status, _1));
   c.tree().put(OPCODE, OP_AUTH_TOKEN);
   c.tree().put("login.username", username);
   c.tree().put("login.token", tok);
@@ -80,49 +78,43 @@ bool instance::authenticate_token(std::string username, std::string tok)
   safe_write(c); // uses RSA
   replace_crypto(g_aes); // chance crypto to aes
   start();
-  lock.lock();
-  lock.lock();
-  lock.unlock();
+  bar.wait();
   return status;
 }
 
-void instance::authenticate_cb(std::mutex *lock, bool *status, call c)
+void instance::authenticate_cb(boost::barrier *bar, bool *status, call c)
 {
   *status = c.tree().get<bool>("status");
   BOOST_LOG_TRIVIAL(trace) << "authentication: " << *status;
-  lock -> unlock();
+  bar -> wait();
 }
 
 bool instance::change_map(map_t map, region_t region)
 {
-  std::mutex lock;
+  boost::barrier bar(2);
   bool status;
   call c;
-  ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::change_map_cb, this, &lock, &status, _1));
+  ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::change_map_cb, this, &bar, &status, _1));
   c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP);
   c.tree().put("target.map", map);
   c.tree().put("target.region", region);
   c.tree().put("target.public", true);
   safe_write(c);
-  lock.lock();
-  lock.lock();
-  lock.unlock();
+  bar.wait();
   return status;
 }
 
 bool instance::change_map(std::string instance_uuid)
 {
-  std::mutex lock;
+  boost::barrier bar(2);
   bool status;
   call c;
-  ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::change_map_cb, this, &lock, &status, _1));
+  ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&instance::change_map_cb, this, &bar, &status, _1));
   c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP);
   c.tree().put("target.uuid", instance_uuid);
   c.tree().put("target.public", false);
   safe_write(c);
-  lock.lock();
-  lock.lock();
-  lock.unlock();
+  bar.wait();
   return status;
 }
 
@@ -134,12 +126,12 @@ void instance::send_message(message m)
   safe_write(c);
 }
 
-void instance::change_map_cb(std::mutex *lock, bool *status, call c)
+void instance::change_map_cb(boost::barrier *bar, bool *status, call c)
 {
   ept.remove(OP_REQUEST_CHANGE_MAP);
   *status = c.tree().get<bool>("status");
   BOOST_LOG_TRIVIAL(trace) << "map_change_request: " << *status;
-  lock -> unlock();
+  bar -> wait();
 }
 
 void instance::uc_transfer(call c)
