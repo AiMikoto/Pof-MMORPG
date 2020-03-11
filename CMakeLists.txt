@@ -6,6 +6,14 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_TEST OFF CACHE BOOL "" FORCE)
 
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(dep/glfw)
+add_subdirectory(dep/glm)
+add_subdirectory(dep/assimp)
+
 add_subdirectory(dep/glfw)
 add_subdirectory(dep/libpqxx)
 
@@ -63,6 +71,8 @@ add_executable(chat_server ${CHAT_SERVER_SOURCES})
 add_executable(instance ${INSTANCE_SOURCES})
 add_executable(gfx ${GRAPHICS_SOURCES})
 target_link_libraries(gfx glfw)
+target_link_libraries(gfx glm)
+target_link_libraries(gfx assimp)
 target_link_libraries(gfx OpenGL::GL)
 add_executable(client ${CLIENT_SOURCES})
 add_executable(world_test ${WORLD_STRUCTURE_SOURCES} src/test/world_structure_test.cpp)

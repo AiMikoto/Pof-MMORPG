@@ -13,5 +13,5 @@ _deps
 build
 *.sln
 /Graphics Engine
-*.vs
 /x64
+/.vs
