@@ -40,6 +40,7 @@ gph::GameObject::GameObject(llong parentID, std::vector<llong> childrenIDs) {
 
 void gph::GameObject::add_child(llong child) {
 	this->childrenIDs.push_back(child);
+	gameObjects[child]->parentID = this->id;
 }
 
 void gph::GameObject::add_children(std::vector<llong> childrenIDs) {

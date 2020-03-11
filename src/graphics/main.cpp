@@ -49,9 +49,9 @@ int main() {
 		(size_t)gph::requiredShadersPathLength);
 	gph::loadShaders(shaders);
 	gph::Model* model = new gph::Model("../src/graphics/objects/cube.obj", false);
-	model->transform.rotation = glm::quat(1, 0.25, 0, 0);
-	model->updateTransform();
 	mainScene->add_child(model->id);
+	model->transform.rotation = glm::quat(0.7, 0.7, 0, 0);
+	model->updateTransform();
 	//gph::loadTextures();
 
 	double lastTime = glfwGetTime();
