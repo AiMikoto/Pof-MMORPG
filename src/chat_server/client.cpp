@@ -7,17 +7,10 @@
 #include <exception>
 #include "lib/chat.h"
 #include "chat_server/rooms.h"
+#include "chat_server/crypto.h"
+#include "chat_server/shutdown.h"
 
 std::string my_tok = "lion"; // TODO: export this
-
-rsa_crypto *g_rsa;
-
-void init_crypto(std::string priv)
-{
-  BIO *keybio = BIO_new(BIO_s_file());
-  BIO_read_filename(keybio, priv.c_str());
-  g_rsa = new rsa_crypto(NULL, keybio);
-}
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {

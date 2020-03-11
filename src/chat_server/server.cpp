@@ -16,7 +16,19 @@ server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(io
 server::~server()
 {
   shutdown = true;
+  BOOST_LOG_TRIVIAL(trace) << "cancelling acceptor";
+  acceptor.cancel();
+  BOOST_LOG_TRIVIAL(trace) << "closing acceptor";
+  acceptor.close();
+  BOOST_LOG_TRIVIAL(trace) << "stopping io context";
+  ioc.stop();
+  BOOST_LOG_TRIVIAL(trace) << "server shutdown terminated";
   bar.wait();
+}
+
+void accept(boost::barrier *b)
+{
+  b -> wait();
 }
 
 void server::routine()
@@ -24,10 +36,14 @@ void server::routine()
   forever_until(shutdown)
   {
     boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(ioc);
-    acceptor.accept(*socket);
+    BOOST_LOG_TRIVIAL(trace) << "asdsadasdsadsadas";
+    boost::barrier b(2);
+    acceptor.async_accept(*socket, boost::bind(accept, &b));
+    b.wait();
     client *c = new client(socket);
     clients.push_back(c);
   }
+  BOOST_LOG_TRIVIAL(trace) << "server routine terminated";
   bar.wait();
 }
 
@@ -57,5 +73,6 @@ void server::cleanup()
     BOOST_LOG_TRIVIAL(trace) << "deleting client";
     delete c;
   }
+  BOOST_LOG_TRIVIAL(trace) << "cleanup terminated";
   bar.wait();
 }

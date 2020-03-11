@@ -17,6 +17,10 @@ private:
   std::set<client *> subs;
 };
 
+void chat_init();
+
+void chat_destroy();
+
 extern std::map<std::string, room *> rooms;
 
 void give_message(std::string target, call c);

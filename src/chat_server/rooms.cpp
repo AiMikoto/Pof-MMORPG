@@ -34,6 +34,18 @@ void room::unsubscribe(client *c)
   }
 }
 
+void chat_init()
+{
+}
+
+void chat_destroy()
+{
+  for(auto room:rooms)
+  {
+    delete room.second;
+  }
+}
+
 void give_message(std::string target, call c)
 {
   if(rooms.find(target) != rooms.end())

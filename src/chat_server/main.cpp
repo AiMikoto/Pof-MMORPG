@@ -4,7 +4,13 @@
 #include <cstdlib>
 #include <iostream>
 #include "chat_server/ioc.h"
-#include <boost/thread/barrier.hpp>
+#include "chat_server/shutdown.h"
+#include "chat_server/rooms.h"
+#include "chat_server/crypto.h"
+
+#ifdef __linux__
+#include <csignal>
+#endif
 
 boost::asio::io_context ioc;
 
@@ -33,14 +39,23 @@ int main(int argc, char **argv)
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
   log_init("chat_server");
+#ifdef __linux__
+  BOOST_LOG_TRIVIAL(trace) << "loading handler for SIGINT";
+  std::signal(SIGINT, shutdown);
+#endif
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pri);
+  BOOST_LOG_TRIVIAL(trace) << "initialising chat rooms";
+  chat_init(); 
   BOOST_LOG_TRIVIAL(trace) << "creating server";
-  server s(port);
+  server *s = new server(port);
   // block current thread
   BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
-  boost::barrier b(2);
-  b.wait();
+  main_barrier.wait();
+  BOOST_LOG_TRIVIAL(trace) << "cleaning up server";
+  delete s;
+  BOOST_LOG_TRIVIAL(trace) << "destroying chat rooms";
+  chat_destroy();
   free(args);
   return 0;
 }
