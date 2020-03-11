@@ -11,14 +11,17 @@ class server
 public:
   server(int port);
   ~server();
-private:
-  void routine();
-  void cleanup();
+  void accept();
   boost::asio::ip::tcp::endpoint endpoint;
   boost::asio::ip::tcp::acceptor acceptor;
   boost::barrier bar;
+  boost::barrier acceptor_barrier;
   std::vector<client*> clients;
   bool shutdown;
 };
+
+void routine(server *that);
+
+void cleanup(server *that);
 
 #endif // CHAT_SERVER_SERVER_H

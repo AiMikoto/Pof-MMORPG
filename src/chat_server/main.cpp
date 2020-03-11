@@ -56,6 +56,6 @@ int main(int argc, char **argv)
   delete s;
   BOOST_LOG_TRIVIAL(trace) << "destroying chat rooms";
   chat_destroy();
-  free(args);
+  delete[] args;
   return 0;
 }

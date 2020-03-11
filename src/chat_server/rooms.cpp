@@ -40,8 +40,10 @@ void chat_init()
 
 void chat_destroy()
 {
+  BOOST_LOG_TRIVIAL(trace) << "purging rooms";
   for(auto room:rooms)
   {
+    BOOST_LOG_TRIVIAL(trace) << "purging room " << room.first;
     delete room.second;
   }
 }
