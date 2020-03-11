@@ -6,6 +6,7 @@
 #include <mutex>
 #include "instance/ioc.h"
 #include "instance/crypto.h"
+#include <boost/thread/barrier.hpp>
 
 boost::asio::io_context ioc;
 database *db;
@@ -49,8 +50,7 @@ int main(int argc, char **argv)
   server s(port);
   // block current thread
   BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
-  std::mutex m;
-  m.lock();
-  m.lock();
+  boost::barrier b(2);
+  b.wait();
   return 0;
 }
