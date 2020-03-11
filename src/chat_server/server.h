@@ -4,7 +4,6 @@
 #include <boost/asio.hpp>
 #include <vector>
 #include "chat_server/client.h"
-#include <boost/thread/barrier.hpp>
 
 class server
 {
@@ -13,7 +12,6 @@ public:
   ~server();
   boost::asio::ip::tcp::endpoint endpoint;
   boost::asio::ip::tcp::acceptor acceptor;
-  boost::barrier acceptor_barrier;
   std::vector<client*> clients;
   bool shutdown;
   boost::thread *t_routine;

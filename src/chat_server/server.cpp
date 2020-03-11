@@ -5,7 +5,7 @@
 #include "include/common_macro.h"
 #include "chat_server/ioc.h"
 
-server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(ioc, endpoint), acceptor_barrier(2)
+server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(ioc, endpoint)
 {
   shutdown = false;
   BOOST_LOG_TRIVIAL(info) << "Created listener on port " << port;
@@ -20,34 +20,40 @@ server::~server()
   acceptor.cancel();
   BOOST_LOG_TRIVIAL(trace) << "closing acceptor";
   acceptor.close();
-  BOOST_LOG_TRIVIAL(trace) << "stopping io context";
+  BOOST_LOG_TRIVIAL(trace) << "stopping ioc";
   ioc.stop();
-  BOOST_LOG_TRIVIAL(trace) << "lowering acceptor barrier";
-  acceptor_barrier.wait();
-  BOOST_LOG_TRIVIAL(trace) << "server shutdown terminated";
+  BOOST_LOG_TRIVIAL(trace) << "waiting on routine thread";
   t_routine -> join();
   delete t_routine;
+  BOOST_LOG_TRIVIAL(trace) << "waiting on cleanup thread";
   t_cleanup -> join();
   delete t_cleanup;
   BOOST_LOG_TRIVIAL(trace) << "server terminated successfully";
 }
 
-void accept(boost::barrier *acceptor_barrier)
+void accept(const boost::system::error_code& error)
 {
-  acceptor_barrier -> wait();
+  BOOST_LOG_TRIVIAL(trace) << "accepting client";
+  ioc.stop();
 }
 
 void routine(server *that)
 {
   forever_until(that -> shutdown)
   {
+    BOOST_LOG_TRIVIAL(trace) << "creating new socket";
     boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(ioc);
-    that -> acceptor.async_accept(*socket, boost::bind(accept, &(that -> acceptor_barrier)));
-    that -> acceptor_barrier.wait();
+    BOOST_LOG_TRIVIAL(trace) << "adding handler";
+    that -> acceptor.async_accept(*socket, boost::bind(accept, boost::asio::placeholders::error));
+    BOOST_LOG_TRIVIAL(trace) << "running ioc";
+    ioc.run();
+    BOOST_LOG_TRIVIAL(trace) << "restarting ioc";
+    ioc.restart();
     if(that -> shutdown)
     {
       break;
     }
+    BOOST_LOG_TRIVIAL(trace) << "creating client";
     client *c = new client(socket);
     that -> clients.push_back(c);
   }
