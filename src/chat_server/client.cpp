@@ -55,6 +55,7 @@ void client::handle_cmd(call c)
     std::string iv = c.tree().get<std::string>("aes.iv");
     aes = new aes_crypto(key, iv);
     replace_crypto(aes);
+    return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }

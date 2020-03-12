@@ -7,7 +7,8 @@
 #include "server/crypto.h"
 #include "lib/log.h"
 #include "server/hosts.h"
-#include <boost/property_tree/json_parser.hpp>
+
+boost::asio::io_context instances_ioc;
 
 bool shuttingdown = false;
 
@@ -120,8 +121,8 @@ instance_info::instance_info(region_t reg, std::string auth_tok, std::string hos
   this -> auth_tok = auth_tok;
   this -> hostname = hostname;
   this -> port = port;
-  boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
-  boost::asio::ip::tcp::resolver resolver(ioc);
+  boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(instances_ioc);
+  boost::asio::ip::tcp::resolver resolver(instances_ioc);
   boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), this -> hostname, std::to_string(this -> port));
   boost::asio::connect(*sock, endpoint);
   this -> in = new instance(sock, id);
