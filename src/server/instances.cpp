@@ -208,7 +208,7 @@ void populate_dins()
   for(int i = 0; i < count; i++)
   {
     boost::property_tree::ptree instance = hosts.get_child("instance." + std::to_string(i));
-    fins[instance_counter++] = new instance_info(instance.get<region_t>("region"), "fish", instance.get<std::string>("host"), instance.get<int>("port"), instance_counter);
+    fins[instance_counter++] = new instance_info(instance.get<region_t>("region"), instance.get<std::string>("token"), instance.get<std::string>("host"), instance.get<int>("port"), instance_counter);
   }
 }
 

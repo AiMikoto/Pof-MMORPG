@@ -75,7 +75,7 @@ int main(int argc, char **argv)
   BOOST_LOG_TRIVIAL(trace) << "destroying dynamic instances";
   destroy_dins();
   // At this point, there are no more users in the system
-  // TODO: take down chat server
+  take_down("chat.0");
   BOOST_LOG_TRIVIAL(trace) << "destroying keys";
   destroy_crypto();
   BOOST_LOG_TRIVIAL(trace) << "closing database";
