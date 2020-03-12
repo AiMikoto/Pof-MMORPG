@@ -64,7 +64,7 @@ void cleanup(server *that)
 {
   forever_until(that -> shutdown)
   {
-    boost::this_thread::sleep( boost::posix_time::seconds(2));
+    boost::this_thread::sleep( boost::posix_time::seconds(20));
     BOOST_LOG_TRIVIAL(trace) << "cleaning up";
     for(auto it = that -> clients.begin(); it != that -> clients.end(); it++)
     {

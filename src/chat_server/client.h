@@ -13,7 +13,7 @@ public:
 private:
   void validate_authority(std::string token);
   void handle_cmd(call c);
-  void handle_rcon_shutdown(call c);
+  void handle_shutdown(call c);
   void handle_irc_request(call c);
   void handle_subscribe(call c);
   void handle_unsubscribe(call c);

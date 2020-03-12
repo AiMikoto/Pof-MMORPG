@@ -26,6 +26,7 @@ class instance_info
 {
 public:
   instance_info(region_t reg, std::string auth_tok, std::string hostname, int port, instance_id_t id);
+  ~instance_info();
   void transfer_user_card(user_card uc);
   region_t reg;
   std::string auth_tok;
@@ -43,5 +44,9 @@ instance_info *get_pub_in(region_t reg, map_t map);
 extern instance_id_t instance_counter;
 
 void populate_dins();
+
+void disable_dins();
+
+void destroy_dins();
 
 #endif // SERVER_INSTANCES_H

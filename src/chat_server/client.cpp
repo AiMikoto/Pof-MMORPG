@@ -15,6 +15,7 @@ std::string my_tok = "lion"; // TODO: export this
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
+  ept.add(OP_SHUTDOWN, boost::bind(&client::handle_shutdown, this, _1));
   ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
   start();
 }
@@ -54,14 +55,15 @@ void client::handle_cmd(call c)
     std::string iv = c.tree().get<std::string>("aes.iv");
     aes = new aes_crypto(key, iv);
     replace_crypto(aes);
-    ept.add(OP_RCON_SHUTDOWN, boost::bind(&client::handle_rcon_shutdown, this, _1));
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }
 
-void client::handle_rcon_shutdown(call c)
+void client::handle_shutdown(call c)
 {
-  BOOST_LOG_TRIVIAL(trace) << "shutdown initiated";
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  BOOST_LOG_TRIVIAL(trace) << "remote shutdown initiated";
+  shutdown();
 }
 
 void client::handle_irc_request(call c)

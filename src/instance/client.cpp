@@ -11,6 +11,7 @@
 #include "instance/crypto.h"
 #include "instance/ioc.h"
 #include "instance/chat_client.h"
+#include "chat_server/shutdown.h"
 
 client *master = NULL;
 
@@ -19,6 +20,7 @@ std::string my_tok = "fish"; // TODO: export this
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
+  ept.add(OP_SHUTDOWN, boost::bind(&client::handle_shutdown, this, _1));
   ept.add(OP_AUTH_TOKEN, boost::bind(&client::handle_auth, this, _1));
   ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
   start();
@@ -214,4 +216,11 @@ void client::handle_irc_request(call c)
     chat -> safe_write(c);
   }
   ucl.apply(boost::bind(send_message, _1, c));
+}
+
+void client::handle_shutdown(call c)
+{
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  BOOST_LOG_TRIVIAL(trace) << "remote shutdown initiated";
+  shutdown();
 }

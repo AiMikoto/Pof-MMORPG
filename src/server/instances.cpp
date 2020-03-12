@@ -6,6 +6,9 @@
 #include <boost/lexical_cast.hpp>
 #include "server/crypto.h"
 #include "lib/log.h"
+#include "server/hosts.h"
+
+bool shuttingdown = false;
 
 std::map<instance_id_t, instance_info *> fins;
 std::map<instance_id_t, instance_info *> pins;
@@ -38,6 +41,12 @@ instance_info *get_active_instance(instance_id_t id)
 
 void instance::handle_map_change_request(call c)
 {
+  c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP_CB);
+  c.tree().put("status", false);
+  if(shuttingdown)
+  {
+    this -> safe_write(c);
+  }
   bool pub = c.tree().get<bool>("target.public");
   instance_info *insi;
   if(pub)
@@ -53,7 +62,6 @@ void instance::handle_map_change_request(call c)
   }
   user_card uc;
   uc.tree() = c.tree().get_child("card");
-  c.tree().put(OPCODE, OP_REQUEST_CHANGE_MAP_CB);
   if(insi)
   {
     c.tree().put("status", true);
@@ -81,6 +89,10 @@ void handle_free(instance_id_t id)
 
 void instance::handle_deactivate(call c)
 {
+  if(shuttingdown)
+  {
+    return;
+  }
   BOOST_LOG_TRIVIAL(trace) << "deactivating instance " << id;
   pins[id] = ains[id];
   ains.erase(id);
@@ -89,6 +101,10 @@ void instance::handle_deactivate(call c)
 
 void instance::handle_reactivate(call c)
 {
+  if(shuttingdown)
+  {
+    return;
+  }
   if(pins.find(id) != pins.end())
   {
     BOOST_LOG_TRIVIAL(trace) << "reactivating instance " << id;
@@ -125,6 +141,15 @@ instance_info::instance_info(region_t reg, std::string auth_tok, std::string hos
   chat_init.tree().put("target.token", "lion");
   this -> in -> safe_write(chat_init);
   this -> in -> start();
+}
+
+instance_info::~instance_info()
+{
+  call destroy;
+  destroy.tree().put(OPCODE, OP_SHUTDOWN);
+  destroy.tree().put("authority.token", this -> auth_tok);
+  this -> in -> safe_write(destroy);
+  delete this -> in;
 }
 
 void instance_info::transfer_user_card(user_card uc)
@@ -179,4 +204,34 @@ instance_info *get_pub_in(region_t reg, map_t map)
 void populate_dins()
 {
   fins[instance_counter++] = new instance_info(REG_EU, "fish", "localhost", 7000, instance_counter);
+}
+
+void ignore(call c)
+{
+}
+
+void disable_dins()
+{
+  shuttingdown = true;
+}
+
+void destroy_dins()
+{
+  for(auto ins:ains)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "destroying active instance";
+    delete ins.second;
+  }
+  for(auto ins:pins)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "destroying pending instance";
+    delete ins.second;
+  }
+  for(auto ins:fins)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "destroying free instance";
+    delete ins.second;
+  }
+  BOOST_LOG_TRIVIAL(trace) << "clearing public instance index";
+  pub_ins.clear();
 }

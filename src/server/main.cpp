@@ -7,6 +7,11 @@
 #include "server/instances.h"
 #include "server/crypto.h"
 #include <boost/thread/barrier.hpp>
+#include "instance/shutdown.h"
+
+#ifdef __linux__
+#include <csignal>
+#endif
 
 database *db;
 boost::asio::io_context ioc;
@@ -42,6 +47,10 @@ int main(int argc, char **argv)
     }
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
+#ifdef __linux__
+  BOOST_LOG_TRIVIAL(trace) << "loading handler for SIGINT";
+  std::signal(SIGINT, shutdown);
+#endif
   BOOST_LOG_TRIVIAL(trace) << "initialising database";
   db = db_init();
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
@@ -49,9 +58,26 @@ int main(int argc, char **argv)
   BOOST_LOG_TRIVIAL(trace) << "creating instances";
   populate_dins();
   BOOST_LOG_TRIVIAL(trace) << "creating server";
-  server s(port);
-  BOOST_LOG_TRIVIAL(trace) << "blocking thread";
-  boost::barrier b(2);
-  b.wait();
+  server *s = new server(port);
+  BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
+  main_barrier.wait();
+  BOOST_LOG_TRIVIAL(trace) << "stopping io context";
+  ioc.stop();
+  BOOST_LOG_TRIVIAL(trace) << "cleaning up server";
+  delete s;
+  // Authentication is disabled at this point
+  BOOST_LOG_TRIVIAL(trace) << "disabling dynamic instance interaction";
+  disable_dins();
+  // At this point, instances can safely be terminated
+  BOOST_LOG_TRIVIAL(trace) << "destroying dynamic instances";
+  destroy_dins();
+  // At this point, there are no more users in the system
+  // TODO: take down chat server
+  BOOST_LOG_TRIVIAL(trace) << "destroying keys";
+  destroy_crypto();
+  BOOST_LOG_TRIVIAL(trace) << "closing database";
+  delete db;
+  BOOST_LOG_TRIVIAL(trace) << "deleting argument array";
+  delete[] args;
   return 0;
 }

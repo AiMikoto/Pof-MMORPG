@@ -1,5 +1,5 @@
-#ifndef INSTANCE_SHUTDOWN_H
-#define INSTANCE_SHUTDOWN_H
+#ifndef SERVER_SHUTDOWN_H
+#define SERVER_SHUTDOWN_H
 
 #include <boost/thread/barrier.hpp>
 
