@@ -9,6 +9,7 @@
 #include "instance/shutdown.h"
 #include "instance/chat_client.h"
 #include "instance/game.h"
+#include "instance/misc.h"
 
 #ifdef __linux__
 #include <csignal>
@@ -69,6 +70,10 @@ int main(int argc, char **argv)
     BOOST_LOG_TRIVIAL(trace) << "cleaning up chat client";
     delete chat;
   }
+  BOOST_LOG_TRIVIAL(trace) << "saving users";
+  ucl.apply(saver);
+  BOOST_LOG_TRIVIAL(trace) << "saving pending users";
+  uclp.apply(saver);
   BOOST_LOG_TRIVIAL(trace) << "destroying keys";
   destroy_crypto();
   BOOST_LOG_TRIVIAL(trace) << "closing database";
