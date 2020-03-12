@@ -69,11 +69,6 @@ int main(int argc, char **argv)
     BOOST_LOG_TRIVIAL(trace) << "cleaning up chat client";
     delete chat;
   }
-  if(master)
-  {
-    BOOST_LOG_TRIVIAL(trace) << "closing master connection";
-    delete master;
-  }
   BOOST_LOG_TRIVIAL(trace) << "destroying keys";
   destroy_crypto();
   BOOST_LOG_TRIVIAL(trace) << "closing database";
