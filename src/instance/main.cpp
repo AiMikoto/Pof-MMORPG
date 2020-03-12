@@ -7,6 +7,8 @@
 #include "instance/crypto.h"
 #include <boost/thread/barrier.hpp>
 #include "instance/shutdown.h"
+#include "instance/chat_client.h"
+#include "instance/game.h"
 
 #ifdef __linux__
 #include <csignal>
@@ -62,6 +64,16 @@ int main(int argc, char **argv)
   ioc.stop();
   BOOST_LOG_TRIVIAL(trace) << "cleaning up server";
   delete s;
+  if(chat)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "cleaning up chat client";
+    delete chat;
+  }
+  if(master)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "closing master connection";
+    delete master;
+  }
   BOOST_LOG_TRIVIAL(trace) << "destroying keys";
   destroy_crypto();
   BOOST_LOG_TRIVIAL(trace) << "closing database";
