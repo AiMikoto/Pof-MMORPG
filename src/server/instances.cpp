@@ -7,6 +7,7 @@
 #include "server/crypto.h"
 #include "lib/log.h"
 #include "server/hosts.h"
+#include <boost/property_tree/json_parser.hpp>
 
 bool shuttingdown = false;
 
@@ -203,7 +204,12 @@ instance_info *get_pub_in(region_t reg, map_t map)
 
 void populate_dins()
 {
-  fins[instance_counter++] = new instance_info(REG_EU, "fish", "localhost", 7000, instance_counter);
+  int count = hosts.get<int>("instance.count");
+  for(int i = 0; i < count; i++)
+  {
+    boost::property_tree::ptree instance = hosts.get_child("instance." + std::to_string(i));
+    fins[instance_counter++] = new instance_info(instance.get<region_t>("region"), "fish", instance.get<std::string>("host"), instance.get<int>("port"), instance_counter);
+  }
 }
 
 void ignore(call c)

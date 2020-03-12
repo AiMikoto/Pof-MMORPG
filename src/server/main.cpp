@@ -7,7 +7,8 @@
 #include "server/instances.h"
 #include "server/crypto.h"
 #include <boost/thread/barrier.hpp>
-#include "instance/shutdown.h"
+#include "server/shutdown.h"
+#include "server/hosts.h"
 
 #ifdef __linux__
 #include <csignal>
@@ -51,6 +52,8 @@ int main(int argc, char **argv)
   BOOST_LOG_TRIVIAL(trace) << "loading handler for SIGINT";
   std::signal(SIGINT, shutdown);
 #endif
+  BOOST_LOG_TRIVIAL(trace) << "initialising host database";
+  init_hosts();
   BOOST_LOG_TRIVIAL(trace) << "initialising database";
   db = db_init();
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
@@ -77,6 +80,8 @@ int main(int argc, char **argv)
   destroy_crypto();
   BOOST_LOG_TRIVIAL(trace) << "closing database";
   delete db;
+  BOOST_LOG_TRIVIAL(trace) << "destroying host database";
+  clear_hosts();
   BOOST_LOG_TRIVIAL(trace) << "deleting argument array";
   delete[] args;
   return 0;
