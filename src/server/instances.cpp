@@ -134,13 +134,14 @@ instance_info::instance_info(region_t reg, std::string auth_tok, std::string hos
   init.tree().put("aes.iv", g_aes -> iv);
   this -> in -> safe_write(init); // uses RSA
   this -> in -> replace_crypto(g_aes); // chance crypto to aes
+  boost::property_tree::ptree chat_instance = hosts.get_child("chat.0");
   call chat_init;
   chat_init.tree().put(OPCODE, OP_CMD);
   chat_init.tree().put("authority.token", this -> auth_tok);
   chat_init.tree().put("command", "irc");
-  chat_init.tree().put("target.host", "localhost");
-  chat_init.tree().put("target.port", 1231);
-  chat_init.tree().put("target.token", "lion");
+  chat_init.tree().put("target.host", chat_instance.get<std::string>("host"));
+  chat_init.tree().put("target.port", chat_instance.get<int>("port"));
+  chat_init.tree().put("target.token", chat_instance.get<std::string>("token"));
   this -> in -> safe_write(chat_init);
   this -> in -> start();
 }
@@ -211,10 +212,6 @@ void populate_dins()
     boost::property_tree::ptree instance = hosts.get_child("instance." + std::to_string(i));
     fins[instance_counter++] = new instance_info(instance.get<region_t>("region"), instance.get<std::string>("token"), instance.get<std::string>("host"), instance.get<int>("port"), instance_counter);
   }
-}
-
-void ignore(call c)
-{
 }
 
 void disable_dins()
