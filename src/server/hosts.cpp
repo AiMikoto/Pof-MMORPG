@@ -3,6 +3,7 @@
 #include "server/crypto.h"
 #include "server/ioc.h"
 #include "lib/log.h"
+#include "lib/rcon.h"
 
 boost::property_tree::ptree hosts;
 
@@ -34,25 +35,11 @@ void take_down(std::string target)
   std::string tok = instance.get<std::string>("token");
   std::string hostname = instance.get<std::string>("host");
   int port = instance.get<int>("port");
-  boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(hosts_ioc);
-  BOOST_LOG_TRIVIAL(info) << "attempting rcon to " << hostname << ":" << port;
-  boost::asio::ip::tcp::resolver resolver(hosts_ioc);
-  boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), hostname, std::to_string(port));
-  boost::asio::connect(*sock, endpoint);
-  protocol *p = new protocol(sock, g_rsa, -1);
-  call init;
-  init.tree().put(OPCODE, OP_CMD);
-  init.tree().put("authority.token", tok);
-  init.tree().put("command", "rcon");
-  init.tree().put("aes.key", g_aes -> key);
-  init.tree().put("aes.iv", g_aes -> iv);
-  p -> safe_write(init); // uses RSA
-  p -> replace_crypto(g_aes); // chance crypto to aes
+  rcon r(hostname, port, tok, g_rsa, g_aes);
   call destroy;
   destroy.tree().put(OPCODE, OP_SHUTDOWN);
   destroy.tree().put("authority.token", tok);
-  p -> safe_write(destroy);
-  init.tree().put(OPCODE, OP_CMD);
+  r.proto -> safe_write(destroy);
 }
 
 void clear_hosts()

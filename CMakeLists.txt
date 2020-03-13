@@ -45,7 +45,8 @@ add_library(database STATIC src/lib/database.cpp)
 target_link_libraries(database pqxx)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call user_card crypto database chat uuid)
 add_library(protocol STATIC src/lib/protocol.cpp)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol user_card crypto database chat uuid dl)
+add_library(rcon STATIC src/lib/rcon.cpp)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol rcon user_card crypto database chat uuid dl)
 
 # idk how to set this for windows
 set(OPENSSL openssl)
