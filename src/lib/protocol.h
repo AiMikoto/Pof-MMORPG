@@ -59,6 +59,7 @@ private:
   boost::thread *t_routine;
   boost::thread *t_pinger;
   std::map<std::string, boost::chrono::high_resolution_clock::time_point> pings;
+  bool terminated;
 };
 
 #endif // LIB_PROTOCOL_H

@@ -6,6 +6,7 @@
 #include "server/ioc.h"
 
 boost::asio::io_context server_ioc;
+boost::asio::io_context socket_ioc;
 
 server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(server_ioc, endpoint)
 {
@@ -41,7 +42,6 @@ void accept(const boost::system::error_code& error)
 
 void routine(server *that)
 {
-  boost::asio::io_context socket_ioc;
   forever_until(that -> shutdown)
   {
     BOOST_LOG_TRIVIAL(trace) << "creating new socket";

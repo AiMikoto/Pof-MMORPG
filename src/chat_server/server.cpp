@@ -3,9 +3,11 @@
 #include <boost/thread/thread.hpp>
 #include "chat_server/server.h"
 #include "include/common_macro.h"
-#include "chat_server/ioc.h"
 
-server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(ioc, endpoint)
+boost::asio::io_context server_ioc;
+boost::asio::io_context socket_ioc;
+
+server::server(int port):endpoint(boost::asio::ip::tcp::v4(), port), acceptor(server_ioc, endpoint)
 {
   shutdown = false;
   BOOST_LOG_TRIVIAL(info) << "Created listener on port " << port;
@@ -21,7 +23,7 @@ server::~server()
   BOOST_LOG_TRIVIAL(trace) << "closing acceptor";
   acceptor.close();
   BOOST_LOG_TRIVIAL(trace) << "stopping ioc";
-  ioc.stop();
+  server_ioc.stop();
   BOOST_LOG_TRIVIAL(trace) << "waiting on routine thread";
   t_routine -> join();
   delete t_routine;
@@ -34,7 +36,7 @@ server::~server()
 void accept(const boost::system::error_code& error)
 {
   BOOST_LOG_TRIVIAL(trace) << "accepting client";
-  ioc.stop();
+  server_ioc.stop();
 }
 
 void routine(server *that)
@@ -42,13 +44,13 @@ void routine(server *that)
   forever_until(that -> shutdown)
   {
     BOOST_LOG_TRIVIAL(trace) << "creating new socket";
-    boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(ioc);
+    boost::asio::ip::tcp::socket *socket = new boost::asio::ip::tcp::socket(socket_ioc);
     BOOST_LOG_TRIVIAL(trace) << "adding handler";
     that -> acceptor.async_accept(*socket, boost::bind(accept, boost::asio::placeholders::error));
     BOOST_LOG_TRIVIAL(trace) << "running ioc";
-    ioc.run();
+    server_ioc.run();
     BOOST_LOG_TRIVIAL(trace) << "restarting ioc";
-    ioc.restart();
+    server_ioc.restart();
     if(that -> shutdown)
     {
       break;
@@ -64,7 +66,7 @@ void cleanup(server *that)
 {
   forever_until(that -> shutdown)
   {
-    boost::this_thread::sleep( boost::posix_time::seconds(20));
+    boost::this_thread::sleep( boost::posix_time::seconds(2));
     BOOST_LOG_TRIVIAL(trace) << "cleaning up";
     for(auto it = that -> clients.begin(); it != that -> clients.end(); it++)
     {
