@@ -76,3 +76,7 @@ void gph::GameObject::updateTransform() {
 }
 
 void gph::GameObject::update(GLFWwindow* window) {}
+
+std::string gph::GameObject::toJSON() {}
+
+void gph::GameObject::fromJSON(std::string data) {}

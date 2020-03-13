@@ -29,6 +29,8 @@ namespace graphics {
 		void add_children(std::vector<llong> children);
 		virtual void update(GLFWwindow* window);
 		void updateTransform();
+		virtual std::string toJSON();
+		virtual void fromJSON(std::string data);
 	private:
 		void setup();
 		void generateID();		
