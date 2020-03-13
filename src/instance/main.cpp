@@ -15,7 +15,6 @@
 #include <csignal>
 #endif
 
-boost::asio::io_context ioc;
 database *db;
 
 int main(int argc, char **argv)
@@ -61,8 +60,6 @@ int main(int argc, char **argv)
   server *s = new server(port);
   BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
   main_barrier.wait();
-  BOOST_LOG_TRIVIAL(trace) << "stopping io context";
-  ioc.stop();
   BOOST_LOG_TRIVIAL(trace) << "cleaning up server";
   delete s;
   if(chat)

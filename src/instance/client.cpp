@@ -17,6 +17,8 @@ client *master = NULL;
 
 std::string my_tok = "fish"; // TODO: export this
 
+boost::asio::io_context irc_context;
+
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
@@ -160,8 +162,8 @@ void client::handle_cmd(call c)
     std::string hostname = c.tree().get<std::string>("target.host");
     int port = c.tree().get<int>("target.port");
     std::string token = c.tree().get<std::string>("target.token");
-    boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
-    boost::asio::ip::tcp::resolver resolver(ioc);
+    boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(irc_context);
+    boost::asio::ip::tcp::resolver resolver(irc_context);
     boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), hostname, std::to_string(port));
     boost::asio::connect(*sock, endpoint);
     chat = new chatter(sock);
