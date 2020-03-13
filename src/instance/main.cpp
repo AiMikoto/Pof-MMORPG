@@ -79,6 +79,13 @@ int main(int argc, char **argv)
   ucl.apply(saver);
   BOOST_LOG_TRIVIAL(trace) << "saving pending users";
   uclp.apply(saver);
+  BOOST_LOG_TRIVIAL(trace) << "destroying user card libraries";
+  ucl_destroy();
+  if(is_loaded())
+  {
+    BOOST_LOG_TRIVIAL(trace) << "unloading instance";
+    unload();
+  }
   BOOST_LOG_TRIVIAL(trace) << "destroying keys";
   destroy_crypto();
   BOOST_LOG_TRIVIAL(trace) << "closing database";

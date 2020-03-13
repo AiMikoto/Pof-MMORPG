@@ -5,4 +5,4 @@
 
 extern std::string my_token;
 
-#endif
+#endif // SERVER_TOKEN_H

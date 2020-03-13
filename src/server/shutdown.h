@@ -9,4 +9,4 @@ void shutdown(int _whatever);
 
 extern boost::barrier main_barrier;
 
-#endif
+#endif // SERVER_SHUTDOWN_H
