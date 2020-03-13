@@ -11,7 +11,6 @@ void move(std::string host, int port)
   init_l.unlock();
   // TODO: put up loading screen
   BOOST_LOG_TRIVIAL(trace) << "closing current instance";
-  current_instance -> close();
   delete current_instance;
   // connect to new instance
   BOOST_LOG_TRIVIAL(trace) << "connecting to new instance";
