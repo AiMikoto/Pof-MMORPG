@@ -4,11 +4,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "lib/stb_image.h"
 #include "lib/log.h"
+#include "scene.h"
 
 namespace gph = graphics;
-
-std::map<uint, gph::Texture*> gph::textures;
-std::vector<gph::Mesh*> gph::meshes;
 
 gph::Texture::Texture() {}
 
@@ -58,7 +56,7 @@ void gph::Texture::load() {
 		BOOST_LOG_TRIVIAL(trace) << "Failed to load texture at: " << path;
 	}
 	stbi_image_free(data);
-	textures[this->id] = this;
+	activeScene->textures[this->id] = this;
 }
 
 gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std::vector<uint> indices) : gph::GameObject() {
@@ -74,7 +72,6 @@ gph::Mesh::~Mesh() {
 	glDeleteBuffers(1, &elementsBufferID);
 	glDeleteBuffers(1, &outlineIndicesBufferID);
 	vertices.clear();
-	textures.clear();
 	indices.clear();
 	outlineIndices.clear();
 }
@@ -90,7 +87,7 @@ void gph::Mesh::draw(Shader* shader, Camera* camera, GLFWwindow* window) {
 	for (auto i: this->textureIDs) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		std::string current;
-		uint type = textures[i]->type;
+		uint type = activeScene->textures[i]->type;
 		switch (type) {
 		case aiTextureType_DIFFUSE:
 			current = "diffuseSampler" + std::to_string(currentDiffuse++);
@@ -121,8 +118,6 @@ void gph::Mesh::draw(Shader* shader, Camera* camera, GLFWwindow* window) {
 	glBindVertexArray(0);
 
 	glActiveTexture(GL_TEXTURE0);
-
-	GameObject::draw(shader, camera, window);
 }
 
 void gph::Mesh::copy(Mesh* target) {}
@@ -145,9 +140,6 @@ void gph::Mesh::bindBuffers() {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), &indices[0], GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, outlineIndicesBufferID);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), &outlineIndices[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -199,7 +191,7 @@ llong gph::Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<uint> indices = loadMeshIndices(mesh, scene);
 	std::vector<uint> textureIDs = loadTextures(mesh, scene);
 	Mesh* processedMesh = new Mesh(vertices, textureIDs, indices);
-	meshes.push_back(processedMesh);
+	activeScene->addMesh(processedMesh);
 	return processedMesh->id;
 }
 
@@ -257,7 +249,7 @@ std::vector<uint> gph::Model::loadMaterialTextures(aiMaterial *mat, aiTextureTyp
 		aiString path;
 		mat->GetTexture(type, i, &path);
 		bool skip = false;
-		for (auto texture : textures) {
+		for (auto texture : activeScene->textures) {
 			if (texture.second->path == std::string(path.C_Str())) {
 				meshTextures.push_back(texture.second->id);
 				skip = true;

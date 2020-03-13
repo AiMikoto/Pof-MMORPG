@@ -1,41 +1,52 @@
 #include "objects.h"
 #include "transform.h"
 #include "lib/log.h"
+#include "scene.h"
+#include "constants.h"
+#include "variables.h"
 
 namespace gph = graphics;
-
-std::map<llong, gph::GameObject*> gph::gameObjects;
 
 gph::GameObject::GameObject() {
 	setup();
 }
 
 void gph::GameObject::setup() {
-	this->parentID = -1;
-	this->name = "";
-	this->tag = "";
-	generateID();
+	if(this->id == -1)	generateID();
+	gameObjects[this->id] = this;
 }
 
 gph::GameObject::~GameObject() {
-	BOOST_LOG_TRIVIAL(trace) << "clearing children";
 	childrenIDs.clear();
 }
 
 gph::GameObject::GameObject(llong parentID) {
-	setup();
 	this->parentID = parentID;
+	setup();
+}
+
+gph::GameObject::GameObject(llong id, llong parentID) {
+	this->id = id;
+	this->parentID = parentID;
+	setup();
 }
 
 gph::GameObject::GameObject(std::vector<llong> childrenIDs) {
-	setup();
 	this->childrenIDs = childrenIDs;
+	setup();
 }
 
 gph::GameObject::GameObject(llong parentID, std::vector<llong> childrenIDs) {
-	setup();
 	this->childrenIDs = childrenIDs;
 	this->parentID = parentID;
+	setup();
+}
+
+gph::GameObject::GameObject(llong id, llong parentID, std::vector<llong> childrenIDs) {
+	this->id = id;
+	this->childrenIDs = childrenIDs;
+	this->parentID = parentID;
+	setup();
 }
 
 void gph::GameObject::add_child(llong child) {
@@ -49,11 +60,8 @@ void gph::GameObject::add_children(std::vector<llong> childrenIDs) {
 	}
 }
 
-void gph::GameObject::draw(Shader* shader, GameObject* camera, GLFWwindow* window) {}
-
 void gph::GameObject::generateID() {
 	this->id = gameObjects.size();
-	gameObjects[this->id] = this;
 }
 
 void gph::GameObject::updateTransform() {
@@ -66,3 +74,5 @@ void gph::GameObject::updateTransform() {
 		gameObjects[i]->updateTransform();
 	}
 }
+
+void gph::GameObject::update(GLFWwindow* window) {}

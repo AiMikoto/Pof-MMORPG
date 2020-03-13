@@ -8,8 +8,6 @@
 
 namespace gph = graphics;
 
-std::vector<gph::Camera*> gph::cameras;
-
 gph::CameraViewport::CameraViewport() {
 	this->startX = 0;
 	this->startY = 0;
@@ -25,6 +23,10 @@ gph::CameraViewport::CameraViewport(float startX, float startY, float endX, floa
 }
 
 gph::Camera::Camera() {
+	setup();
+}
+
+gph::Camera::Camera(llong parentID) : GameObject(parentID) {
 	setup();
 }
 
@@ -146,4 +148,16 @@ glm::mat4 gph::Camera::projection(GLFWwindow* window) {
 
 glm::mat4 gph::Camera::view() {
 	return glm::lookAt(glm::vec3(transform.position), lookAt(), glm::vec3(0, 1, 0));
+}
+
+void gph::Camera::setViewport(GLFWwindow* window) {
+	int x, y, width, height;
+	glfwGetWindowSize(window, &width, &height);
+	x = int(std::round(viewport.startX * width));
+	y = int(std::round(viewport.startY * height));
+	width = int(std::round(viewport.endX * width));
+	height = int(std::round(viewport.endY * height));
+	glScissor(x, y, width, height);
+	glEnable(GL_SCISSOR_TEST);
+	glViewport(x, y, width, height);
 }

@@ -6,8 +6,6 @@
 namespace graphics {
 	extern int windowWidth, windowHeight;
 	extern bool windowResized, quit;
-	extern const char* windowName;
-	extern GLuint vertexArrayID;
-	extern GLuint vertexBufferID, elementBufferID;
+	extern std::string windowName;
 	extern double deltaTime;
 }

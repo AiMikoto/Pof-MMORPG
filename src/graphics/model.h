@@ -65,7 +65,4 @@ namespace graphics {
 		std::vector<uint> loadTextures(aiMesh *mesh, const aiScene *scene);
 		std::vector<uint> loadMaterialTextures(aiMaterial *mat, aiTextureType type);
 	};
-
-	extern std::map<uint, Texture*> textures;
-	extern std::vector<Mesh*> meshes;
 }

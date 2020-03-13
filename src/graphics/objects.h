@@ -3,8 +3,6 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "constants.h"
-#include "variables.h"
 #include "transform.h"
 #include "shader.h"
 
@@ -13,24 +11,26 @@ namespace graphics {
 	class GameObject {
 	public:
 		std::string name, tag;
-		llong id, parentID;
+		llong id = -1;
+		llong parentID = -1;
 		std::vector<llong> childrenIDs;
 		Transform transform;
 		uint type;
+		bool transformChanged;
 
 		GameObject();
 		~GameObject();
 		GameObject(llong parentID);
+		GameObject(llong id, llong parentID);
 		GameObject(std::vector<llong> childrenIDs);
 		GameObject(llong parentID, std::vector<llong> childrenIDs);
+		GameObject(llong id, llong parentID, std::vector<llong> childrenIDs);
 		void add_child(llong child);
 		void add_children(std::vector<llong> children);
-		virtual void draw(Shader* shader, GameObject* camera, GLFWwindow* window);
+		virtual void update(GLFWwindow* window);
 		void updateTransform();
 	private:
 		void setup();
-		void generateID();
+		void generateID();		
 	};
-
-	extern std::map<llong, GameObject*> gameObjects;
 }

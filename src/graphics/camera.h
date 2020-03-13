@@ -23,6 +23,7 @@ namespace graphics {
 		std::vector<size_t> objectsInView;
 
 		Camera();
+		Camera(llong parentID);
 		Camera(CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
 		Camera(Transform transform, CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
 		~Camera();
@@ -31,6 +32,7 @@ namespace graphics {
 		glm::vec3 lookAt();
 		glm::mat4 projection(GLFWwindow* window);
 		glm::mat4 view();
+		void setViewport(GLFWwindow* window);
 	private:
 		void setup();
 		glm::dvec3 forward();
@@ -38,6 +40,4 @@ namespace graphics {
 		glm::dvec3 up();
 		void updateRotation();
 	};
-
-	extern std::vector<Camera*> cameras;
 }
