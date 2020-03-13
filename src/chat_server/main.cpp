@@ -6,10 +6,13 @@
 #include "chat_server/shutdown.h"
 #include "chat_server/rooms.h"
 #include "chat_server/crypto.h"
+#include "chat_server/token.h"
 
 #ifdef __linux__
 #include <csignal>
 #endif
+
+std::string my_token = "lion";
 
 int main(int argc, char **argv)
 {
@@ -23,6 +26,11 @@ int main(int argc, char **argv)
   }
   for(int i = 1; i < argc; i++)
   {
+    if(args[i] == "-tok")
+    {
+      my_token = args[++i];
+      continue;
+    }
     if(args[i] == "-priv")
     {
       pri = args[++i];

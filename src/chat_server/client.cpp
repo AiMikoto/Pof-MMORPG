@@ -9,8 +9,7 @@
 #include "chat_server/rooms.h"
 #include "chat_server/crypto.h"
 #include "chat_server/shutdown.h"
-
-std::string my_tok = "lion"; // TODO: export this
+#include "chat_server/token.h"
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
@@ -27,7 +26,7 @@ client::~client()
 // throws instead of returning.
 void client::validate_authority(std::string auth_tok)
 {
-  if(auth_tok != my_tok)
+  if(auth_tok != my_token)
   {
     throw std::logic_error("wrong authority token");
   }

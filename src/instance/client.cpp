@@ -11,11 +11,10 @@
 #include "instance/crypto.h"
 #include "instance/ioc.h"
 #include "instance/chat_client.h"
-#include "chat_server/shutdown.h"
+#include "instance/shutdown.h"
+#include "instance/token.h"
 
 client *master = NULL;
-
-std::string my_tok = "fish"; // TODO: export this
 
 boost::asio::io_context irc_context;
 
@@ -35,7 +34,7 @@ client::~client()
 // throws instead of returning.
 void client::validate_authority(std::string auth_tok)
 {
-  if(auth_tok != my_tok)
+  if(auth_tok != my_token)
   {
     throw std::logic_error("wrong authority token");
   }
@@ -189,6 +188,15 @@ void client::handle_cmd(call c)
       unload();
     }
     load();
+    return;
+  }
+  if(command == "rcon")
+  { // uses RSA
+    BOOST_LOG_TRIVIAL(warning) << "received rcon authentication";
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;

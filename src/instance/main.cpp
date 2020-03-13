@@ -10,10 +10,13 @@
 #include "instance/chat_client.h"
 #include "instance/game.h"
 #include "instance/misc.h"
+#include "instance/token.h"
 
 #ifdef __linux__
 #include <csignal>
 #endif
+
+std::string my_token = "fish";
 
 database *db;
 
@@ -30,6 +33,11 @@ int main(int argc, char **argv)
   }
   for(int i = 1; i < argc; i++)
   {
+    if(args[i] == "-tok")
+    {
+      my_token = args[++i];
+      continue;
+    }
     if(args[i] == "-pub")
     {
       pub = args[++i];

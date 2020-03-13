@@ -11,7 +11,10 @@ public:
   client(boost::asio::ip::tcp::socket *sock);
   ~client();
 private:
+  void validate_authority(std::string token);
   void handle_auth(call c);
+  void handle_cmd(call c);
+  void handle_shutdown(call c);
 };
 
 #endif // SERVER_CLIENT_H
