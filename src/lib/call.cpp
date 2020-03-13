@@ -1,5 +1,9 @@
 #include "lib/call.h"
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/chrono.hpp>
+#include <boost/thread/thread.hpp>
+
+#define MAX_TRIAL_SEQUENT 1000
 
 void noop(call c) {}
 
@@ -35,7 +39,17 @@ call read_call(boost::asio::ip::tcp::socket *s, crypto *cry)
 {
   boost::asio::streambuf read_buffer;
   boost::asio::read(*s, read_buffer, boost::asio::transfer_exactly(sizeof(uint32_t)));
+  int trials = 0;
   uint32_t length = *(uint32_t *)(make_string(read_buffer).c_str());
+  while(s -> available() < length)
+  {
+    trials++;
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+    if(trials == MAX_TRIAL_SEQUENT)
+    {
+      throw std::logic_error("too slow connection");
+    }
+  }
   read_buffer.consume(sizeof(uint32_t));
   boost::asio::read(*s, read_buffer, boost::asio::transfer_exactly(length));
   call c;
