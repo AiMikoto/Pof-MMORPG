@@ -86,3 +86,7 @@ void gph::Scene::addMesh(Mesh* mesh) {
 	add_child(mesh->id);
 	meshes[mesh->id] = mesh;
 }
+
+std::string gph::Scene::sceneToJSON() {}
+
+void gph::Scene::sceneFromJSON(std::string data) {}

@@ -27,6 +27,8 @@ namespace graphics {
 		void setBackground();
 		void addCamera(Camera* camera, bool isMainCamera = false);
 		void addMesh(Mesh* mesh);
+		std::string sceneToJSON();
+		void sceneFromJSON(std::string data);
 	private:
 		void draw(GLFWwindow* window);
 		void drawObjects(GLFWwindow* window);
