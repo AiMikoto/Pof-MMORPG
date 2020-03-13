@@ -1,4 +1,5 @@
 #include "transform.h"
+#include "utils.h"
 
 namespace gph = graphics;
 
@@ -33,4 +34,16 @@ glm::mat4 gph::Transform::model() {
 	glm::mat4 rotation = glm::mat4_cast(glm::quat(this->rotation));
 	glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(this->scale));
 	return translation * rotation * scale;
+}
+
+boost::property_tree::ptree gph::Transform::serialize() {
+	boost::property_tree::ptree node;
+	node.add_child("position", dvec3serializer(position));
+	node.add_child("rotation", dvec4serializer(glm::dvec4(rotation.x, rotation.y, rotation.z, rotation.w)));
+	node.add_child("scale", dvec3serializer(scale));
+	return node;
+}
+
+void gph::Transform::deserialize(boost::property_tree::ptree node) {
+	
 }

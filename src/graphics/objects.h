@@ -5,6 +5,7 @@
 #include <map>
 #include "transform.h"
 #include "shader.h"
+#include <boost/property_tree/ptree.hpp>
 
 namespace graphics {
 
@@ -25,12 +26,13 @@ namespace graphics {
 		GameObject(std::vector<llong> childrenIDs);
 		GameObject(llong parentID, std::vector<llong> childrenIDs);
 		GameObject(llong id, llong parentID, std::vector<llong> childrenIDs);
-		void add_child(llong child);
-		void add_children(std::vector<llong> children);
+		void addParent(llong parentID);
+		void addChild(llong childID);
+		void addChildren(std::vector<llong> children);
 		virtual void update(GLFWwindow* window);
 		void updateTransform();
-		virtual std::string toJSON();
-		virtual void fromJSON(std::string data);
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
 	private:
 		void setup();
 		void generateID();		

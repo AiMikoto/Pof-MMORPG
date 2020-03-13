@@ -1,6 +1,7 @@
 #include "scene.h"
 #include "gl_functions.h"
 #include "lib/log.h"
+#include <boost/property_tree/json_parser.hpp>
 
 namespace gph = graphics;
 
@@ -77,18 +78,51 @@ void gph::Scene::updateGameObjects(GLFWwindow* window) {
 }
 
 void gph::Scene::addCamera(Camera* camera, bool isMainCamera) {
-	add_child(camera->id);
+	addChild(camera->id);
 	cameras[camera->id] = camera;
 	if(isMainCamera) mainCameraID = camera->id;
 }
 
 void gph::Scene::addMesh(Mesh* mesh) {
-	add_child(mesh->id);
+	addChild(mesh->id);
 	meshes[mesh->id] = mesh;
 }
 
-std::string gph::Scene::sceneToJSON() {
-
+void gph::Scene::sceneToJSON(std::string path) {
+	boost::property_tree::ptree root = serialize();
+	boost::property_tree::write_json(path, root);
 }
 
 void gph::Scene::sceneFromJSON(std::string data) {}
+
+boost::property_tree::ptree gph::Scene::serialize() {
+	boost::property_tree::ptree root, cNode, tNode, mNode, goNode;
+	std::map<llong, GameObject*> gameObjectsCopy;
+	for (auto g : gameObjects) {
+		gameObjectsCopy[g.second->id] = g.second;
+	}
+	for (auto camera : cameras) {
+		boost::property_tree::ptree camNode = camera.second->serialize();
+		cNode.push_back(std::pair<std::string, boost::property_tree::ptree>("", camNode));
+		gameObjectsCopy.erase(camera.second->id);
+	}
+	for (auto texture : textures) {
+		tNode.push_back(std::pair<std::string, boost::property_tree::ptree>("", texture.second->serialize()));
+	}
+	for (auto mesh : meshes) {
+		mNode.push_back(std::pair<std::string, boost::property_tree::ptree>("", mesh.second->serialize()));
+		gameObjectsCopy.erase(mesh.second->id);
+	}
+	for (auto g : gameObjectsCopy) {
+		goNode.push_back(std::pair<std::string, boost::property_tree::ptree>("", g.second->serialize()));
+	}
+	root.add_child("Cameras", cNode);
+	root.add_child("Textures", tNode);
+	root.add_child("Meshes", mNode);
+	root.add_child("Unaccounted Game Objects", goNode);
+	return root;
+}
+
+void deserialize(boost::property_tree::ptree node) {
+
+}

@@ -5,6 +5,7 @@
 #include "lib/stb_image.h"
 #include "lib/log.h"
 #include "scene.h"
+#include "utils.h"
 
 namespace gph = graphics;
 
@@ -59,10 +60,15 @@ void gph::Texture::load() {
 	activeScene->textures[this->id] = this;
 }
 
+gph::Mesh::Mesh() {
+	type = objectTypes::mesh;
+}
+
 gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std::vector<uint> indices) : gph::GameObject() {
 	this->vertices = vertices;
 	this->textureIDs = textureIDs;
 	this->indices = indices;
+	this->type = objectTypes::mesh;
 	setup();
 }
 
@@ -125,7 +131,6 @@ void gph::Mesh::copy(Mesh* target) {}
 void gph::Mesh::setup() {
 	bindBuffers();
 	createOutline();
-	type = objectTypes::mesh;
 }
 
 void gph::Mesh::bindBuffers() {
@@ -157,6 +162,8 @@ void gph::Mesh::bindBuffers() {
 
 void gph::Mesh::createOutline() {}
 
+
+
 gph::Model::Model(std::string path, bool gammaCorrection) {
 	this->gammaCorrection = gammaCorrection;
 	loadModel(path);
@@ -179,7 +186,7 @@ void gph::Model::loadModel(std::string path) {
 void gph::Model::processNode(aiNode* node, const aiScene* scene) {
 	for (uint i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		add_child(processMesh(mesh, scene));
+		addChild(processMesh(mesh, scene));
 	}
 	for (uint i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
@@ -262,4 +269,50 @@ std::vector<uint> gph::Model::loadMaterialTextures(aiMaterial *mat, aiTextureTyp
 		}
 	}
 	return meshTextures;
+}
+
+boost::property_tree::ptree gph::Vertex::serialize() {
+	boost::property_tree::ptree node;
+	node.add_child("position", dvec3serializer(position));
+	node.add_child("normal", dvec3serializer(normal));
+	node.add_child("textureCoordinates", dvec2serializer(textureCoordinates));
+	node.add_child("tangent", dvec3serializer(tangent));
+	node.add_child("bitangent", dvec3serializer(bitangent));
+	return node;
+}
+
+void gph::Vertex::deserialize(boost::property_tree::ptree node) {
+
+}
+
+boost::property_tree::ptree gph::Texture::serialize() {
+	boost::property_tree::ptree node;
+	node.put("id", id);
+	node.put("type", type);
+	node.put("path", path);
+	return node;
+}
+
+void gph::Texture::deserialize(boost::property_tree::ptree node) {
+	id = node.get<uint>("id");
+	type = node.get<uint>("type");
+	path = node.get<std::string>("path");
+}
+
+boost::property_tree::ptree gph::Mesh::serialize() {
+	boost::property_tree::ptree node, verticesNode;
+	for (int i = 0; i < vertices.size(); i++) {
+		verticesNode.add_child("v" + std::to_string(i), vertices[i].serialize());
+	}
+	node.add_child("vertices", verticesNode);
+	node.put("textureIDs", vectorToString(textureIDs, ' '));
+	node.put("indices", vectorToString(indices, ' '));
+	node.put("textures", vectorToString(outlineIndices, ' '));
+	node.add_child("gameObject", GameObject::serialize());
+	return node;
+}
+
+void gph::Mesh::deserialize(boost::property_tree::ptree node) {
+	boost::property_tree::ptree verticesNode;
+
 }

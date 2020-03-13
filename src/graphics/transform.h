@@ -6,6 +6,7 @@
 #include <string>
 #include "constants.h"
 #include "variables.h"
+#include <boost/property_tree/ptree.hpp>
 
 namespace graphics {
 	class Transform {
@@ -21,5 +22,8 @@ namespace graphics {
 		glm::dvec3 up();
 
 		glm::mat4 model();
+
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
 	};
 }

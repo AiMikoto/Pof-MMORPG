@@ -10,11 +10,14 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <boost/property_tree/ptree.hpp>
 
 namespace graphics {
 	struct Vertex {
 		glm::vec3 position, normal, tangent, bitangent;
 		glm::vec2 textureCoordinates;
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
 	};
 
 	struct Texture {
@@ -26,6 +29,8 @@ namespace graphics {
 		Texture(std::string path);
 		Texture(std::string path, uint type);
 		~Texture();
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
 	private:
 		void load();
 	};
@@ -37,10 +42,13 @@ namespace graphics {
 		std::vector<uint> indices, outlineIndices;
 		int drawMode;
 
+		Mesh();
 		Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std::vector<uint> indices);
 		~Mesh();
 		void draw(Shader* shader, Camera* camera, GLFWwindow* window);
 		void copy(Mesh* target);
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
 	private:
 		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
 

@@ -4,6 +4,8 @@
 #include "scene.h"
 #include "constants.h"
 #include "variables.h"
+#include "utils.h"
+
 
 namespace gph = graphics;
 
@@ -49,14 +51,29 @@ gph::GameObject::GameObject(llong id, llong parentID, std::vector<llong> childre
 	setup();
 }
 
-void gph::GameObject::add_child(llong child) {
-	this->childrenIDs.push_back(child);
-	gameObjects[child]->parentID = this->id;
+void gph::GameObject::addParent(llong parentID) {
+	this->parentID = parentID;
+	this->updateTransform();
 }
 
-void gph::GameObject::add_children(std::vector<llong> childrenIDs) {
+void gph::GameObject::addChild(llong childID) {
+	bool found = false;
 	for (auto i : childrenIDs) {
-		this->add_child(i);
+		if (i == childID) {
+			found = true;
+			break;
+		}
+	}
+	if (!found) {
+		this->childrenIDs.push_back(childID);
+		gameObjects[childID]->parentID = this->id;
+		gameObjects[childID]->updateTransform();
+	}
+}
+
+void gph::GameObject::addChildren(std::vector<llong> childrenIDs) {
+	for (auto i : childrenIDs) {
+		this->addChild(i);
 	}
 }
 
@@ -77,6 +94,25 @@ void gph::GameObject::updateTransform() {
 
 void gph::GameObject::update(GLFWwindow* window) {}
 
-std::string gph::GameObject::toJSON() {}
+boost::property_tree::ptree gph::GameObject::serialize() {
+	boost::property_tree::ptree node;
+	node.put("name", name);
+	node.put("tag", tag);
+	node.put("id", id);
+	node.put("parentID", parentID);
+	node.put("childrenIDs", vectorToString(childrenIDs, ' '));
+	node.add_child("transform", transform.serialize());
+	return node;
+}
 
-void gph::GameObject::fromJSON(std::string data) {}
+void gph::GameObject::deserialize(boost::property_tree::ptree node) {
+	gameObjects.erase(this->id);
+	transform = Transform();
+	transform.deserialize(node.get_child("transform"));
+	name = node.get<std::string>("name");
+	tag = node.get<std::string>("tag");
+	id = node.get<llong>("id");
+	parentID = node.get<llong>("parentID");
+	std::string children = node.get<std::string>("children");
+	childrenIDs = stringToVector<llong>(children, ' ');
+}

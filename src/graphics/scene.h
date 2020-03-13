@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <boost/property_tree/ptree.hpp>
 
 namespace graphics {
 	class Scene : public GameObject {
@@ -27,8 +28,10 @@ namespace graphics {
 		void setBackground();
 		void addCamera(Camera* camera, bool isMainCamera = false);
 		void addMesh(Mesh* mesh);
-		std::string sceneToJSON();
+		void sceneToJSON(std::string path);
 		void sceneFromJSON(std::string data);
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
 	private:
 		void draw(GLFWwindow* window);
 		void drawObjects(GLFWwindow* window);

@@ -4,6 +4,7 @@
 #include "lib/log.h"
 #include "model.h"
 #include "scene.h"
+#include "utils.h"
 
 namespace gph = graphics;
 
@@ -25,9 +26,10 @@ int main() {
 	gph::loadShaders(shaders);
 	BOOST_LOG_TRIVIAL(trace) << "Loading model";
 	gph::Model* model = new gph::Model("../src/graphics/objects/cube.obj", false);
-	gph::activeScene->add_child(model->id);
 	model->transform.rotation = glm::dquat(0.7, 0.7, 0, 0);
-	model->updateTransform();
+	gph::activeScene->addChild(model->id);	
+
+	gph::activeScene->sceneToJSON("../src/graphics/scenes/test.json");
 
 	double lastTime = glfwGetTime();
 	double check = 0;
