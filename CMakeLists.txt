@@ -21,6 +21,7 @@ file(GLOB INSTANCE_SOURCES "src/instance/*.cpp")
 file(GLOB GRAPHICS_SOURCES "src/graphics/*.cpp" "src/graphics/*.c")
 file(GLOB CLIENT_SOURCES "src/client/*.cpp")
 file(GLOB WORLD_STRUCTURE_SOURCES "src/world_structure/*.cpp")
+file(GLOB PHYS_SOURCES "src/phys/*.cpp")
 include_directories(src)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -46,6 +47,8 @@ target_link_libraries(database pqxx)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call user_card crypto database chat uuid)
 add_library(protocol STATIC src/lib/protocol.cpp)
 add_library(rcon STATIC src/lib/rcon.cpp)
+add_library(phys STATIC ${PHYS_SOURCES})
+target_link_libraries(phys glm)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol rcon user_card crypto database chat uuid dl)
 
 # idk how to set this for windows
