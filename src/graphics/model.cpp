@@ -60,10 +60,6 @@ void gph::Texture::load() {
 	activeScene->textures[this->id] = this;
 }
 
-gph::Mesh::Mesh() {
-	type = objectTypes::mesh;
-}
-
 gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std::vector<uint> indices) : gph::GameObject() {
 	this->vertices = vertices;
 	this->textureIDs = textureIDs;
@@ -131,6 +127,24 @@ void gph::Mesh::copy(Mesh* target) {}
 void gph::Mesh::setup() {
 	bindBuffers();
 	createOutline();
+	computeScale();
+}
+
+void gph::Mesh::computeScale(){
+	glm::dvec3 min = vertices[0].position;
+	glm::dvec3 max = vertices[0].position;
+	for (auto v : vertices) {
+		min.x = glm::min(min.x, double(v.position.x));
+		min.y = glm::min(min.y, double(v.position.y));
+		min.z = glm::min(min.z, double(v.position.z));
+		max.x = glm::max(max.x, double(v.position.x));
+		max.y = glm::max(max.y, double(v.position.y));
+		max.z = glm::max(max.z, double(v.position.z));
+		if (v.position.x < min.x)
+			min.x = v.position.x;
+	}
+	meshScale = max - min;
+	BOOST_LOG_TRIVIAL(trace) << meshScale.x << ", " << meshScale.y << ", " << meshScale.z;
 }
 
 void gph::Mesh::bindBuffers() {

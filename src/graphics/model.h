@@ -40,9 +40,10 @@ namespace graphics {
 		std::vector<Vertex> vertices;
 		std::vector<uint> textureIDs;
 		std::vector<uint> indices, outlineIndices;
+		//represents the width, height and length of the inital loaded mesh
+		glm::dvec3 meshScale;
 		int drawMode;
 
-		Mesh();
 		Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std::vector<uint> indices);
 		~Mesh();
 		void draw(Shader* shader, Camera* camera, GLFWwindow* window);
@@ -51,7 +52,7 @@ namespace graphics {
 		void deserialize(boost::property_tree::ptree node);
 	private:
 		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
-
+		void computeScale();
 		void setup();
 		void bindBuffers();
 		void createOutline();
