@@ -102,15 +102,16 @@ void octree::assert_split()
     partialbox.miny = midz;
     partialbox.minz = midz;
     children[7] = new octree(partialbox, depth + 1);
-    // apply updater
-    for(auto it:boxes)
+  }
+  // apply updater
+  for(auto it:lazy_boxes)
+  {
+    for(int i = 0; i < 8; i++)
     {
-      for(int i = 0; i < 8; i++)
-      {
-        children[i] -> insert(it.first, it.second);
-      }
+      children[i] -> insert(it.first, it.second);
     }
   }
+  lazy_boxes.clear();
 }
 
 void octree::insert(int id, aabb box)
@@ -121,19 +122,13 @@ void octree::insert(int id, aabb box)
   }
   weight++;
   boxes[id] = box;
-  if(children[0])
-  {
-    for(int i = 0; i < 8; i++)
-    {
-      children[i] -> insert(id, box);
-    }
-  }
+  lazy_boxes[id] = box;
 }
 
 std::set<int> octree::get_collisions(aabb box)
 {
   std::set<int> ret;
-  if(no_intersect(box, this -> base))
+  if(no_intersect(box, this -> base) || (weight == 0))
   {
     return ret;
   }

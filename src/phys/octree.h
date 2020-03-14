@@ -19,6 +19,7 @@ private:
   octree *children[8];
   int weight;
   std::map<int, aabb> boxes;
+  std::map<int, aabb> lazy_boxes;
   int depth;
 };
 
