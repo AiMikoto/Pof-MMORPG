@@ -45,7 +45,7 @@ void test_octree()
   box3.maxy =  3.5;
   box3.maxz =  3.5;
   std::set<int> collisions = t.get_collisions(box3);
-  if(collisions.size() == 1)
+  if((collisions.size() == 1) && (collisions.find(2) != collisions.end()))
   {
     PASS;
   }

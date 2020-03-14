@@ -1,7 +1,6 @@
 #include "phys/octree.h"
-#include <cstdio>
 
-#define MAX_DEPTH 13
+#define MAX_DEPTH 10
 
 bool intersect(aabb a, aabb b)
 { // return true if there is intersection between a and b
@@ -133,7 +132,6 @@ void octree::insert(int id, aabb box)
 
 std::set<int> octree::get_collisions(aabb box)
 {
-  printf("query %s in %s\n", box.print().c_str(), this -> base.print().c_str());
   std::set<int> ret;
   if(no_intersect(box, this -> base))
   {
