@@ -4,6 +4,7 @@
 #include "phys/aabb.h"
 #include <set>
 #include <map>
+#include <vector>
 
 class octree
 {
@@ -19,7 +20,7 @@ private:
   octree *children[8];
   int weight;
   std::map<int, aabb> boxes;
-  std::map<int, aabb> lazy_boxes;
+  std::map<int, aabb> lazy_boxes[8];
   int depth;
 };
 
