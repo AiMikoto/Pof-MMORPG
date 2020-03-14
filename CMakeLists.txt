@@ -49,6 +49,7 @@ add_library(protocol STATIC src/lib/protocol.cpp)
 add_library(rcon STATIC src/lib/rcon.cpp)
 add_library(phys STATIC ${PHYS_SOURCES})
 target_link_libraries(phys glm)
+target_link_libraries(phys assimp)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol rcon user_card crypto database chat uuid dl phys)
 
 # idk how to set this for windows
