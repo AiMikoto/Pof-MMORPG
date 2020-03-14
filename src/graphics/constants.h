@@ -53,19 +53,4 @@ namespace graphics {
 		left = GLFW_KEY_A,
 		right = GLFW_KEY_D
 	};
-
-	//just as a test, will remove later when adding proper graphics
-	const float vertices[] = {
-		0.5f,  0.5f, 0.0f, 1, 1,
-		0.5f, -0.5f, 0.0f, 1, 0,
-	   -0.5f, -0.5f, 0.0f, 0, 0,
-	   -0.5f,  0.5f, 0.0f, 0, 1
-	};
-	//	   -0.5f, -0.5f, -0.5f,  0, 0, //v0 bottom
-	//-0.5f, -0.5f, -0.5f, 0, 1, //v1 bottom
-
-	const uint indices[] = {
-		0,1,3,
-		3,1,2
-	};
 }
