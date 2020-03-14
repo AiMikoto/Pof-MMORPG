@@ -5,7 +5,7 @@
 
 enum capsule_t
 {
-  capsule,
+  caps,
   box
 };
 
