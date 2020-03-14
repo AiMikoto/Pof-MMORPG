@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <sstream>
 
 namespace gph = graphics;
 
@@ -23,4 +24,28 @@ std::vector<std::string> gph::split(const std::string &toSplit, char separator)
 	if (end != start)
 		tokens.push_back(toSplit.substr(start));
 	return tokens;
+}
+
+boost::property_tree::ptree gph::dvec2serializer(glm::dvec2 in) {
+	boost::property_tree::ptree node;
+	node.add("x", in.x);
+	node.add("y", in.y);
+	return node;
+}
+
+boost::property_tree::ptree gph::dvec3serializer(glm::dvec3 in) {
+	boost::property_tree::ptree node;
+	node.add("x", in.x);
+	node.add("y", in.y);
+	node.add("z", in.y);
+	return node;
+}
+
+boost::property_tree::ptree gph::dvec4serializer(glm::dvec4 in) {
+	boost::property_tree::ptree node;
+	node.add("w", in.w);
+	node.add("x", in.x);
+	node.add("y", in.y);
+	node.add("z", in.z);
+	return node;
 }

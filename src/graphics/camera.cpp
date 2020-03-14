@@ -8,8 +8,6 @@
 
 namespace gph = graphics;
 
-std::vector<gph::Camera*> gph::cameras;
-
 gph::CameraViewport::CameraViewport() {
 	this->startX = 0;
 	this->startY = 0;
@@ -25,6 +23,10 @@ gph::CameraViewport::CameraViewport(float startX, float startY, float endX, floa
 }
 
 gph::Camera::Camera() {
+	setup();
+}
+
+gph::Camera::Camera(llong parentID) : GameObject(parentID) {
 	setup();
 }
 
@@ -49,9 +51,7 @@ void gph::Camera::setup() {
 	transform = Transform(glm::dvec3(0, 0, 3),
 		glm::dquat(glm::dvec3(0, 0, 0)),
 		glm::dvec3(0, 0, 0));
-	moveSpeed = defaultSpeed = 5.0f;
-	maxSpeed = 10.0f;
-	acceleration = 0;
+	moveSpeed = 5.0f;
 	rotationSpeed = 1;
 	fieldOfView = 45.0f;
 	nearClipDistance = 0.1f;
@@ -146,4 +146,63 @@ glm::mat4 gph::Camera::projection(GLFWwindow* window) {
 
 glm::mat4 gph::Camera::view() {
 	return glm::lookAt(glm::vec3(transform.position), lookAt(), glm::vec3(0, 1, 0));
+}
+
+void gph::Camera::setViewport(GLFWwindow* window) {
+	int x, y, width, height;
+	glfwGetWindowSize(window, &width, &height);
+	x = int(std::round(viewport.startX * width));
+	y = int(std::round(viewport.startY * height));
+	width = int(std::round(viewport.endX * width));
+	height = int(std::round(viewport.endY * height));
+	glScissor(x, y, width, height);
+	glEnable(GL_SCISSOR_TEST);
+	glViewport(x, y, width, height);
+}
+
+boost::property_tree::ptree gph::Camera::serialize() {
+	boost::property_tree::ptree node;
+	node.put("isFixed", isFixed);
+	node.put("isPerspective", isPerspective);
+	node.put("moveSpeed", moveSpeed);
+	node.put("rotationSpeed", rotationSpeed);
+	node.put("nearClipDistance", nearClipDistance);
+	node.put("farClipDistance", farClipDistance);
+	node.put("fieldOfView", fieldOfView);
+	node.put("yaw", yaw);
+	node.put("pitch", pitch);
+	node.add_child("viewport", viewport.serialize());
+	node.add_child("gameObject", GameObject::serialize());
+	return node;
+}
+
+void gph::Camera::deserialize(boost::property_tree::ptree node) {
+	viewport = CameraViewport();
+	viewport.deserialize(node.get_child("viewport"));
+	isFixed = node.get<bool>("isFixed");
+	isPerspective = node.get<bool>("isPerspective");
+	moveSpeed = node.get<double>("moveSpeed");
+	rotationSpeed = node.get<double>("rotationSpeed");
+	nearClipDistance = node.get<float>("nearClipDistance");
+	farClipDistance = node.get<float>("farClipDistance");
+	fieldOfView = node.get<float>("fieldOfView");
+	yaw = node.get<double>("yaw");
+	pitch = node.get<double>("pitch");
+	GameObject::deserialize(node.get_child("gameObject"));
+}
+
+boost::property_tree::ptree gph::CameraViewport::serialize() {
+	boost::property_tree::ptree node;
+	node.put("startX", startX);
+	node.put("startY", startY);
+	node.put("endX", endX);
+	node.put("endY", endY);
+	return node;
+}
+
+void gph::CameraViewport::deserialize(boost::property_tree::ptree node) {
+	startX = node.get<float>("startX");
+	startY = node.get<float>("startY");
+	endX = node.get<float>("endX");
+	endY = node.get<float>("endY");
 }
