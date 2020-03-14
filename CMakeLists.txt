@@ -10,9 +10,9 @@ set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(INJECT_DEBUG_POSTFIX OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(dep/glfw)
 add_subdirectory(dep/glm)
 add_subdirectory(dep/assimp)
+add_subdirectory(dep/glfw)
 add_subdirectory(dep/libpqxx)
 
 file(GLOB SERVER_SOURCES "src/server/*.cpp")
@@ -45,7 +45,7 @@ add_library(database STATIC src/lib/database.cpp)
 target_link_libraries(database pqxx)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call user_card crypto database chat uuid)
 add_library(protocol STATIC src/lib/protocol.cpp)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol user_card crypto database chat uuid)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol user_card crypto database chat uuid dl)
 
 # idk how to set this for windows
 set(OPENSSL openssl)
