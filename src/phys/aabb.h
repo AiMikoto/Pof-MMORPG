@@ -1,6 +1,8 @@
 #ifndef PHYS_AABB_H
 #define PHYS_AABB_H
 
+#include <string>
+
 class aabb
 {
 public:
@@ -10,6 +12,7 @@ public:
   double maxy;
   double minz;
   double maxz;
+  std::string print();
 };
 
 #endif
