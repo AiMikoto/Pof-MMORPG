@@ -49,7 +49,7 @@ add_library(protocol STATIC src/lib/protocol.cpp)
 add_library(rcon STATIC src/lib/rcon.cpp)
 add_library(phys STATIC ${PHYS_SOURCES})
 target_link_libraries(phys glm)
-link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol rcon user_card crypto database chat uuid dl)
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol rcon user_card crypto database chat uuid dl phys)
 
 # idk how to set this for windows
 set(OPENSSL openssl)
@@ -81,6 +81,7 @@ add_executable(world_test ${WORLD_STRUCTURE_SOURCES} src/test/world_structure_te
 add_executable(call_test src/test/call_test.cpp)
 add_executable(crypto_test src/test/crypto_test.cpp)
 add_executable(trie_test src/test/trie_test.cpp)
+add_executable(phys_test src/test/phys_test.cpp)
 add_dependencies(chat_server rsa_key)
 add_dependencies(server rsa_key)
 add_dependencies(instance rsa_key)
