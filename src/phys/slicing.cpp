@@ -8,9 +8,9 @@ double SPS = 1;
 
 environment *tick(environment *e)
 {
-  for(auto it:e -> capsules)
+  for(auto it:e -> containers)
   {
-    capsule *c = it.second;
+    container *c = it.second;
     if(c -> movable)
     {
       BOOST_LOG_TRIVIAL(trace) << "Applying gravity vector to velocity";

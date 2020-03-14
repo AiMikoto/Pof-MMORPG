@@ -10,9 +10,9 @@ environment::~environment()
   // TODO: free capsules
 }
 
-int environment::add(capsule *c)
+int environment::add(container *c)
 {
   counter;
-  capsules[counter] = c;
+  containers[counter] = c;
   return counter++;
 }

@@ -3,6 +3,7 @@
 
 class aabb
 {
+public:
   double minx;
   double maxx;
   double miny;
