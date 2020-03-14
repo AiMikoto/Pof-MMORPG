@@ -29,11 +29,33 @@ glm::dvec3 gph::Transform::right() {
 	return glm::normalize(rotation * glm::dvec3(1, 0, 0));
 }
 
+void gph::Transform::rotateTo(double angle, glm::dvec3 axes) {
+	rotation = glm::angleAxis(angle, glm::normalize(axes));
+}
+
+void gph::Transform::rotateBy(double angle, glm::dvec3 axes) {
+	glm::dquat rotation = glm::angleAxis(angle, glm::normalize(axes));
+	this->rotation *= rotation;
+}
+
+void gph::Transform::rotateBy(glm::dquat rotation) {
+	this->rotation *= rotation;
+}
+
+glm::mat4 gph::Transform::translationMatrix() {
+	return glm::translate(glm::mat4(1), glm::vec3(this->position));
+}
+
+glm::mat4 gph::Transform::rotationMatrix() {
+	return glm::mat4_cast(glm::quat(this->rotation));
+}
+
+glm::mat4 gph::Transform::scaleMatrix() {
+	return glm::scale(glm::mat4(1), glm::vec3(this->scale));
+}
+
 glm::mat4 gph::Transform::model() {
-	glm::mat4 translation = glm::translate(glm::mat4(1), glm::vec3(this->position));
-	glm::mat4 rotation = glm::mat4_cast(glm::quat(this->rotation));
-	glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(this->scale));
-	return translation * rotation * scale;
+	return translationMatrix() * rotationMatrix() * scaleMatrix();
 }
 
 boost::property_tree::ptree gph::Transform::serialize() {
