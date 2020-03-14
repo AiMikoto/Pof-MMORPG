@@ -1,7 +1,9 @@
 #include "phys/octree.h"
+#include "phys/slicing.h"
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include "lib/log.h"
 
 #define TEST(x) printf(x " - ");tests++;
 #define PASS printf("PASSED\n");
@@ -12,14 +14,7 @@ int tests;
 
 void test_octree()
 {
-  aabb base;
-  base.minx = -1000;
-  base.miny = -1000;
-  base.minz = -1000;
-  base.maxx =  1000;
-  base.maxy =  1000;
-  base.maxz =  1000;
-  octree t(base);
+  octree t(root_aabb());
   TEST("TESTING ADDITION OF BOXES TO OCTREE");
   aabb box;
   box.minx = -1;
@@ -154,9 +149,69 @@ void test_octree()
   PASS;
 }
 
+graphics::Mesh *mesh_generator()
+{
+  std::vector<uint> vec;
+  graphics::Vertex v1;
+  graphics::Vertex v2;
+  v1.position = {-1, -1, -1};
+  v2.position = {1, 1, 1};
+  std::vector<graphics::Vertex> vertices;
+  vertices.push_back(v1);
+  vertices.push_back(v2);
+  return new graphics::Mesh(vertices, vec, vec);
+}
+
+bool equals(glm::dvec3 a, glm::dvec3 b)
+{
+  return std::abs(a.x - b.x) < 0.01 && std::abs(a.y - b.y) < 0.01 && std::abs(a.z - b.z) < 0.01;
+}
+
+void test_slicing()
+{
+  TEST("TESTING TICKING OF EMPTY ENVIRONMENT");
+  environment *e = new environment();
+  tick(e);
+  PASS;
+  TEST("TESTING TICKING OF STATIC OBJECT");
+  graphics::Mesh *m = mesh_generator();
+  m -> transform.position = {0, 0, 0};
+  container *c = new container(m, box, false, true);
+  e -> add(c);
+  tick(e);
+  bool velo_equals = equals(c -> velocity, {0, 0, 0});
+  bool pos_equals = equals(c -> o -> transform.position, {0, 0, 0});
+  if(velo_equals && pos_equals)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING TICKING OF MOVABLE OBJECT");
+  m = mesh_generator();
+  m -> transform.position = {0, 100, 0};
+  c = new container(m, box, true, true);
+  e -> add(c);
+  tick(e);
+  velo_equals = equals(c -> velocity, {0, -1, 0});
+  pos_equals = equals(c -> o -> transform.position, {0, 99.5, 0});
+  if(velo_equals && pos_equals)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+}
+
 int main()
 {
+  log_test();
   test_octree();
+  test_slicing();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
 }

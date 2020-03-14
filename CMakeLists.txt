@@ -47,9 +47,12 @@ target_link_libraries(database pqxx)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call user_card crypto database chat uuid)
 add_library(protocol STATIC src/lib/protocol.cpp)
 add_library(rcon STATIC src/lib/rcon.cpp)
-add_library(phys STATIC ${PHYS_SOURCES})
+link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol rcon user_card crypto database chat uuid dl)
+add_library(phys STATIC ${PHYS_SOURCES} ${GRAPHICS_SOURCES})
+target_link_libraries(phys glfw)
 target_link_libraries(phys glm)
 target_link_libraries(phys assimp)
+target_link_libraries(phys OpenGL::GL)
 link_libraries(${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol rcon user_card crypto database chat uuid dl phys)
 
 # idk how to set this for windows

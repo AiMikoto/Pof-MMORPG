@@ -15,4 +15,6 @@ public:
   std::string print();
 };
 
+aabb root_aabb();
+
 #endif

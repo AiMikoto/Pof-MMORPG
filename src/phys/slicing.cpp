@@ -19,14 +19,28 @@ environment *tick(environment *e)
       c -> o -> transform.position += c -> velocity * (1/SPS);
       if(c -> collidable)
       {
+        aabb caabb = c -> to_aabb();
         BOOST_LOG_TRIVIAL(trace) << "Checking for colisions";
+        std::set<int> collisions, partial;
+        partial = e -> unmovable_octree.get_collisions(caabb);
+        collisions.insert(partial.begin(), partial.end());
+        partial = e -> movable_octree.get_collisions(caabb);
+        collisions.insert(partial.begin(), partial.end());
         BOOST_LOG_TRIVIAL(trace) << "Handling collision";
         BOOST_LOG_TRIVIAL(trace) << "Updating position";
         BOOST_LOG_TRIVIAL(trace) << "Updating velocity";
       }
     }
   }
-    
-    
+  BOOST_LOG_TRIVIAL(trace) << "Generating new dynamic octree";
+  e -> movable_octree = octree(root_aabb());
+  for(auto it:e -> containers)
+  {
+    container *c = it.second;
+    if(c -> movable && c -> collidable)
+    {
+      e -> movable_octree.insert(it.first, c -> to_aabb());
+    }
+  }
   return e;
 }

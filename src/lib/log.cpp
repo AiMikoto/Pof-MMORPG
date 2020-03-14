@@ -19,3 +19,8 @@ void log_init(std::string name)
   );
   BOOST_LOG_TRIVIAL(info) << "enabled logging on file " << file;
 }
+
+void log_test()
+{
+  boost::log::core::get() -> set_logging_enabled(false);
+}
