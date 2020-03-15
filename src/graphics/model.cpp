@@ -65,14 +65,15 @@ gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std:
 	this->textureIDs = textureIDs;
 	this->indices = indices;
 	this->type = objectTypes::mesh;
-	setup();
 }
 
 gph::Mesh::~Mesh() {
-	glDeleteVertexArrays(1, &vertexArrayID);
-	glDeleteBuffers(1, &vertexBufferID);
-	glDeleteBuffers(1, &elementsBufferID);
-	glDeleteBuffers(1, &outlineIndicesBufferID);
+	if (initialized) {
+		glDeleteVertexArrays(1, &vertexArrayID);
+		glDeleteBuffers(1, &vertexBufferID);
+		glDeleteBuffers(1, &elementsBufferID);
+		glDeleteBuffers(1, &outlineIndicesBufferID);
+	}
 	vertices.clear();
 	indices.clear();
 	outlineIndices.clear();
@@ -124,10 +125,13 @@ void gph::Mesh::draw(Shader* shader, Camera* camera, GLFWwindow* window) {
 
 void gph::Mesh::copy(Mesh* target) {}
 
-void gph::Mesh::setup() {
-	bindBuffers();
-	createOutline();
-	computeScale();
+void gph::Mesh::glContextSetup() {
+	if (!initialized) {
+		bindBuffers();
+		createOutline();
+		computeScale();
+		initialized = true;
+	}
 }
 
 void gph::Mesh::computeScale(){
@@ -212,6 +216,7 @@ llong gph::Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<uint> indices = loadMeshIndices(mesh, scene);
 	std::vector<uint> textureIDs = loadTextures(mesh, scene);
 	Mesh* processedMesh = new Mesh(vertices, textureIDs, indices);
+	processedMesh->computeScale();
 	activeScene->addMesh(processedMesh);
 	return processedMesh->id;
 }

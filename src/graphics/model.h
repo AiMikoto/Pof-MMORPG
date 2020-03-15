@@ -50,10 +50,12 @@ namespace graphics {
 		void copy(Mesh* target);
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
+		void computeScale();
+		//only call on the rendering side
+		void glContextSetup();
 	private:
 		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
-		void computeScale();
-		void setup();
+		bool initialized = false;
 		void bindBuffers();
 		void createOutline();
 	};
