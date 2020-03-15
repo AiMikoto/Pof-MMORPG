@@ -1,4 +1,5 @@
 #include "phys/octree.h"
+#include "phys/collisions.h"
 #include "phys/slicing.h"
 #include <cstdio>
 #include <iostream>
@@ -196,6 +197,239 @@ void test_aabb()
   // delete c;
 }
 
+void test_collisions()
+{
+  graphics::Mesh *m1 = mesh_generator();
+  m1 -> transform.position = {10, 10, 10};
+  m1 -> transform.scale = {3, 3, 3};
+  container *c1 = new container(m1, box, true, true);
+  // obj1 is 7 -> 13
+  graphics::Mesh *m2 = mesh_generator();
+  container *c2 = new container(m2, box, true, true);
+  TEST("TESTING BOX-BOX COLLISION NESTED");
+  m2 -> transform.position = {10, 10, 10};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE -X");
+  m2 -> transform.position = {6, 10, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE +X");
+  m2 -> transform.position = {14, 10, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE -Y");
+  m2 -> transform.position = {10, 6, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE +Y");
+  m2 -> transform.position = {10, 14, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE -Z");
+  m2 -> transform.position = {10, 10, 6};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE +Z");
+  m2 -> transform.position = {10, 10, 14};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING EDGE");
+  m2 -> transform.position = {10, 6, 6};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING EDGE");
+  m2 -> transform.position = {6, 10, 6};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING EDGE");
+  m2 -> transform.position = {6, 10, 14};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING EDGE");
+  m2 -> transform.position = {14, 10, 6};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING EDGE");
+  m2 -> transform.position = {14, 10, 14};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING EDGE");
+  m2 -> transform.position = {6, 6, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION CORNER");
+  m2 -> transform.position = {6, 6, 6};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION CORNER");
+  m2 -> transform.position = {14, 14, 14};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION BIGDISTANCE");
+  m2 -> transform.position = {0, 0, 100};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION BIGDISTANCE");
+  m2 -> transform.position = {0, 100, 0};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION BIGDISTANCE");
+  m2 -> transform.position = {100, 0, 0};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION BIGDISTANCE");
+  m2 -> transform.position = {100, 100, 0};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION BIGDISTANCE");
+  m2 -> transform.position = {0, 100, 100};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION BIGDISTANCE");
+  m2 -> transform.position = {100, 0, 100};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION BIGDISTANCE");
+  m2 -> transform.position = {100, 100, 100};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  // delete c1;
+  // delete c2;
+}
+
 void test_slicing()
 {
   TEST("TESTING TICKING OF EMPTY ENVIRONMENT");
@@ -254,6 +488,7 @@ int main()
   log_test();
   test_octree();
   test_aabb();
+  test_collisions();
   test_slicing();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
