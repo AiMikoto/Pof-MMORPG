@@ -1,5 +1,6 @@
 #include "phys/slicing.h"
 #include "lib/log.h"
+#include "phys/collisions.h"
 
 glm::dvec3 gravity_vector = {0, -1, 0};
 
@@ -26,9 +27,18 @@ environment *tick(environment *e)
         collisions.insert(partial.begin(), partial.end());
         partial = e -> movable_octree.get_collisions(caabb);
         collisions.insert(partial.begin(), partial.end());
+        collisions.erase(it.first);
         BOOST_LOG_TRIVIAL(trace) << "Handling collision";
-        BOOST_LOG_TRIVIAL(trace) << "Updating position";
-        BOOST_LOG_TRIVIAL(trace) << "Updating velocity";
+        for(auto collision:collisions)
+        {
+          if((c -> type == box) && (e -> containers[collision] -> type == box))
+          {
+            BOOST_LOG_TRIVIAL(trace) << "box to box collision";
+            box_box(c, e -> containers[collision]);
+          }
+          BOOST_LOG_TRIVIAL(trace) << "Updating position";
+          BOOST_LOG_TRIVIAL(trace) << "Updating velocity";
+        }
       }
     }
   }

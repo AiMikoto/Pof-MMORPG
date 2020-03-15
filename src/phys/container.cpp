@@ -1,14 +1,5 @@
 #include "phys/container.h"
-
-double dmin(double x, double y)
-{
-  return (x < y) ? x : y;
-}
-
-double dmax(double x, double y)
-{
-  return (x > y) ? x : y;
-}
+#include <algorithm>
 
 container::container(graphics::Mesh *o, container_t c_type, bool movable, bool collidable)
 {
@@ -29,7 +20,6 @@ aabb container::to_aabb()
   aabb ret;
   glm::dvec3 position = this -> o -> transform.position;
   double oneeighty = 180;
-  glm::dvec3 rotation = glm::eulerAngles(this -> o -> transform.rotation) * pi / oneeighty;
   glm::dvec3 scale = this -> o -> transform.scale;
   glm::dvec3 size = this -> o -> meshScale;
   if(this -> type == caps)
@@ -47,20 +37,8 @@ aabb container::to_aabb()
   if(this -> type == box)
   {
     // Assumptions
-    // rotation - only around x y and z axis
     glm::dvec4 points[8];
-    points[0] = glm::dvec4( size.x / 2,  size.y / 2,  size.z / 2, 1);
-    points[1] = glm::dvec4( size.x / 2,  size.y / 2, -size.z / 2, 1);
-    points[2] = glm::dvec4( size.x / 2, -size.y / 2,  size.z / 2, 1);
-    points[3] = glm::dvec4( size.x / 2, -size.y / 2, -size.z / 2, 1);
-    points[4] = glm::dvec4(-size.x / 2,  size.y / 2,  size.z / 2, 1);
-    points[5] = glm::dvec4(-size.x / 2,  size.y / 2, -size.z / 2, 1);
-    points[6] = glm::dvec4(-size.x / 2, -size.y / 2,  size.z / 2, 1);
-    points[7] = glm::dvec4(-size.x / 2, -size.y / 2, -size.z / 2, 1);
-    for(int i = 0; i < 8; i++)
-    {
-      points[i] = o -> transform.model() * points[i];
-    }
+    get_points(this, points);
     // calculate min/max values;
     ret.minx = points[0].x;
     ret.maxx = points[0].x;
@@ -70,13 +48,31 @@ aabb container::to_aabb()
     ret.maxz = points[0].z;
     for(int i = 1; i < 8; i++)
     {
-      ret.minx = dmin(ret.minx, points[i].x);
-      ret.maxx = dmax(ret.maxx, points[i].x);
-      ret.miny = dmin(ret.miny, points[i].y);
-      ret.maxy = dmax(ret.maxy, points[i].y);
-      ret.minz = dmin(ret.minz, points[i].z);
-      ret.maxz = dmax(ret.maxz, points[i].z);
+      ret.minx = std::min(ret.minx, points[i].x);
+      ret.maxx = std::max(ret.maxx, points[i].x);
+      ret.miny = std::min(ret.miny, points[i].y);
+      ret.maxy = std::max(ret.maxy, points[i].y);
+      ret.minz = std::min(ret.minz, points[i].z);
+      ret.maxz = std::max(ret.maxz, points[i].z);
     }
   }
   return ret;
+}
+
+void get_points(container *c, glm::dvec4 *points)
+{
+  glm::dvec3 size = c -> o -> meshScale;
+  points[0] = glm::dvec4( size.x / 2,  size.y / 2,  size.z / 2, 1);
+  points[1] = glm::dvec4( size.x / 2,  size.y / 2, -size.z / 2, 1);
+  points[2] = glm::dvec4( size.x / 2, -size.y / 2,  size.z / 2, 1);
+  points[3] = glm::dvec4( size.x / 2, -size.y / 2, -size.z / 2, 1);
+  points[4] = glm::dvec4(-size.x / 2,  size.y / 2,  size.z / 2, 1);
+  points[5] = glm::dvec4(-size.x / 2,  size.y / 2, -size.z / 2, 1);
+  points[6] = glm::dvec4(-size.x / 2, -size.y / 2,  size.z / 2, 1);
+  points[7] = glm::dvec4(-size.x / 2, -size.y / 2, -size.z / 2, 1);
+  glm::mat4x4 m = c -> o -> transform.model();
+  for(int i = 0; i < 8; i++)
+  {
+    points[i] = m * points[i];
+  }
 }

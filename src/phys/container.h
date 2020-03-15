@@ -23,4 +23,6 @@ public:
   bool collidable;
 };
 
+void get_points(container *c, glm::dvec4 *points);
+
 #endif // PHYS_CONTAINER_H
