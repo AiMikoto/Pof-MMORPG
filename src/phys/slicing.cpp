@@ -1,6 +1,7 @@
 #include "phys/slicing.h"
 #include "lib/log.h"
 #include "phys/collisions.h"
+#include "phys/impulse.h"
 
 glm::dvec3 gravity_vector = {0, -1, 0};
 
@@ -42,20 +43,26 @@ environment *tick(environment *e)
         collisions.insert(partial.begin(), partial.end());
         collisions.erase(it.first);
         BOOST_LOG_TRIVIAL(trace) << "Handling collision";
+        impulse imp;
         for(auto collision:collisions)
         {
-          if((c -> type == box) && (e -> containers[collision] -> type == box))
+          bool iambox = c -> type == floor_box || c -> type == nonfloor_box;
+          if((iambox) && (e -> containers[collision] -> type == nonfloor_box))
           {
             glm::dvec3 axis;
             double offset;
             BOOST_LOG_TRIVIAL(trace) << "box to box collision";
             if(box_box(e -> containers[collision], c, &axis, &offset))
             {
-              BOOST_LOG_TRIVIAL(trace) << "handling collision";
-              BOOST_LOG_TRIVIAL(trace) << "Updating position";
-              c -> o -> transform.position -= (axis * offset);
+              BOOST_LOG_TRIVIAL(trace) << "handling non floored collision";
+              BOOST_LOG_TRIVIAL(trace) << "updating impulse";
+              imp.add(axis, offset);
               BOOST_LOG_TRIVIAL(trace) << "Updating velocity";
-              c -> velocity = {0, 0, 0};
+              // removing vector component of velocity that caused the impact
+              double p = axis.x * c -> velocity.x
+                + axis.y * c -> velocity.y
+                + axis.z * c -> velocity.z;
+              c -> velocity -= axis * p;
             }
             else
             {
@@ -63,6 +70,8 @@ environment *tick(environment *e)
             }
           }
         }
+        BOOST_LOG_TRIVIAL(trace) << "Updating position";
+        c -> o -> transform.position -= imp.get_offset();
       }
     }
   }

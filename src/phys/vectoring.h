@@ -1,4 +1,0 @@
-#ifndef PHYS_VECTORING_H
-#define PHYS_VECTORING_H
-
-#endif // PHYS_VECTORING_H

@@ -7,7 +7,8 @@
 enum container_t
 {
   caps,
-  box
+  floor_box,
+  nonfloor_box
 };
 
 class container

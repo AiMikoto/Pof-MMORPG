@@ -178,7 +178,7 @@ void test_aabb()
   TEST("TESTING AABB SIZE");
   graphics::Mesh *m = mesh_generator();
   m -> transform.position = {4, 6, 10};
-  container *c = new container(m, box, true, true);
+  container *c = new container(m, nonfloor_box, true, true);
   aabb box = c -> to_aabb();
   if(equals(box.minx, 3)
   && equals(box.maxx, 5)
@@ -202,10 +202,10 @@ void test_collisions()
   graphics::Mesh *m1 = mesh_generator();
   m1 -> transform.position = {10, 10, 10};
   m1 -> transform.scale = {3, 3, 3};
-  container *c1 = new container(m1, box, true, true);
+  container *c1 = new container(m1, nonfloor_box, true, true);
   // obj1 is 7 -> 13
   graphics::Mesh *m2 = mesh_generator();
-  container *c2 = new container(m2, box, true, true);
+  container *c2 = new container(m2, nonfloor_box, true, true);
   TEST("TESTING BOX-BOX COLLISION NESTED");
   m2 -> transform.position = {10, 10, 10};
   if(box_box(c1, c2))
@@ -625,7 +625,7 @@ void test_slicing()
   graphics::Mesh *m = mesh_generator();
   m -> transform.position = {0, 0, 0};
   m -> transform.scale = {10, 10, 10};
-  container *c = new container(m, box, false, true);
+  container *c = new container(m, nonfloor_box, false, true);
   e -> add(c);
   tick(e);
   bool velo_equals = equals(c -> velocity, {0, 0, 0});
@@ -641,17 +641,18 @@ void test_slicing()
   TEST("TESTING TICKING OF MOVABLE OBJECT");
   m = mesh_generator();
   m -> transform.position = {0, 100, 0};
-  c = new container(m, box, true, true);
+  c = new container(m, nonfloor_box, true, true);
   e -> add(c);
   tick(e);
-  velo_equals = equals(c -> velocity, {0, -0.01, 0});
-  if(velo_equals)
+  velo_equals = equals(c -> velocity, {0, 0, 0});
+  pos_equals = equals(c -> o -> transform.position, {0, 100, 0});
+  if(velo_equals || pos_equals)
   {
-    PASS;
+    FAIL;
   }
   else
   {
-    FAIL;
+    PASS;
   }
   TEST("TESTING FALLING OBJECT EVENTUALLY RESTING ON SURFACE");
   int ticks = 10000;

@@ -34,7 +34,7 @@ aabb container::to_aabb()
     ret.minz = position.z - scale.z * size.x / 2;
     ret.maxz = position.z + scale.z * size.x / 2;
   }
-  if(this -> type == box)
+  if((this -> type == floor_box) || (this -> type == nonfloor_box))
   {
     // Assumptions
     glm::dvec4 points[8];
