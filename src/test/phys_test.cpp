@@ -526,6 +526,91 @@ void test_collisions()
   {
     FAIL;
   }
+  TEST("TESTING BOX-BOX COLLISION ROTATED NESTED");
+  m2 -> transform.position = {10, 10, 10};
+  m2 -> transform.rotateTo(1, {2, 3, 4});
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  m2 -> transform.rotateTo(pi/4, {0, 1, 0});
+  TEST("TESTING BOX-BOX COLLISION ROTATED SURFACE PEEKING");
+  m2 -> transform.position = {10, 13.5, 10};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION ROTATED SURFACE TOUCHING");
+  m2 -> transform.position = {10, 14, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION ROTATED SURFACE DETACHED");
+  m2 -> transform.position = {10, 14.5, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  double sq2 = 2;
+  sq2 = std::sqrt(sq2);
+  TEST("TESTING BOX-BOX COLLISION ROTATED EDGE INSIDE SURFACE");
+  m2 -> transform.position = {10 + 3 + sq2 - 0.1, 10, 10};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION ROTATED EDGE OUTSIDE SURFACE");
+  m2 -> transform.position = {10 + 3 + sq2 + 0.1, 10, 10};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  double pos = 10 + 3 + sq2 / 2;
+  TEST("TESTING BOX-BOX COLLISION ROTATED EDGE INSIDE EDGE");
+  m2 -> transform.position = {pos - 0.1, 10, pos - 0.1};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION ROTATED EDGE OUTSIDE EDGE");
+  m2 -> transform.position = {pos + 0.1, 10, pos + 0.1};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
   // delete c1;
   // delete c2;
 }
