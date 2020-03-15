@@ -7,6 +7,13 @@ bool is_zero(glm::dvec3 v)
 
 bool box_box(container *b1, container *b2)
 {
+  glm::dvec3 axis;
+  double projection;
+  return box_box(b1, b2, &axis, &projection);
+}
+
+bool box_box(container *b1, container *b2, glm::dvec3 *axis, double *projection)
+{
   int i, j;
   bool collides = true;
   glm::dvec4 points1[8], points2[8];
@@ -23,7 +30,7 @@ bool box_box(container *b1, container *b2)
   glm::dvec3 eb22 = points2[0] - points2[2];
   glm::dvec3 eb23 = points2[0] - points2[4];
   // compute 15 axis
-  glm::dvec3 axis[15] = {
+  glm::dvec3 axi[15] = {
     // 3 normals from b1
     glm::cross(eb11, eb12),
     glm::cross(eb11, eb13),
@@ -47,18 +54,18 @@ bool box_box(container *b1, container *b2)
   // for each axis
   for(i = 0; i < 15; i++)
   {
-    if(is_zero(axis[i]))
+    if(is_zero(axi[i]))
     { // pointless
       continue;
     }
-    axis[i] = glm::normalize(axis[i]);
+    axi[i] = glm::normalize(axi[i]);
     double min1p, max1p, min2p, max2p;
     // project b1 onto axis
     for(j = 0; j < 8; j++)
     {
-      p = axis[i].x * points1[j].x
-        + axis[i].y * points1[j].y
-        + axis[i].z * points1[j].z;
+      p = axi[i].x * points1[j].x
+        + axi[i].y * points1[j].y
+        + axi[i].z * points1[j].z;
       if(j == 0)
       {
         min1p = p;
@@ -73,9 +80,9 @@ bool box_box(container *b1, container *b2)
     // project b2 onto axis
     for(j = 0; j < 8; j++)
     {
-      p = axis[i].x * points2[j].x
-        + axis[i].y * points2[j].y
-        + axis[i].z * points2[j].z;
+      p = axi[i].x * points2[j].x
+        + axi[i].y * points2[j].y
+        + axi[i].z * points2[j].z;
       if(j == 0)
       {
         min2p = p;
@@ -90,6 +97,17 @@ bool box_box(container *b1, container *b2)
     if((max2p > min1p) && (max1p > min2p))
     {
       // collides on this axis
+      double projection_difference = max2p - min1p;
+      if(i == 0)
+      {
+        *projection = projection_difference;
+        *axis = axi[i];
+      }
+      if(*projection > projection_difference)
+      {
+        *projection = projection_difference;
+        *axis = axi[i];
+      }
     }
     else
     {

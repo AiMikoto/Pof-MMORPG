@@ -5,7 +5,19 @@
 glm::dvec3 gravity_vector = {0, -1, 0};
 
 // Slices per second
-const double SPS = 1;
+const double SPS = 100;
+const double MAX_VELO = 1000;
+
+glm::dvec3 clamp_velocity(glm::dvec3 velocity)
+{
+  velocity.x = std::min(velocity.x,  MAX_VELO);
+  velocity.x = std::max(velocity.x, -MAX_VELO);
+  velocity.y = std::min(velocity.y,  MAX_VELO);
+  velocity.y = std::max(velocity.y, -MAX_VELO);
+  velocity.z = std::min(velocity.z,  MAX_VELO);
+  velocity.z = std::max(velocity.z, -MAX_VELO);
+  return velocity;
+}
 
 environment *tick(environment *e)
 {
@@ -18,6 +30,7 @@ environment *tick(environment *e)
       c -> o -> transform.position += c -> velocity * (1 / SPS) + gravity_vector * (pow(1 / SPS, 2) / 2);
       BOOST_LOG_TRIVIAL(trace) << "Applying gravity vector to velocity";
       c -> velocity += gravity_vector * (1 / SPS);
+      c -> velocity = clamp_velocity(c -> velocity);
       if(c -> collidable)
       {
         aabb caabb = c -> to_aabb();
@@ -33,11 +46,22 @@ environment *tick(environment *e)
         {
           if((c -> type == box) && (e -> containers[collision] -> type == box))
           {
+            glm::dvec3 axis;
+            double offset;
             BOOST_LOG_TRIVIAL(trace) << "box to box collision";
-            box_box(c, e -> containers[collision]);
+            if(box_box(e -> containers[collision], c, &axis, &offset))
+            {
+              BOOST_LOG_TRIVIAL(trace) << "handling collision";
+              BOOST_LOG_TRIVIAL(trace) << "Updating position";
+              c -> o -> transform.position -= (axis * offset);
+              BOOST_LOG_TRIVIAL(trace) << "Updating velocity";
+              c -> velocity = {0, 0, 0};
+            }
+            else
+            {
+              BOOST_LOG_TRIVIAL(trace) << "false collision";
+            }
           }
-          BOOST_LOG_TRIVIAL(trace) << "Updating position";
-          BOOST_LOG_TRIVIAL(trace) << "Updating velocity";
         }
       }
     }

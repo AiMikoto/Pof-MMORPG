@@ -165,7 +165,7 @@ graphics::Mesh *mesh_generator()
 
 bool equals(double a, double b)
 {
-  return std::abs(a - b) < 0.01;
+  return std::abs(a - b) < 0.00001;
 }
 
 bool equals(glm::dvec3 a, glm::dvec3 b)
@@ -624,6 +624,7 @@ void test_slicing()
   TEST("TESTING TICKING OF STATIC OBJECT");
   graphics::Mesh *m = mesh_generator();
   m -> transform.position = {0, 0, 0};
+  m -> transform.scale = {10, 10, 10};
   container *c = new container(m, box, false, true);
   e -> add(c);
   tick(e);
@@ -643,9 +644,8 @@ void test_slicing()
   c = new container(m, box, true, true);
   e -> add(c);
   tick(e);
-  velo_equals = equals(c -> velocity, {0, -1, 0});
-  pos_equals = equals(c -> o -> transform.position, {0, 99.5, 0});
-  if(velo_equals && pos_equals)
+  velo_equals = equals(c -> velocity, {0, -0.01, 0});
+  if(velo_equals)
   {
     PASS;
   }
@@ -654,8 +654,13 @@ void test_slicing()
     FAIL;
   }
   TEST("TESTING FALLING OBJECT EVENTUALLY RESTING ON SURFACE");
-  tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e)))))))))))));
+  int ticks = 10000;
+  while(ticks--)
+  {
+    tick(e);
+  }
   velo_equals = equals(c -> velocity, {0, 0, 0});
+  pos_equals = equals(c -> o -> transform.position, {0, 11, 0});
   if(velo_equals && pos_equals)
   {
     PASS;
