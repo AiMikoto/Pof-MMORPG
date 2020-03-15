@@ -655,7 +655,7 @@ void test_slicing()
     PASS;
   }
   TEST("TESTING FALLING OBJECT EVENTUALLY RESTING ON SURFACE");
-  int ticks = 10000;
+  int ticks = 1000;
   while(ticks--)
   {
     tick(e);
@@ -671,6 +671,56 @@ void test_slicing()
     FAIL;
   }
   pos_equals = equals(c -> o -> transform.position, {0, 1, 0});
+  // delete e;
+  TEST("TESTING THROW ONTO CORNER WILL EVENTUALLY SETTLE");
+  e = new environment();
+  m = mesh_generator();
+  m -> transform.position = {0, 0, 0};
+  m -> transform.scale = {300, 10, 300};
+  c = new container(m, nonfloor_box, false, true);
+  e -> add(c);
+  m = mesh_generator();
+  m -> transform.position = {0, 0, 0};
+  m -> transform.scale = {10, 300, 300};
+  c = new container(m, nonfloor_box, false, true);
+  e -> add(c);
+  m = mesh_generator();
+  m -> transform.position = {20, 20, 20};
+  c = new container(m, nonfloor_box, true, true);
+  c -> velocity = {-10, 0, -10};
+  e -> add(c);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  velo_equals = equals(c -> velocity, {0, 0, -10});
+  bool xeq = equals(c -> o -> transform.position.x, 11);
+  bool yeq = equals(c -> o -> transform.position.y, 11);
+  if(velo_equals && xeq && yeq)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING THROW ONTO CORNER WILL EVENTUALLY FALL OFF AGAIN");
+  ticks = 10000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  velo_equals = equals(c -> velocity, {0, 0, -10});
+  yeq = equals(c -> o -> transform.position.y, 11);
+  if(velo_equals || yeq)
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
   // delete e;
 }
 

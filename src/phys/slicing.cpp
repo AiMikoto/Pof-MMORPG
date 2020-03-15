@@ -3,7 +3,7 @@
 #include "phys/collisions.h"
 #include "phys/impulse.h"
 
-glm::dvec3 gravity_vector = {0, -1, 0};
+glm::dvec3 gravity_vector = {0, -9.8, 0};
 
 // Slices per second
 const double SPS = 100;
