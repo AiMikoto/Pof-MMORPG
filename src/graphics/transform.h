@@ -20,7 +20,11 @@ namespace graphics {
 		glm::dvec3 forward();
 		glm::dvec3 right();
 		glm::dvec3 up();
+		//rotates to certain angles (in degrees) on all 3 axis
 		void rotateTo(double angle, glm::dvec3 axes);
+		void rotateTo(glm::dvec3 rotationAngles);
+		//rotates the current angles by a certain amount (in degrees) on all 3 axis
+		void rotateBy(glm::dvec3 rotationAngles);
 		void rotateBy(double angle, glm::dvec3 axes);
 		void rotateBy(glm::dquat rotation);
 
@@ -31,5 +35,7 @@ namespace graphics {
 
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
+	private:
+		std::pair<double, glm::dvec3> anglesToAngleAxis(glm::dvec3 rotationAngles);
 	};
 }

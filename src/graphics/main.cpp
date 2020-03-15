@@ -27,10 +27,12 @@ int main() {
 	BOOST_LOG_TRIVIAL(trace) << "Loading model";
 	gph::Model* model = new gph::Model("../src/graphics/objects/cube.obj", false);
 	model->transform.position = glm::dvec3(5, 2, -20);
-	model->transform.rotateTo(glm::radians(45.0), glm::dvec3(1, 1, 1));
+	model->transform.rotateTo(glm::dvec3(30, 20, 150));
 	model->transform.scale = glm::dvec3(2, 2, 2);
-	gph::activeScene->addChild(model->id);	
-
+	gph::activeScene->addChild(model->id);
+	for (auto m : gph::activeScene->meshes) {
+		m.second->glContextSetup();
+	}
 	gph::activeScene->sceneToJSON("../src/graphics/scenes/test.json");
 
 	double lastTime = glfwGetTime();

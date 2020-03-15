@@ -29,8 +29,18 @@ glm::dvec3 gph::Transform::right() {
 	return glm::normalize(rotation * glm::dvec3(1, 0, 0));
 }
 
+void gph::Transform::rotateTo(glm::dvec3 rotationAngles) {
+	std::pair<double, glm::dvec3> angleAxis = anglesToAngleAxis(rotationAngles);
+	rotateTo(angleAxis.first, glm::normalize(angleAxis.second));
+}
+
 void gph::Transform::rotateTo(double angle, glm::dvec3 axes) {
 	rotation = glm::angleAxis(angle, glm::normalize(axes));
+}
+
+void gph::Transform::rotateBy(glm::dvec3 rotationAngles) {
+	std::pair<double, glm::dvec3> angleAxis = anglesToAngleAxis(rotationAngles);
+	rotateBy(angleAxis.first, glm::normalize(angleAxis.second));
 }
 
 void gph::Transform::rotateBy(double angle, glm::dvec3 axes) {
@@ -40,6 +50,14 @@ void gph::Transform::rotateBy(double angle, glm::dvec3 axes) {
 
 void gph::Transform::rotateBy(glm::dquat rotation) {
 	this->rotation *= rotation;
+}
+
+std::pair<double, glm::dvec3> gph::Transform::anglesToAngleAxis(glm::dvec3 rotationAngles) {
+	double angle = highestCommonDenominator(rotationAngles.x, rotationAngles.y);
+	angle = highestCommonDenominator(angle, rotationAngles.z);
+	glm::dvec3 axes = glm::dvec3(rotationAngles.x / angle, rotationAngles.y / angle, rotationAngles.z / angle);
+	return std::pair<double, glm::dvec3>(angle, axes);
+
 }
 
 glm::mat4 gph::Transform::translationMatrix() {

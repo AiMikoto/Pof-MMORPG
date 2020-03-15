@@ -49,3 +49,14 @@ boost::property_tree::ptree gph::dvec4serializer(glm::dvec4 in) {
 	node.add("z", in.z);
 	return node;
 }
+
+double gph::highestCommonDenominator(double a, double b, double eps) {
+	a = std::fabs(a);
+	b = std::fabs(b);
+	if (a < b)
+		return highestCommonDenominator(b, a);
+	if (std::fabs(b) < eps)
+		return a;
+	else
+		return highestCommonDenominator(b, a - floor(a / b) * b);
+}

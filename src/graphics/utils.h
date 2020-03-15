@@ -33,4 +33,5 @@ namespace graphics {
 	boost::property_tree::ptree dvec2serializer(glm::dvec2);
 	boost::property_tree::ptree dvec3serializer(glm::dvec3);
 	boost::property_tree::ptree dvec4serializer(glm::dvec4);
+	double highestCommonDenominator(double a, double b, double eps = 0.0001);
 }
