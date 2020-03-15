@@ -125,7 +125,7 @@ void gph::Mesh::draw(Shader* shader, Camera* camera, GLFWwindow* window) {
 void gph::Mesh::copy(Mesh* target) {}
 
 void gph::Mesh::setup() {
-	bindBuffers();
+//	bindBuffers();
 	createOutline();
 	computeScale();
 }

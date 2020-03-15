@@ -3,6 +3,8 @@
 
 #include "phys/environment.h"
 
+extern const double sps;
+
 environment *tick(environment *e);
 
 #endif // PHYS_SLICING_H

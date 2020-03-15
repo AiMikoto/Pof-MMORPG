@@ -62,7 +62,13 @@ aabb container::to_aabb()
       points[i] = o -> transform.model() * points[i];
     }
     // calculate min/max values;
-    for(int i = 0; i < 8; i++)
+    ret.minx = points[0].x;
+    ret.maxx = points[0].x;
+    ret.miny = points[0].y;
+    ret.maxy = points[0].y;
+    ret.minz = points[0].z;
+    ret.maxz = points[0].z;
+    for(int i = 1; i < 8; i++)
     {
       ret.minx = dmin(ret.minx, points[i].x);
       ret.maxx = dmax(ret.maxx, points[i].x);

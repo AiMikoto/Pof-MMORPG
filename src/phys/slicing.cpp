@@ -4,7 +4,7 @@
 glm::dvec3 gravity_vector = {0, -1, 0};
 
 // Slices per second
-double SPS = 1;
+const double SPS = 1;
 
 environment *tick(environment *e)
 {
@@ -13,10 +13,10 @@ environment *tick(environment *e)
     container *c = it.second;
     if(c -> movable)
     {
+      BOOST_LOG_TRIVIAL(trace) << "Updating position";
+      c -> o -> transform.position += c -> velocity * (1 / SPS) + gravity_vector * (pow(1 / SPS, 2) / 2);
       BOOST_LOG_TRIVIAL(trace) << "Applying gravity vector to velocity";
       c -> velocity += gravity_vector * (1 / SPS);
-      BOOST_LOG_TRIVIAL(trace) << "Updating position";
-      c -> o -> transform.position += c -> velocity * (1/SPS);
       if(c -> collidable)
       {
         aabb caabb = c -> to_aabb();

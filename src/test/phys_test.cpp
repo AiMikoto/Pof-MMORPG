@@ -162,9 +162,38 @@ graphics::Mesh *mesh_generator()
   return new graphics::Mesh(vertices, vec, vec);
 }
 
+bool equals(double a, double b)
+{
+  return std::abs(a - b) < 0.01;
+}
+
 bool equals(glm::dvec3 a, glm::dvec3 b)
 {
-  return std::abs(a.x - b.x) < 0.01 && std::abs(a.y - b.y) < 0.01 && std::abs(a.z - b.z) < 0.01;
+  return equals(a.x, b.x) && equals(a.y, b.y) && equals(a.z, b.z);
+}
+
+void test_aabb()
+{
+  TEST("TESTING AABB SIZE");
+  graphics::Mesh *m = mesh_generator();
+  m -> transform.position = {4, 6, 10};
+  container *c = new container(m, box, true, true);
+  aabb box = c -> to_aabb();
+  if(equals(box.minx, 3)
+  && equals(box.maxx, 5)
+  && equals(box.miny, 5)
+  && equals(box.maxy, 7)
+  && equals(box.minz, 9)
+  && equals(box.maxz, 11)
+    )
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  // delete c;
 }
 
 void test_slicing()
@@ -205,12 +234,26 @@ void test_slicing()
   {
     FAIL;
   }
+  TEST("TESTING FALLING OBJECT EVENTUALLY RESTING ON SURFACE");
+  tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e)))))))))))));
+  velo_equals = equals(c -> velocity, {0, 0, 0});
+  if(velo_equals && pos_equals)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  pos_equals = equals(c -> o -> transform.position, {0, 1, 0});
+  // delete e;
 }
 
 int main()
 {
   log_test();
   test_octree();
+  test_aabb();
   test_slicing();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
