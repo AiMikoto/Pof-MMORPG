@@ -216,6 +216,46 @@ void test_collisions()
   {
     FAIL;
   }
+  TEST("TESTING BOX-BOX COLLISION NESTED TOUCHING SURFACE");
+  m2 -> transform.position = {10, 10, 12};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION NESTED TOUCHING EDGE");
+  m2 -> transform.position = {10, 12, 12};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION NESTED TOUCHING CORNER");
+  m2 -> transform.position = {12, 12, 12};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION SURFACE PEEKING OUT");
+  m2 -> transform.position = {10, 10, 12.5};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
   TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE -X");
   m2 -> transform.position = {6, 10, 10};
   if(box_box(c1, c2))
@@ -268,6 +308,26 @@ void test_collisions()
   }
   TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE +Z");
   m2 -> transform.position = {10, 10, 14};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION SHIFTED SURFACE +Z");
+  m2 -> transform.position = {12, 12, 14};
+  if(box_box(c1, c2))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION TOUCHING SURFACE +Z");
+  m2 -> transform.position = {13, 13, 14};
   if(box_box(c1, c2))
   {
     FAIL;
@@ -425,6 +485,46 @@ void test_collisions()
   else
   {
     PASS;
+  }
+  TEST("TESTING BOX-BOX COLLISION CORNER COLLISION");
+  m2 -> transform.position = {7, 7, 7};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION CORNER COLLISION");
+  m2 -> transform.position = {13.5, 13.5, 13.5};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION CORNER COLLISION");
+  m2 -> transform.position = {7, 13.5, 13.5};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING BOX-BOX COLLISION CORNER COLLISION");
+  m2 -> transform.position = {13.5, 7, 13.5};
+  if(box_box(c1, c2))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
   }
   // delete c1;
   // delete c2;

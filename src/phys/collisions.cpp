@@ -1,5 +1,10 @@
 #include "phys/collisions.h"
 
+bool is_zero(glm::dvec3 v)
+{
+  return (std::abs(v.x) < 0.01) && (std::abs(v.y) < 0.01) && (std::abs(v.z) < 0.01);
+}
+
 bool box_box(container *b1, container *b2)
 {
   int i, j;
@@ -42,6 +47,11 @@ bool box_box(container *b1, container *b2)
   // for each axis
   for(i = 0; i < 15; i++)
   {
+    if(is_zero(axis[i]))
+    { // pointless
+      continue;
+    }
+    axis[i] = glm::normalize(axis[i]);
     double min1p, max1p, min2p, max2p;
     // project b1 onto axis
     for(j = 0; j < 8; j++)
@@ -52,7 +62,7 @@ bool box_box(container *b1, container *b2)
       if(j == 0)
       {
         min1p = p;
-        min1p = p;
+        max1p = p;
       }
       else
       {
@@ -69,7 +79,7 @@ bool box_box(container *b1, container *b2)
       if(j == 0)
       {
         min2p = p;
-        min2p = p;
+        max2p = p;
       }
       else
       {
@@ -77,7 +87,7 @@ bool box_box(container *b1, container *b2)
         max2p = std::max(max2p, p);
       }
     }
-    if((max2p > min1p) && (min2p < max1p))
+    if((max2p > min1p) && (max1p > min2p))
     {
       // collides on this axis
     }
