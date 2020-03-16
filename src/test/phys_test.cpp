@@ -861,15 +861,16 @@ void test_slicing()
   }
   TEST("TESTING TICKING OF STILL MOVABLE OBJECT");
   m = mesh_generator();
-  m -> transform.position = {0, 11, 0};
-  c = new container(m, box, true, false, true);
+  m -> transform.position = {0, 12, 0};
+  m -> transform.scale = {1, 2, 1};
+  c = new container(m, caps, true, false, true);
   e -> add(c);
   int ticks = 300;
   while(ticks--)
   {
     tick(e);
   }
-  pos_equals = equals(c -> o -> transform.position, {0, 11, 0});
+  pos_equals = equals(c -> o -> transform.position, {0, 12, 0});
   if(pos_equals)
   {
     PASS;
@@ -881,7 +882,8 @@ void test_slicing()
   TEST("TESTING TICKING OF MOVABLE OBJECT");
   m = mesh_generator();
   m -> transform.position = {0, 100, 0};
-  c = new container(m, box, true, false, true);
+  m -> transform.scale = {1, 2, 1};
+  c = new container(m, caps, true, false, true);
   e -> add(c);
   tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e))))))))));
   velo_equals = equals(c -> velocity, {0, 0, 0});
@@ -900,7 +902,7 @@ void test_slicing()
   {
     tick(e);
   }
-  pos_equals = equals(c -> o -> transform.position, {0, 11, 0});
+  pos_equals = equals(c -> o -> transform.position, {0, 12, 0});
   if(pos_equals)
   {
     PASS;
@@ -924,17 +926,18 @@ void test_slicing()
   c = new container(m, box, false, true, false);
   e -> add(c);
   m = mesh_generator();
-  m -> transform.position = {20, 20, 20};
-  c = new container(m, box, true, false, true);
-  c -> velocity = {-10, 0, -10};
+  m -> transform.position = {-20, 20, 20};
+  m -> transform.scale = {1, 2, 1};
+  c = new container(m, caps, true, false, true);
+  c -> velocity = {10, 0, -10};
   e -> add(c);
   ticks = 1000;
   while(ticks--)
   {
     tick(e);
   }
-  bool xeq = equals(c -> o -> transform.position.x, 11);
-  bool yeq = equals(c -> o -> transform.position.y, 11);
+  bool xeq = equals(c -> o -> transform.position.x, -11);
+  bool yeq = equals(c -> o -> transform.position.y, 12);
   if(xeq && yeq)
   {
     PASS;

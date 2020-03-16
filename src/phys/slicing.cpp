@@ -1,7 +1,6 @@
 #include "phys/slicing.h"
 #include "lib/log.h"
 #include "phys/collisions.h"
-#include "phys/impulse.h"
 
 glm::dvec3 gravity_vector = {0, -2, 0};
 
@@ -33,27 +32,48 @@ environment *tick(environment *e)
         BOOST_LOG_TRIVIAL(trace) << "Handling collision";
         for(auto collision:collisions)
         {
+          glm::dvec3 axis;
+          double offset;
+          bool collidet = false;
           if((c -> type == box) && (e -> containers[collision] -> type == box))
           {
-            glm::dvec3 axis;
-            double offset;
             BOOST_LOG_TRIVIAL(trace) << "box to box collision";
-            if(box_box(e -> containers[collision], c, &axis, &offset))
+            collidet = box_box(e -> containers[collision], c, &axis, &offset);
+          }
+          if((c -> type == box) && (e -> containers[collision] -> type == caps))
+          {
+            BOOST_LOG_TRIVIAL(trace) << "capsule to box collision";
+            collidet = capsule_box(e -> containers[collision], c, &axis, &offset);
+          }
+          if((c -> type == caps) && (e -> containers[collision] -> type == box))
+          {
+            BOOST_LOG_TRIVIAL(trace) << "box to capsule collision";
+            collidet = box_capsule(e -> containers[collision], c, &axis, &offset);
+          }
+          if((c -> type == caps) && (e -> containers[collision] -> type == caps))
+          {
+            BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
+            collidet = capsule_capsule(e -> containers[collision], c, &axis, &offset);
+          }
+          if(collidet)
+          {
+            if(offset < 0.000001)
             {
-              BOOST_LOG_TRIVIAL(trace) << "handling collision";
-              double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-c -> velocity, axis);
-              glm::dvec3 j = axis;
-              glm::dmat3 im = {{c -> im, 0, 0}, {0, c -> im, 0}, {0, 0, c -> im}};
-              glm::dvec3 v = c -> velocity;
-              double em = glm::dot(j, im * j);
-              double lam = (-glm::dot(j, v) + bias) / em;
-              glm::dvec3 dv = (im * j) * lam;
-              c -> velocity += dv;
+              continue;
             }
-            else
-            {
-              BOOST_LOG_TRIVIAL(trace) << "false collision";
-            }
+            BOOST_LOG_TRIVIAL(trace) << "handling collision";
+            double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-c -> velocity, axis);
+            glm::dvec3 j = axis;
+            glm::dmat3 im = {{c -> im, 0, 0}, {0, c -> im, 0}, {0, 0, c -> im}};
+            glm::dvec3 v = c -> velocity;
+            double em = glm::dot(j, im * j);
+            double lam = (-glm::dot(j, v) + bias) / em;
+            glm::dvec3 dv = (im * j) * lam;
+            c -> velocity += dv;
+          }
+          else
+          {
+            BOOST_LOG_TRIVIAL(trace) << "false collision";
           }
         }
       }
