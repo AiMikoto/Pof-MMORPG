@@ -53,10 +53,10 @@ aabb container::to_aabb()
     // rotation - only around y axis -> no impact on aabb
     ret.minx = position.x - scale.x * size.x / 2;
     ret.maxx = position.x + scale.x * size.x / 2;
-    ret.miny = position.y - scale.y * size.x / 2;
-    ret.maxy = position.y + scale.y * size.x / 2;
-    ret.minz = position.z - scale.z * size.x / 2;
-    ret.maxz = position.z + scale.z * size.x / 2;
+    ret.miny = position.y - scale.y * size.y / 2;
+    ret.maxy = position.y + scale.y * size.y / 2;
+    ret.minz = position.z - scale.z * size.z / 2;
+    ret.maxz = position.z + scale.z * size.z / 2;
   }
   if(this -> type == box)
   {

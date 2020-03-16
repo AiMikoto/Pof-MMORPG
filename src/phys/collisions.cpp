@@ -127,7 +127,7 @@ bool capsule_box(container *c, container *b)
   return capsule_box(c, b, &axis, &projection);
 }
 
-bool capsule_box(container *c, container *b, glm::dvec *axis, double *projection)
+bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projection)
 {
   // TODO: this
 }
@@ -137,34 +137,71 @@ bool box_capsule(container *b, container *c)
   return capsule_box(c, b);
 }
 
-bool box_capsule(container *b, container *c, glm::dvec *axis, double *projection)
+bool box_capsule(container *b, container *c, glm::dvec3 *axis, double *projection)
 {
-  glm::dvec3 axis;
-  double projection;
-  bool ret = capsule_box(c, b, &axis, &projection);
-  projection *= -1;
+  bool ret = capsule_box(c, b, axis, projection);
+  *axis = -*axis;
+  return ret;
 }
 
 bool capsule_capsule(container *c1, container *c2)
 {
   glm::dvec3 axis;
   double projection;
-  return capsule_box(c1, c2, &axis, &projection);
+  return capsule_capsule(c1, c2, &axis, &projection);
 }
 
-bool capsule_capsule(container *c1, container *c2, glm::dvec *axis, double *projection)
+bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *projection)
 {
-  glm::dvec3 scale = c1 -> o -> transform.scale;
-  glm::dvec3 size = c1 -> o -> meshScale;
-  double r1 = c1 -> o -> transform.scale.x * c1 -> o -> meshScale.x / 2;
-  double r2 = c2 -> o -> transform.scale.x * c2 -> o -> meshScale.x / 2;
-  double miny1 = position.y - scale.y * size.y;
   // Assumptions
   // scale - x = z = radius, y = height
   // rotation - only around y axis -> no impact on aabb
-  ret.maxx = position.x + scale.x * size.x / 2;
-  ret.miny = position.y - scale.y * size.x / 2;
-  ret.maxy = position.y + scale.y * size.x / 2;
-  ret.minz = position.z - scale.z * size.x / 2;
-  ret.maxz = position.z + scale.z * size.x / 2;
+  double r1 = c1 -> o -> transform.scale.x * c1 -> o -> meshScale.x / 2;
+  double r2 = c2 -> o -> transform.scale.x * c2 -> o -> meshScale.x / 2;
+  double miny1 = c1 -> o -> transform.position.y - c1 -> o -> transform.scale.y * c1 -> o -> meshScale.y / 2 + r1;
+  double maxy1 = c1 -> o -> transform.position.y + c1 -> o -> transform.scale.y * c1 -> o -> meshScale.y / 2 - r1;
+  double miny2 = c2 -> o -> transform.position.y - c2 -> o -> transform.scale.y * c2 -> o -> meshScale.y / 2 + r2;
+  double maxy2 = c2 -> o -> transform.position.y + c2 -> o -> transform.scale.y * c2 -> o -> meshScale.y / 2 - r2;
+  double dx = c1 -> o -> transform.position.x - c2 -> o -> transform.position.x;
+  double dz = c1 -> o -> transform.position.z - c2 -> o -> transform.position.z;
+  if((maxy2 > miny1) && (maxy1 > miny2))
+  {
+    // Just radius check
+    double distance = std::sqrt(dx * dx + dz * dz);
+    if(distance < r1 + r2)
+    {
+      *projection = r1 + r2 - distance;
+      *axis = {dx, 0, dz};
+      *axis = glm::normalize(*axis);
+      return true;
+    }
+    return false;
+  }
+  if(maxy2 < miny1)
+  {
+    double dy = miny1 - maxy2;
+    double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+    if(distance < r1 + r2)
+    {
+      *projection = r1 + r2 - distance;
+      *axis = {dx, -dy, dz};
+      *axis = glm::normalize(*axis);
+      return true;
+    }
+    return false;
+  }
+  if(maxy1 < miny2)
+  {
+    double dy = miny2 - maxy1;
+    double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+    if(distance < r1 + r2)
+    {
+      *projection = r1 + r2 - distance;
+      *axis = {dx, dy, dz};
+      *axis = glm::normalize(*axis);
+      return true;
+    }
+    return false;
+  }
+  return false;
 }

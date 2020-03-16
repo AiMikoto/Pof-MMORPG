@@ -611,8 +611,137 @@ void test_collisions()
   {
     PASS;
   }
+  graphics::Mesh *m3 = mesh_generator();
+  m3 -> transform.position = {10, 10, 10};
+  m3 -> transform.scale = {1, 6, 1};
+  container *c3 = new container(m3, caps, true, true, true);
+  graphics::Mesh *m4 = mesh_generator();
+  m4 -> transform.scale = {1, 6, 1};
+  container *c4 = new container(m4, caps, true, true, true);
+  TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
+  m4 -> transform.position = {8, 10, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
+  m4 -> transform.position = {12, 10, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
+  m4 -> transform.position = {10, 10, 8};
+  if(capsule_capsule(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
+  m4 -> transform.position = {10, 10, 12};
+  if(capsule_capsule(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION NESTED");
+  m4 -> transform.position = {10, 8, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION NESTED");
+  m4 -> transform.position = {10, 12, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION TOP");
+  m4 -> transform.position = {10, 17, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION TOP");
+  m4 -> transform.position = {10, 21, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION TOP");
+  m4 -> transform.position = {10, 22, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION BOTTOM");
+  m4 -> transform.position = {10, 3, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION BOTTOM");
+  m4 -> transform.position = {10, -1, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE CAPSULE COLLISION BOTTOM");
+  m4 -> transform.position = {10, -2, 10};
+  if(capsule_capsule(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
   // delete c1;
   // delete c2;
+  // delete c3;
+  // delete c4;
 }
 
 void test_slicing()
