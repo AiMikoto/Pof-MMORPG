@@ -118,3 +118,53 @@ bool box_box(container *b1, container *b2, glm::dvec3 *axis, double *projection)
   }
   return collides;
 }
+
+
+bool capsule_box(container *c, container *b)
+{
+  glm::dvec3 axis;
+  double projection;
+  return capsule_box(c, b, &axis, &projection);
+}
+
+bool capsule_box(container *c, container *b, glm::dvec *axis, double *projection)
+{
+  // TODO: this
+}
+
+bool box_capsule(container *b, container *c)
+{
+  return capsule_box(c, b);
+}
+
+bool box_capsule(container *b, container *c, glm::dvec *axis, double *projection)
+{
+  glm::dvec3 axis;
+  double projection;
+  bool ret = capsule_box(c, b, &axis, &projection);
+  projection *= -1;
+}
+
+bool capsule_capsule(container *c1, container *c2)
+{
+  glm::dvec3 axis;
+  double projection;
+  return capsule_box(c1, c2, &axis, &projection);
+}
+
+bool capsule_capsule(container *c1, container *c2, glm::dvec *axis, double *projection)
+{
+  glm::dvec3 scale = c1 -> o -> transform.scale;
+  glm::dvec3 size = c1 -> o -> meshScale;
+  double r1 = c1 -> o -> transform.scale.x * c1 -> o -> meshScale.x / 2;
+  double r2 = c2 -> o -> transform.scale.x * c2 -> o -> meshScale.x / 2;
+  double miny1 = position.y - scale.y * size.y;
+  // Assumptions
+  // scale - x = z = radius, y = height
+  // rotation - only around y axis -> no impact on aabb
+  ret.maxx = position.x + scale.x * size.x / 2;
+  ret.miny = position.y - scale.y * size.x / 2;
+  ret.maxy = position.y + scale.y * size.x / 2;
+  ret.minz = position.z - scale.z * size.x / 2;
+  ret.maxz = position.z + scale.z * size.x / 2;
+}
