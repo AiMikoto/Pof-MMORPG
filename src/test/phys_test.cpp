@@ -738,6 +738,98 @@ void test_collisions()
   {
     PASS;
   }
+  // gonna be lazy and treat c4 as a box
+  TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
+  m4 -> transform.position = {8, 10, 10};
+  if(capsule_box(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
+  m4 -> transform.position = {12, 10, 10};
+  if(capsule_box(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
+  m4 -> transform.position = {10, 10, 12};
+  if(capsule_box(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
+  m4 -> transform.position = {10, 10, 8};
+  if(capsule_box(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE BOX COLLISION NESTED");
+  m4 -> transform.position = {10, 8, 10};
+  if(capsule_box(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE BOX COLLISION NESTED");
+  m4 -> transform.position = {10, 12, 10};
+  if(capsule_box(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE BOX ROTATED NESTED");
+  m4 -> transform.rotateTo(1, {2, 3, 4});
+  if(capsule_box(c3, c4))
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  TEST("TESTING CAPSULE BOX ROTATED TOUCHING EDGE");
+  m4 -> transform.rotateTo(pi/4, {0, 1, 0});
+  m4 -> transform.position = {10 - 1 - sq2 - 0.001, 10, 10};
+  if(capsule_box(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
+  TEST("TESTING CAPSULE BOX ROTATED TOUCHING TANGENT");
+  m4 -> transform.position = {10 - sq2 - 0.001, 10, 10 - sq2 - 0.001};
+  if(capsule_box(c3, c4))
+  {
+    FAIL;
+  }
+  else
+  {
+    PASS;
+  }
   // delete c1;
   // delete c2;
   // delete c3;
@@ -808,7 +900,6 @@ void test_slicing()
   {
     tick(e);
   }
-  printf("p=%lf\n", c -> o -> transform.position.y);
   pos_equals = equals(c -> o -> transform.position, {0, 11, 0});
   if(pos_equals)
   {

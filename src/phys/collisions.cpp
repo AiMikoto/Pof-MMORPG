@@ -13,7 +13,7 @@ bool box_box(container *b1, container *b2)
 }
 
 bool box_box(container *b1, container *b2, glm::dvec3 *axis, double *projection)
-{
+{ // use SAT
   int i, j;
   bool collides = true;
   glm::dvec4 points1[8], points2[8];
@@ -128,8 +128,100 @@ bool capsule_box(container *c, container *b)
 }
 
 bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projection)
-{
-  // TODO: this
+{ // use SAT
+  int i, j;
+  bool collides = true;
+  glm::dvec4 points[8];
+  // get details of capsule, namely the radius and the 2 segment delimiters
+  double r = c -> o -> transform.scale.x * c -> o -> meshScale.x / 2;
+  double minyc = c -> o -> transform.position.y - c -> o -> transform.scale.y * c -> o -> meshScale.y / 2 + r;
+  double maxyc = c -> o -> transform.position.y + c -> o -> transform.scale.y * c -> o -> meshScale.y / 2 - r;
+  glm::dvec3 pointc1 = {c -> o -> transform.position.x, minyc, c -> o -> transform.position.z};
+  glm::dvec3 pointc2 = {c -> o -> transform.position.x, maxyc, c -> o -> transform.position.z};
+  // get points from b
+  get_points(b, points);
+  // compute 3 edges for b
+  glm::dvec3 eb1 = points[0] - points[1];
+  glm::dvec3 eb2 = points[0] - points[2];
+  glm::dvec3 eb3 = points[0] - points[4];
+  glm::dvec3 ec = pointc1 - pointc2;
+  // compute 17 axis
+  glm::dvec3 axi[7] = {
+    // 3 normals from b
+    glm::cross(eb1, eb2),
+    glm::cross(eb1, eb3),
+    glm::cross(eb2, eb3),
+    // 3 cross products from edges of b1 and the capsule segment
+    glm::cross(eb1, ec),
+    glm::cross(eb2, ec),
+    glm::cross(eb2, ec),
+    // the capsule axis itself
+    ec
+  };
+  double p;
+  // for each axis
+  for(i = 0; i < 7; i++)
+  {
+    if(is_zero(axi[i]))
+    { // pointless
+      continue;
+    }
+    axi[i] = glm::normalize(axi[i]);
+    double min1p, max1p, min2p, max2p;
+    // project b onto axis
+    for(j = 0; j < 8; j++)
+    {
+      p = axi[i].x * points[j].x
+        + axi[i].y * points[j].y
+        + axi[i].z * points[j].z;
+      if(j == 0)
+      {
+        min1p = p;
+        max1p = p;
+      }
+      else
+      {
+        min1p = std::min(min1p, p);
+        max1p = std::max(max1p, p);
+      }
+    }
+    // project the capsule onto axis
+    p = axi[i].x * pointc1.x
+      + axi[i].y * pointc1.y
+      + axi[i].z * pointc1.z;
+    min2p = p;
+    max2p = p;
+    p = axi[i].x * pointc2.x
+      + axi[i].y * pointc2.y
+      + axi[i].z * pointc2.z;
+    min2p = std::min(min2p, p);
+    max2p = std::max(max2p, p);
+    // project the radius shadow onto axis
+    min2p -= r;
+    max2p += r;
+    if((max2p > min1p) && (max1p > min2p))
+    {
+      // collides on this axis
+      double projection_difference = max2p - min1p;
+      if(i == 0)
+      {
+        *projection = projection_difference;
+        *axis = axi[i];
+      }
+      if(*projection > projection_difference)
+      {
+        *projection = projection_difference;
+        *axis = axi[i];
+      }
+    }
+    else
+    {
+      // no collision on this axis
+      collides = false;
+      break;
+    }
+  }
+  return collides;
 }
 
 bool box_capsule(container *b, container *c)
