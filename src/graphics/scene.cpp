@@ -5,38 +5,16 @@
 
 namespace gph = graphics;
 
-gph::Scene* gph::activeScene;
-std::map<llong, gph::GameObject*> gph::gameObjects;
-
-gph::Scene::Scene() {
-	mDrawObjects = mDrawUI = true;
-}
+gph::Scene::Scene() {}
 
 gph::Scene::~Scene() {
-	for (auto t : textures) {
-		delete t.second;
-	}
-	textures.clear();
-	meshes.clear();
-	cameras.clear();
-	lights.clear();
 	for (auto go : gameObjects) {
-		if (this->id != go.second->id)
-			delete go.second;
+		delete go;
 	}
 	gameObjects.clear();
 }
 
-void gph::Scene::update(GLFWwindow* window) {
-	updateGameObjects(window);
-	updateCameras(window);
-	draw(window);
-}
-
-void gph::Scene::draw(GLFWwindow* window) {
-	if(mDrawObjects) drawObjects(window);
-	if(mDrawUI) drawUI(window);
-}
+void gph::Scene::update(GLFWwindow* window) {}
 
 void gph::Scene::drawObjects(GLFWwindow* window) {
 	glEnable(GL_DEPTH_TEST);

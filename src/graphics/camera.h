@@ -1,5 +1,6 @@
 #pragma once
 #include "objects.h"
+#include "component.h"
 #include "graphics_files.h"
 #include "constants.h"
 #include "variables.h"
@@ -14,7 +15,7 @@ namespace graphics {
 		void deserialize(boost::property_tree::ptree node);
 	};
 
-	class Camera : public GameObject {
+	class Camera : public Component {
 	public:
 		bool isFixed, isPerspective;
 		double moveSpeed, rotationSpeed;
@@ -26,7 +27,6 @@ namespace graphics {
 		std::vector<size_t> objectsInView;
 
 		Camera();
-		Camera(llong parentID);
 		Camera(CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
 		Camera(Transform transform, CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
 		~Camera();
@@ -36,6 +36,7 @@ namespace graphics {
 		glm::mat4 projection(GLFWwindow* window);
 		glm::mat4 view();
 		void setViewport(GLFWwindow* window);
+		virtual Camera* instantiate(GameObject* gameObject);
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
 	private:

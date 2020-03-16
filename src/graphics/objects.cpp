@@ -1,118 +1,130 @@
 #include "objects.h"
-#include "transform.h"
 #include "lib/log.h"
-#include "scene.h"
 #include "constants.h"
-#include "variables.h"
-#include "utils.h"
-
+#include "component.h"
+#include "mesh.h"
 
 namespace gph = graphics;
 
-gph::GameObject::GameObject() {
-	setup();
-}
-
-void gph::GameObject::setup() {
-	if(this->id == -1)	generateID();
-	gameObjects[this->id] = this;
-}
+gph::GameObject::GameObject() {}
 
 gph::GameObject::~GameObject() {
-	childrenIDs.clear();
+	for (auto c : components) {
+		delete c;
+	}
+	components.clear();
+	for (auto c : children) {
+		delete c;
+	}
+	children.clear();
 }
 
-gph::GameObject::GameObject(llong parentID) {
-	this->parentID = parentID;
-	setup();
+gph::GameObject::GameObject(GameObject* parent) {
+	this->parent = parent;
 }
 
-gph::GameObject::GameObject(llong id, llong parentID) {
-	this->id = id;
-	this->parentID = parentID;
-	setup();
+gph::GameObject::GameObject(std::vector<GameObject*> children) {
+	this->children = children;
 }
 
-gph::GameObject::GameObject(std::vector<llong> childrenIDs) {
-	this->childrenIDs = childrenIDs;
-	setup();
+gph::GameObject::GameObject(std::vector<Component*> components) {
+	this->components = components;
 }
 
-gph::GameObject::GameObject(llong parentID, std::vector<llong> childrenIDs) {
-	this->childrenIDs = childrenIDs;
-	this->parentID = parentID;
-	setup();
+gph::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> children) {
+	this->parent = parent;
+	this->children = children;
 }
 
-gph::GameObject::GameObject(llong id, llong parentID, std::vector<llong> childrenIDs) {
-	this->id = id;
-	this->childrenIDs = childrenIDs;
-	this->parentID = parentID;
-	setup();
+gph::GameObject::GameObject(GameObject* parent, std::vector<Component*> components) {
+	this->parent = parent;
+	this->components = components;
 }
 
-void gph::GameObject::addParent(llong parentID) {
-	this->parentID = parentID;
-	this->updateTransform();
+gph::GameObject::GameObject(std::vector<GameObject*> children, std::vector<Component*> components) {
+	this->children = children;
+	this->components = components;
 }
 
-void gph::GameObject::addChild(llong childID) {
+gph::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> children, std::vector<Component*> components) {
+	this->parent = parent;
+	this->children = children;
+	this->components = components;
+}
+
+gph::GameObject* gph::GameObject::instantiate() {
+	GameObject* gameObject = new GameObject(this->parent);
+	for (auto c : components) {
+		switch (c->type) {
+		case objectTypes::mesh:
+			Mesh* mesh = static_cast<Mesh*>(c)->instantiate();
+			gameObject->addComponent(mesh);
+			break;
+		case objectTypes::camera:
+			Camera* camera = static_cast<Camera*>(c)->instantiate(gameObject);
+			break;
+		case objectTypes::light:
+			break;
+		}
+		
+	}
+
+}
+
+void gph::GameObject::addChild(GameObject* child) {
 	bool found = false;
-	for (auto i : childrenIDs) {
-		if (i == childID) {
+	for (auto i : this->children) {
+		if (i == child) {
 			found = true;
 			break;
 		}
 	}
 	if (!found) {
-		this->childrenIDs.push_back(childID);
-		gameObjects[childID]->parentID = this->id;
-		gameObjects[childID]->updateTransform();
+		this->children.push_back(child);
+		child->parent = this;
 	}
 }
 
-void gph::GameObject::addChildren(std::vector<llong> childrenIDs) {
-	for (auto i : childrenIDs) {
+void gph::GameObject::addChildren(std::vector<GameObject*> children) {
+	for (auto i : children) {
 		this->addChild(i);
 	}
 }
 
-void gph::GameObject::generateID() {
-	this->id = gameObjects.size();
+void gph::GameObject::addComponent(Component* component) {
+	bool found = false;
+	for (auto i : this->components) {
+		if (i == component) {
+			found = true;
+			break;
+		}
+	}
+	if (!found) {
+		this->components.push_back(component);
+		component->gameObject = this;
+	}
 }
 
-void gph::GameObject::updateTransform() {
-	if (parentID != -1) {
-		transform.position += gameObjects[parentID]->transform.position;
-		transform.rotation *= gameObjects[parentID]->transform.rotation;
-		transform.scale *= gameObjects[parentID]->transform.scale;
-	}
-	for (auto i : childrenIDs) {
-		gameObjects[i]->updateTransform();
+void gph::GameObject::addComponents(std::vector<Component*> components) {
+	for (auto i : components) {
+		this->addComponent(i);
 	}
 }
-
-void gph::GameObject::update(GLFWwindow* window) {}
 
 boost::property_tree::ptree gph::GameObject::serialize() {
 	boost::property_tree::ptree node;
 	node.put("name", name);
 	node.put("tag", tag);
-	node.put("id", id);
-	node.put("parentID", parentID);
-	node.put("childrenIDs", vectorToString(childrenIDs, ' '));
+	for (auto c : components) {
+		node.add_child("component", c->serialize());
+	}
+	for (auto c : children) {
+		node.add_child("game object", c->serialize());
+	}	
 	node.add_child("transform", transform.serialize());
 	return node;
 }
 
 void gph::GameObject::deserialize(boost::property_tree::ptree node) {
-	gameObjects.erase(this->id);
-	transform = Transform();
-	transform.deserialize(node.get_child("transform"));
-	name = node.get<std::string>("name");
-	tag = node.get<std::string>("tag");
-	id = node.get<llong>("id");
-	parentID = node.get<llong>("parentID");
-	std::string children = node.get<std::string>("children");
-	childrenIDs = stringToVector<llong>(children, ' ');
+	
 }

@@ -29,17 +29,18 @@ namespace graphics {
 		const glm::vec4 green = glm::vec4(0, 1, 0, 1);
 		const glm::vec4 blue = glm::vec4(0, 0, 1, 1);
 		const glm::vec4 bgColor = glm::vec4(0.2f, 0.3f, 0.3f, 1.0f);
+		const glm::vec4 gray = glm::vec4(0.5f, 0.5f, 0.5f, 1);
 	};
 
 	namespace cam{
 		enum cameraMovements {
 			forward, backwards, up, down, left, right
 		};
-	}	
+	}
 
 	namespace objectTypes {
 		enum types {
-			object, mesh, camera, light
+			object, mesh, camera, light, collider
 		};
 	};
 

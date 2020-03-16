@@ -1,40 +1,38 @@
 #pragma once
-#include "graphics_files.h"
 #include <vector>
 #include <string>
-#include <map>
 #include "transform.h"
-#include "shader.h"
 #include <boost/property_tree/ptree.hpp>
 
 namespace graphics {
+	class Component;
 
 	class GameObject {
 	public:
 		std::string name, tag;
-		llong id = -1;
-		llong parentID = -1;
-		std::vector<llong> childrenIDs;
+		GameObject* parent;
+		std::vector<GameObject*> children;
+		std::vector<Component*> components;
 		Transform transform;
 		uint type;
-		bool mUpdate = false;
 
 		GameObject();
 		~GameObject();
-		GameObject(llong parentID);
-		GameObject(llong id, llong parentID);
-		GameObject(std::vector<llong> childrenIDs);
-		GameObject(llong parentID, std::vector<llong> childrenIDs);
-		GameObject(llong id, llong parentID, std::vector<llong> childrenIDs);
-		void addParent(llong parentID);
-		void addChild(llong childID);
-		void addChildren(std::vector<llong> children);
-		virtual void update(GLFWwindow* window);
-		void updateTransform();
+		GameObject(GameObject* parent);
+		GameObject(std::vector<GameObject*> children);
+		GameObject(std::vector<Component*> components);
+		GameObject(GameObject* parent, std::vector<GameObject*> children);
+		GameObject(GameObject* parent, std::vector<Component*> components);
+		GameObject(std::vector<GameObject*> children, std::vector<Component*> components);
+		GameObject(GameObject* parent, std::vector<GameObject*> children, std::vector<Component*> components);
+
+		//returns a pointer to a new game object that has all its values copied from the current one
+		GameObject* instantiate();
+		void addChild(GameObject* child);
+		void addChildren(std::vector<GameObject*> children);
+		void addComponent(Component* component);
+		void addComponents(std::vector<Component*> components);
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
-	private:
-		void setup();
-		void generateID();		
+		void deserialize(boost::property_tree::ptree node);	
 	};
 }

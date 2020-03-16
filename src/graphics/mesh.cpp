@@ -1,68 +1,16 @@
-#include "model.h"
+#include "mesh.h"
 #include "transform.h"
 #include "light.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "lib/stb_image.h"
 #include "lib/log.h"
 #include "scene.h"
 #include "utils.h"
+#include "gpu.h"
 
 namespace gph = graphics;
 
-gph::Texture::Texture() {}
-
-gph::Texture::Texture(std::string path) {
-	this->path = path;
-	load();
-}
-
-gph::Texture::Texture(std::string path, uint type) {
-	this->path = path;
-	this->type = type;
-	load();
-}
-
-gph::Texture::~Texture() {
-	glDeleteTextures(1, &id);
-}
-
-void gph::Texture::load() {
-	glGenTextures(1, &id);
-	glBindTexture(GL_TEXTURE_2D, id);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width, height, totalChannels;
-	stbi_set_flip_vertically_on_load(true);
-	uchar* data = stbi_load(path.c_str(), &width, &height, &totalChannels, 0);
-
-	if (data) {
-		GLenum format;
-		switch (totalChannels) {
-		case 1:
-			format = GL_RED;
-		case 3:
-			format = GL_RGB;
-		case 4:
-			format = GL_RGBA;
-		}
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		BOOST_LOG_TRIVIAL(trace) << "Failed to load texture at: " << path;
-	}
-	stbi_image_free(data);
-	activeScene->textures[this->id] = this;
-}
-
-gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> textureIDs, std::vector<uint> indices) : gph::GameObject() {
+gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> materialsID, std::vector<uint> indices) {
 	this->vertices = vertices;
-	this->textureIDs = textureIDs;
+	this->materialsIDs = materialsID;
 	this->indices = indices;
 	this->type = objectTypes::mesh;
 }
@@ -79,51 +27,26 @@ gph::Mesh::~Mesh() {
 	outlineIndices.clear();
 }
 
-void gph::Mesh::draw(Shader* shader, Camera* camera, GLFWwindow* window) {
-	uint currentDiffuse = 1;
-	uint currentSpecular = 1;
-	uint currentAmbient = 1;
-	uint currentEmmisive = 1;
-	uint currentHeight = 1;
-	uint currentNormal = 1;
-	int index = 0;
-	for (auto i: this->textureIDs) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		std::string current;
-		uint type = activeScene->textures[i]->type;
-		switch (type) {
-		case aiTextureType_DIFFUSE:
-			current = "diffuseSampler" + std::to_string(currentDiffuse++);
-			break;
-		case aiTextureType_SPECULAR:
-			break;
-		case aiTextureType_AMBIENT:
-			break;
-		case aiTextureType_EMISSIVE:
-			break;
-		case aiTextureType_HEIGHT:
-			break;
-		case aiTextureType_NORMALS:
-			break;
-		}
-		if (current != "") {
-			shader->setInt(current, index);
-			glBindTexture(GL_TEXTURE_2D, i);
-		}
-		index++;
+void gph::Mesh::draw(Camera* camera, GLFWwindow* window) {
+	float alpha = 1.0f / float(materialsIDs.size());
+	glm::mat4 mvp = camera->projection(window) * camera->view() * gameObject->transform.model();
+	gpu->shaders[gpu->materials[0]->shaderID]->setMat4("mvp", mvp);
+	for (auto i : materialsIDs) {
+		gpu->materials[i]->shaderSetup(alpha);
+
+		glBindVertexArray(vertexArrayID);
+		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		glActiveTexture(GL_TEXTURE0);
 	}
-
-	glm::mat4 mvp = camera->projection(window) * camera->view() * transform.model();
-	shader->setMat4("mvp", mvp);
-
-	glBindVertexArray(vertexArrayID);
-	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
-
-	glActiveTexture(GL_TEXTURE0);
 }
 
-void gph::Mesh::copy(Mesh* target) {}
+gph::Mesh* gph::Mesh::instantiate(GameObject* gameObject) {
+	Mesh* mesh = new Mesh(this->vertices, this->materialsIDs, this->indices);
+	mesh->gameObject = gameObject;
+	return mesh;
+}
 
 void gph::Mesh::glContextSetup() {
 	if (!initialized) {
@@ -180,16 +103,14 @@ void gph::Mesh::bindBuffers() {
 
 void gph::Mesh::createOutline() {}
 
-
-
-gph::Model::Model(std::string path, bool gammaCorrection) {
+gph::MeshLoader::MeshLoader(std::string path, bool gammaCorrection) {
 	this->gammaCorrection = gammaCorrection;
 	loadModel(path);
 }
 
-gph::Model::~Model() {}
+gph::MeshLoader::~MeshLoader() {}
 
-void gph::Model::loadModel(std::string path) {
+void gph::MeshLoader::loadModel(std::string path) {
 	Assimp::Importer importer;
 	BOOST_LOG_TRIVIAL(trace) << "Started loading model: " << path;
 	directory = path.substr(0, path.find_last_of('/'));
@@ -201,27 +122,26 @@ void gph::Model::loadModel(std::string path) {
 	processNode(scene->mRootNode, scene);
 }
 
-void gph::Model::processNode(aiNode* node, const aiScene* scene) {
+void gph::MeshLoader::processNode(aiNode* node, const aiScene* scene) {
 	for (uint i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		addChild(processMesh(mesh, scene));
+		loadedMeshes.push_back(processMesh(mesh, scene));
 	}
 	for (uint i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
 	}
 }
 
-llong gph::Model::processMesh(aiMesh *mesh, const aiScene *scene) {
+gph::Mesh* gph::MeshLoader::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices = loadMeshVertices(mesh, scene);
 	std::vector<uint> indices = loadMeshIndices(mesh, scene);
-	std::vector<uint> textureIDs = loadTextures(mesh, scene);
-	Mesh* processedMesh = new Mesh(vertices, textureIDs, indices);
+	std::vector<uint> materialsIDs = loadTextures(mesh, scene);
+	Mesh* processedMesh = new Mesh(vertices, materialsIDs, indices);
 	processedMesh->computeScale();
-	activeScene->addMesh(processedMesh);
-	return processedMesh->id;
+	return processedMesh;
 }
 
-std::vector<gph::Vertex> gph::Model::loadMeshVertices(aiMesh *mesh, const aiScene *scene) {
+std::vector<gph::Vertex> gph::MeshLoader::loadMeshVertices(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices;
 	for (uint i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex;
@@ -240,7 +160,7 @@ std::vector<gph::Vertex> gph::Model::loadMeshVertices(aiMesh *mesh, const aiScen
 	return vertices;
 }
 
-std::vector<uint> gph::Model::loadMeshIndices(aiMesh *mesh, const aiScene *scene) {
+std::vector<uint> gph::MeshLoader::loadMeshIndices(aiMesh *mesh, const aiScene *scene) {
 	std::vector<uint> indices;
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -251,31 +171,31 @@ std::vector<uint> gph::Model::loadMeshIndices(aiMesh *mesh, const aiScene *scene
 	return indices;
 }
 
-std::vector<uint> gph::Model::loadTextures(aiMesh* mesh, const aiScene* scene) {
-	std::vector<uint> textureIDs;
+std::vector<uint> gph::MeshLoader::loadMaterials(aiMesh* mesh, const aiScene* scene) {
+	std::vector<uint> materialsIDs;
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 	std::vector<uint> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE);
-	textureIDs.insert(textureIDs.end(), diffuseMaps.begin(), diffuseMaps.end());
+	materialsIDs.insert(materialsIDs.end(), diffuseMaps.begin(), diffuseMaps.end());
 	std::vector<uint> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR);
-	textureIDs.insert(textureIDs.end(), specularMaps.begin(), specularMaps.end());
+	materialsIDs.insert(materialsIDs.end(), specularMaps.begin(), specularMaps.end());
 	std::vector<uint> ambientMaps = loadMaterialTextures(material, aiTextureType_AMBIENT);
-	textureIDs.insert(textureIDs.end(), ambientMaps.begin(), ambientMaps.end());
+	materialsIDs.insert(materialsIDs.end(), ambientMaps.begin(), ambientMaps.end());
 	std::vector<uint> emmisiveMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE);
-	textureIDs.insert(textureIDs.end(), emmisiveMaps.begin(), emmisiveMaps.end());
+	materialsIDs.insert(materialsIDs.end(), emmisiveMaps.begin(), emmisiveMaps.end());
 	std::vector<uint> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT);
-	textureIDs.insert(textureIDs.end(), heightMaps.begin(), heightMaps.end());
+	materialsIDs.insert(materialsIDs.end(), heightMaps.begin(), heightMaps.end());
 	std::vector<uint> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS);
-	textureIDs.insert(textureIDs.end(), normalMaps.begin(), normalMaps.end());
-	return textureIDs;
+	materialsIDs.insert(materialsIDs.end(), normalMaps.begin(), normalMaps.end());
+	return materialsIDs;
 }
 
-std::vector<uint> gph::Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type) {
+std::vector<uint> gph::MeshLoader::loadMaterialTextures(aiMaterial *mat, aiTextureType type) {
 	std::vector<uint> meshTextures;
 	for (uint i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString path;
 		mat->GetTexture(type, i, &path);
 		bool skip = false;
-		for (auto texture : activeScene->textures) {
+		for (auto texture : gpu->textures) {
 			if (texture.second->path == std::string(path.C_Str())) {
 				meshTextures.push_back(texture.second->id);
 				skip = true;
@@ -285,6 +205,7 @@ std::vector<uint> gph::Model::loadMaterialTextures(aiMaterial *mat, aiTextureTyp
 		if (!skip) {
 			Texture* texture = new Texture(directory + "/" + path.C_Str(), type); //textures are automatically placed in the map when instantiated
 			meshTextures.push_back(texture->id);
+			Material* mat = new Material(texture->id, gpu-);
 		}
 	}
 	return meshTextures;
@@ -324,10 +245,9 @@ boost::property_tree::ptree gph::Mesh::serialize() {
 		verticesNode.add_child("v" + std::to_string(i), vertices[i].serialize());
 	}
 	node.add_child("vertices", verticesNode);
-	node.put("textureIDs", vectorToString(textureIDs, ' '));
+	node.put("materialIDs", vectorToString(materialsIDs, ' '));
 	node.put("indices", vectorToString(indices, ' '));
 	node.put("textures", vectorToString(outlineIndices, ' '));
-	node.add_child("gameObject", GameObject::serialize());
 	return node;
 }
 

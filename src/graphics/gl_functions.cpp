@@ -67,8 +67,6 @@ void gph::update(GLFWwindow* window, double& lastTime, double& check, int fps) {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
-	activeScene->update(window);
-
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 }
