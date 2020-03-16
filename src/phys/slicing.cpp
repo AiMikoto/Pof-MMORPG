@@ -3,12 +3,12 @@
 #include "phys/collisions.h"
 #include "phys/impulse.h"
 
-glm::dvec3 gravity_vector = {0, -1, 0};
+glm::dvec3 gravity_vector = {0, -2, 0};
 
 // Slices per second
 const double SPS = 100;
 const double BAUMGARDE_CONSTANT = 0.2;
-const double COEFFICIENT_OF_RESTITUTION = 0.1;
+const double COEFFICIENT_OF_RESTITUTION = 0.3;
 
 environment *tick(environment *e)
 {
@@ -41,7 +41,7 @@ environment *tick(environment *e)
             if(box_box(e -> containers[collision], c, &axis, &offset))
             {
               BOOST_LOG_TRIVIAL(trace) << "handling collision";
-              double bias = -offset * BAUMGARDE_CONSTANT / dt - COEFFICIENT_OF_RESTITUTION * glm::dot(c -> velocity, axis);
+              double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-c -> velocity, axis);
               glm::dvec3 j = axis;
               glm::dmat3 im = {{c -> im, 0, 0}, {0, c -> im, 0}, {0, 0, c -> im}};
               glm::dvec3 v = c -> velocity;
