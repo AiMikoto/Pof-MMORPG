@@ -145,22 +145,49 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
   glm::dvec3 eb2 = points[0] - points[2];
   glm::dvec3 eb3 = points[0] - points[4];
   glm::dvec3 ec = pointc1 - pointc2;
-  // compute 17 axis
-  glm::dvec3 axi[7] = {
+  // compute a ton of axis
+  glm::dvec3 axi[33] = {
     // 3 normals from b
     glm::cross(eb1, eb2),
     glm::cross(eb1, eb3),
     glm::cross(eb2, eb3),
-    // 3 cross products from edges of b1 and the capsule segment
+    // 3 cross products from edges of b and the capsule segment
     glm::cross(eb1, ec),
     glm::cross(eb2, ec),
     glm::cross(eb2, ec),
+    // all possible diagonals of b
+    -eb1 + -eb2 + -eb3,
+    -eb1 + -eb2       ,
+    -eb1 + -eb2 +  eb3,
+    -eb1        + -eb3,
+    -eb1              ,
+    -eb1        +  eb3,
+    -eb1 +  eb2 + -eb3,
+    -eb1 +  eb2       ,
+    -eb1 +  eb2 +  eb3,
+           -eb2 + -eb3,
+           -eb2       ,
+           -eb2 +  eb3,
+                + -eb3,
+                +  eb3,
+            eb2 + -eb3,
+            eb2       ,
+            eb2 +  eb3,
+     eb1 + -eb2 + -eb3,
+     eb1 + -eb2       ,
+     eb1 + -eb2 +  eb3,
+     eb1        + -eb3,
+     eb1              ,
+     eb1        +  eb3,
+     eb1 +  eb2 + -eb3,
+     eb1 +  eb2       ,
+     eb1 +  eb2 +  eb3,
     // the capsule axis itself
     ec
   };
   double p;
   // for each axis
-  for(i = 0; i < 7; i++)
+  for(i = 0; i < 33; i++)
   {
     if(is_zero(axi[i]))
     { // pointless
@@ -199,6 +226,8 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
     // project the radius shadow onto axis
     min2p -= r;
     max2p += r;
+    printf("\naxis = %lf %lf %lf\n", axi[i].x, axi[i].y, axi[i].z);
+    printf("\nprojections = [%lf %lf] [%lf %lf]\n", min1p, max1p, min2p, max2p);
     if((max2p > min1p) && (max1p > min2p))
     {
       // collides on this axis
