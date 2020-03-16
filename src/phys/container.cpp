@@ -1,13 +1,37 @@
 #include "phys/container.h"
 #include <algorithm>
 
-container::container(graphics::Mesh *o, container_t c_type, bool movable, bool collidable)
+container::container(graphics::Mesh *o, container_t c_type, bool movable, bool collidable, bool collides)
 {
   this -> o = o;
   this -> type = c_type;
   this -> movable = movable;
   this -> collidable = collidable;
+  this -> collides = collides;
   this -> velocity = {0, 0, 0};
+  this -> force_acc = {0, 0, 0};
+  m = 1;
+  if(collidable)
+  {
+    im = 0;
+  }
+  if(collides)
+  {
+    im = 1;
+  }
+  // if the object neither collides nor is collidable, im is never used
+}
+
+void container::add_force(glm::dvec3 force)
+{
+  this -> force_acc += force;
+}
+
+void container::tick(double delta)
+{
+  velocity += (1 / m) * force_acc * delta;
+  force_acc = {0, 0, 0};
+  o -> transform.position += velocity * delta;
 }
 
 container::~container()
@@ -34,7 +58,7 @@ aabb container::to_aabb()
     ret.minz = position.z - scale.z * size.x / 2;
     ret.maxz = position.z + scale.z * size.x / 2;
   }
-  if((this -> type == floor_box) || (this -> type == nonfloor_box))
+  if(this -> type == box)
   {
     // Assumptions
     glm::dvec4 points[8];

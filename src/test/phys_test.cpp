@@ -165,7 +165,7 @@ graphics::Mesh *mesh_generator()
 
 bool equals(double a, double b)
 {
-  return std::abs(a - b) < 0.00001;
+  return std::abs(a - b) < 0.001;
 }
 
 bool equals(glm::dvec3 a, glm::dvec3 b)
@@ -178,7 +178,7 @@ void test_aabb()
   TEST("TESTING AABB SIZE");
   graphics::Mesh *m = mesh_generator();
   m -> transform.position = {4, 6, 10};
-  container *c = new container(m, nonfloor_box, true, true);
+  container *c = new container(m, box, true, true, true);
   aabb box = c -> to_aabb();
   if(equals(box.minx, 3)
   && equals(box.maxx, 5)
@@ -202,10 +202,10 @@ void test_collisions()
   graphics::Mesh *m1 = mesh_generator();
   m1 -> transform.position = {10, 10, 10};
   m1 -> transform.scale = {3, 3, 3};
-  container *c1 = new container(m1, nonfloor_box, true, true);
+  container *c1 = new container(m1, box, true, true, true);
   // obj1 is 7 -> 13
   graphics::Mesh *m2 = mesh_generator();
-  container *c2 = new container(m2, nonfloor_box, true, true);
+  container *c2 = new container(m2, box, true, true, true);
   TEST("TESTING BOX-BOX COLLISION NESTED");
   m2 -> transform.position = {10, 10, 10};
   if(box_box(c1, c2))
@@ -625,7 +625,7 @@ void test_slicing()
   graphics::Mesh *m = mesh_generator();
   m -> transform.position = {0, 0, 0};
   m -> transform.scale = {10, 10, 10};
-  container *c = new container(m, nonfloor_box, false, true);
+  container *c = new container(m, box, false, true, false);
   e -> add(c);
   tick(e);
   bool velo_equals = equals(c -> velocity, {0, 0, 0});
@@ -638,10 +638,34 @@ void test_slicing()
   {
     FAIL;
   }
+  TEST("TESTING TICKING OF STILL MOVABLE OBJECT");
+  m = mesh_generator();
+  m -> transform.position = {0, 11, 0};
+  c = new container(m, box, true, false, true);
+  e -> add(c);
+  int ticks = 100;
+  while(ticks--)
+  {
+    printf("p %lf %lf %lf\n", c -> o -> transform.position.x, c -> o -> transform.position.y, c -> o -> transform.position.z);
+    printf("v %lf %lf %lf\n", c -> velocity.x, c -> velocity.y, c -> velocity.z);
+    tick(e);
+  }
+  printf("p %lf %lf %lf\n", c -> o -> transform.position.x, c -> o -> transform.position.y, c -> o -> transform.position.z);
+  printf("v %lf %lf %lf\n", c -> velocity.x, c -> velocity.y, c -> velocity.z);
+  velo_equals = equals(c -> velocity, {0, 0, 0});
+  pos_equals = equals(c -> o -> transform.position, {0, 11, 0});
+  if(velo_equals && pos_equals)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
   TEST("TESTING TICKING OF MOVABLE OBJECT");
   m = mesh_generator();
   m -> transform.position = {0, 100, 0};
-  c = new container(m, nonfloor_box, true, true);
+  c = new container(m, box, true, false, true);
   e -> add(c);
   tick(e);
   velo_equals = equals(c -> velocity, {0, 0, 0});
@@ -655,7 +679,7 @@ void test_slicing()
     PASS;
   }
   TEST("TESTING FALLING OBJECT EVENTUALLY RESTING ON SURFACE");
-  int ticks = 1000;
+  ticks = 10000;
   while(ticks--)
   {
     tick(e);
@@ -677,16 +701,16 @@ void test_slicing()
   m = mesh_generator();
   m -> transform.position = {0, 0, 0};
   m -> transform.scale = {300, 10, 300};
-  c = new container(m, nonfloor_box, false, true);
+  c = new container(m, box, false, true, false);
   e -> add(c);
   m = mesh_generator();
   m -> transform.position = {0, 0, 0};
   m -> transform.scale = {10, 300, 300};
-  c = new container(m, nonfloor_box, false, true);
+  c = new container(m, box, false, true, false);
   e -> add(c);
   m = mesh_generator();
   m -> transform.position = {20, 20, 20};
-  c = new container(m, nonfloor_box, true, true);
+  c = new container(m, box, true, false, true);
   c -> velocity = {-10, 0, -10};
   e -> add(c);
   ticks = 1000;
