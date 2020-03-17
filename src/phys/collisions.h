@@ -19,4 +19,8 @@ bool capsule_capsule(container *c1, container *c2);
 
 bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *projection);
 
+bool collide(container *c1, container *c2);
+
+bool collide(container *c1, container *c2, glm::dvec3 *axis, double *projection);
+
 #endif // PHYS_COLLISIONS_H

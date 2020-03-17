@@ -1,4 +1,5 @@
 #include "phys/collisions.h"
+#include "lib/log.h"
 
 void rotate_axis(glm::dvec3 *axis, glm::dvec3 p1, glm::dvec3 p2)
 {
@@ -161,14 +162,11 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
   glm::dvec3 eb3 = points[0] - points[4];
   glm::dvec3 ec = pointc1 - pointc2;
   // compute a ton of axis
-  glm::dvec3 axi[21] = {
+  glm::dvec3 axi[17] = {
     // 3 normals from b
     glm::cross(eb1, eb2),
     glm::cross(eb1, eb3),
     glm::cross(eb2, eb3),
-    -glm::cross(eb1, eb2),
-    -glm::cross(eb1, eb3),
-    -glm::cross(eb2, eb3),
     // 3 cross products from edges of b and the capsule segment
     glm::cross(eb1, ec),
     glm::cross(eb2, ec),
@@ -185,12 +183,11 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
            -eb2 + -eb3,
            -eb2 +  eb3,
     // the capsule axis itself
-    -ec,
     ec
   };
   double p;
   // for each axis
-  for(i = 0; i < 21; i++)
+  for(i = 0; i < 17; i++)
   {
     if(is_zero(axi[i]))
     { // pointless
@@ -295,6 +292,10 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
     {
       *projection = r1 + r2 - distance;
       *axis = {dx, 0, dz};
+      if(is_zero(*axis))
+      {
+        *axis = {0, 1, 0};
+      }
       *axis = glm::normalize(*axis);
       rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
       return true;
@@ -309,6 +310,10 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
     {
       *projection = r1 + r2 - distance;
       *axis = {dx, -dy, dz};
+      if(is_zero(*axis))
+      {
+        *axis = {0, 1, 0};
+      }
       *axis = glm::normalize(*axis);
       rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
       return true;
@@ -323,11 +328,48 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
     {
       *projection = r1 + r2 - distance;
       *axis = {dx, dy, dz};
+      if(is_zero(*axis))
+      {
+        *axis = {0, 1, 0};
+      }
       *axis = glm::normalize(*axis);
       rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
       return true;
     }
     return false;
   }
+  return false;
+}
+
+bool collide(container *c1, container *c2)
+{
+  glm::dvec3 axis;
+  double projection;
+  return collide(c1, c2, &axis, &projection);
+}
+
+bool collide(container *c1, container *c2, glm::dvec3 *axis, double *projection)
+{
+  if((c1 -> type == box) && (c2 -> type == box))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "box to box collision";
+    return box_box(c1, c2, axis, projection);
+  }
+  if((c1 -> type == box) && (c2 -> type == caps))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "box to capsule collision";
+    return box_capsule(c1, c2, axis, projection);
+  }
+  if((c1 -> type == caps) && (c2 -> type == box))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "capsule to box collision";
+    return capsule_box(c1, c2, axis, projection);
+  }
+  if((c1 -> type == caps) && (c2 -> type == caps))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
+    return capsule_capsule(c1, c2, axis, projection);
+  }
+  BOOST_LOG_TRIVIAL(error) << "unknown collision type";
   return false;
 }

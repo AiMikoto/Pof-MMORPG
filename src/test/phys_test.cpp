@@ -928,7 +928,7 @@ void test_slicing()
   m = mesh_generator();
   m -> transform.position = {-20, 20, 20};
   m -> transform.scale = {1, 2, 1};
-  c = new container(m, caps, true, false, true);
+  c = new container(m, box, true, false, true);
   c -> velocity = {10, 0, -10};
   e -> add(c);
   ticks = 1000;

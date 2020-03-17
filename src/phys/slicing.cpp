@@ -35,27 +35,7 @@ environment *tick(environment *e)
           glm::dvec3 axis;
           double offset;
           bool collidet = false;
-          if((c -> type == box) && (e -> containers[collision] -> type == box))
-          {
-            BOOST_LOG_TRIVIAL(trace) << "box to box collision";
-            collidet = box_box(e -> containers[collision], c, &axis, &offset);
-          }
-          if((c -> type == box) && (e -> containers[collision] -> type == caps))
-          {
-            BOOST_LOG_TRIVIAL(trace) << "capsule to box collision";
-            collidet = capsule_box(e -> containers[collision], c, &axis, &offset);
-          }
-          if((c -> type == caps) && (e -> containers[collision] -> type == box))
-          {
-            BOOST_LOG_TRIVIAL(trace) << "box to capsule collision";
-            collidet = box_capsule(e -> containers[collision], c, &axis, &offset);
-          }
-          if((c -> type == caps) && (e -> containers[collision] -> type == caps))
-          {
-            BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
-            collidet = capsule_capsule(e -> containers[collision], c, &axis, &offset);
-          }
-          if(collidet)
+          if(collide(e -> containers[collision], c, &axis, &offset))
           {
             if(offset < 0.000001)
             {
