@@ -1,5 +1,19 @@
 #include "phys/collisions.h"
 
+void rotate_axis(glm::dvec3 *axis, glm::dvec3 p1, glm::dvec3 p2)
+{
+  double proj1 = axis -> x * p1.x
+            + axis -> y * p1.y
+            + axis -> z * p1.z;
+  double proj2 = axis -> x * p2.x
+            + axis -> y * p2.y
+            + axis -> z * p2.z;
+  if(proj1 < 0)
+  {
+    *axis *= -1;
+  }
+}
+
 bool is_zero(glm::dvec3 v)
 {
   return (std::abs(v.x) < 0.01) && (std::abs(v.y) < 0.01) && (std::abs(v.z) < 0.01);
@@ -116,6 +130,7 @@ bool box_box(container *b1, container *b2, glm::dvec3 *axis, double *projection)
       break;
     }
   }
+  rotate_axis(axis, b1 -> o -> transform.position, b2 -> o -> transform.position);
   return collides;
 }
 
@@ -236,6 +251,7 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
       break;
     }
   }
+  rotate_axis(axis, c -> o -> transform.position, b -> o -> transform.position);
   return collides;
 }
 
@@ -247,6 +263,7 @@ bool box_capsule(container *b, container *c)
 bool box_capsule(container *b, container *c, glm::dvec3 *axis, double *projection)
 {
   bool ret = capsule_box(c, b, axis, projection);
+  *axis = -*axis;
   return ret;
 }
 
@@ -279,6 +296,7 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
       *projection = r1 + r2 - distance;
       *axis = {dx, 0, dz};
       *axis = glm::normalize(*axis);
+      rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
       return true;
     }
     return false;
@@ -292,6 +310,7 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
       *projection = r1 + r2 - distance;
       *axis = {dx, -dy, dz};
       *axis = glm::normalize(*axis);
+      rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
       return true;
     }
     return false;
@@ -305,6 +324,7 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
       *projection = r1 + r2 - distance;
       *axis = {dx, dy, dz};
       *axis = glm::normalize(*axis);
+      rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
       return true;
     }
     return false;

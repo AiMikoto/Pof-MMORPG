@@ -77,7 +77,11 @@ std::set<int> octree::get_collisions(aabb box)
 
 void octree::get_collisions_h(aabb box, std::set<int> *ret)
 {
-  if((weight == 0) || no_intersect(box, this -> base))
+  if(weight == 0)
+  {
+    return;
+  }
+  if(no_intersect(box, this -> base))
   {
     return;
   }
@@ -117,12 +121,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
     if(mxsplit && mysplit && pzsplit)
     {
@@ -142,12 +145,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
     if(mxsplit && pysplit && mzsplit)
     {
@@ -167,12 +169,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
     if(mxsplit && pysplit && pzsplit)
     {
@@ -192,12 +193,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
     if(pxsplit && mysplit && mzsplit)
     {
@@ -217,12 +217,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
     if(pxsplit && mysplit && pzsplit)
     {
@@ -242,12 +241,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
     if(pxsplit && pysplit && mzsplit)
     {
@@ -267,12 +265,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
     if(pxsplit && pysplit && pzsplit)
     {
@@ -292,12 +289,11 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       lazy_boxes[index].clear();
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
-      if(difference.size() == 0)
+      if(difference.size() != 0)
       {
-        return;
+        std::set<int> partial = children[index] -> get_collisions(box);
+        ret -> insert(partial.begin(), partial.end());
       }
-      std::set<int> partial = children[index] -> get_collisions(box);
-      ret -> insert(partial.begin(), partial.end());
     }
   }
 }
