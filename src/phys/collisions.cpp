@@ -20,6 +20,27 @@ bool is_zero(glm::dvec3 v)
   return (std::abs(v.x) < 0.01) && (std::abs(v.y) < 0.01) && (std::abs(v.z) < 0.01);
 }
 
+double adjust(double origin, double sub, double sup)
+{
+  // if origin is between sub and sup, return 0
+  if(origin >= sub && origin <= sup)
+  {
+    return 0;
+  }
+  // if origin is above sup, return origin - sup
+  if(origin >= sup)
+  {
+    return origin - sup;
+  }
+  // if origin is under sub, return origin - sub
+  if(origin <= sub)
+  {
+    return origin - sub;
+  }
+  // shouldn't reach here
+  return 0;
+}
+
 bool box_box(container *b1, container *b2)
 {
   glm::dvec3 axis;
@@ -162,7 +183,7 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
   glm::dvec3 eb3 = points[0] - points[4];
   glm::dvec3 ec = pointc2 - pointc1;
   // compute a ton of axis
-  glm::dvec3 axi[15] = {
+  glm::dvec3 axi[23] = {
     // 3 normals from b
     glm::cross(eb1, eb2),
     glm::cross(eb1, eb3),
@@ -179,11 +200,19 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
     {points[5].x - pointc1.x, 0, points[5].z - pointc1.z},
     {points[6].x - pointc1.x, 0, points[6].z - pointc1.z},
     {points[7].x - pointc1.x, 0, points[7].z - pointc1.z},
+    {points[0].x - pointc1.x, adjust(points[0].y, minyc, maxyc), points[0].z - pointc1.z},
+    {points[1].x - pointc1.x, adjust(points[1].y, minyc, maxyc), points[1].z - pointc1.z},
+    {points[2].x - pointc1.x, adjust(points[2].y, minyc, maxyc), points[2].z - pointc1.z},
+    {points[3].x - pointc1.x, adjust(points[3].y, minyc, maxyc), points[3].z - pointc1.z},
+    {points[4].x - pointc1.x, adjust(points[4].y, minyc, maxyc), points[4].z - pointc1.z},
+    {points[5].x - pointc1.x, adjust(points[5].y, minyc, maxyc), points[5].z - pointc1.z},
+    {points[6].x - pointc1.x, adjust(points[6].y, minyc, maxyc), points[6].z - pointc1.z},
+    {points[7].x - pointc1.x, adjust(points[7].y, minyc, maxyc), points[7].z - pointc1.z},
     ec
   };
   double p;
   // for each axis
-  for(i = 0; i < 15; i++)
+  for(i = 0; i < 23; i++)
   {
     if(is_zero(axi[i]))
     { // pointless
@@ -337,6 +366,65 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
   return false;
 }
 
+bool sphere_sphere(container *s1, container *s2)
+{
+  glm::dvec3 axis;
+  double projection;
+  return sphere_sphere(s1, s2, &axis, &projection);
+}
+
+bool sphere_sphere(container *s1, container *s2, glm::dvec3 *axis, double *projection)
+{
+  glm::dvec3 point1 = s1 -> o -> transform.position;
+  glm::dvec3 point2 = s2 -> o -> transform.position;
+  *axis = point2 - point1;
+  if(is_zero(*axis))
+  {
+    *axis = {0, 1, 0};
+  }
+  *axis = glm::normalize(*axis);
+  rotate_axis(axis, point1, point2);
+  double dx = s1 -> o -> transform.position.x - s2 -> o -> transform.position.x;
+  double dy = s1 -> o -> transform.position.y - s2 -> o -> transform.position.y;
+  double dz = s1 -> o -> transform.position.z - s2 -> o -> transform.position.z;
+  double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+  double radius1 = s1 -> o -> transform.scale.x * s1 -> o -> meshScale.x / 2;
+  double radius2 = s2 -> o -> transform.scale.x * s2 -> o -> meshScale.x / 2;
+  if(distance >= radius1 + radius2)
+  {
+    return false;
+  }
+  else
+  {
+    *projection = radius1 + radius2 - distance;
+    return true;
+  }
+}
+
+bool sphere_box(container *s, container *b)
+{
+  return box_sphere(b, s);
+}
+
+bool sphere_box(container *s, container *b, glm::dvec3 *axis, double *projection)
+{
+  bool ret = box_sphere(b, s, axis, projection);
+  *axis = -*axis;
+  return ret;
+}
+
+bool box_sphere(container *b, container *s)
+{
+  glm::dvec3 axis;
+  double projection;
+  return capsule_capsule(b, s, &axis, &projection);
+}
+
+bool box_sphere(container *b, container *s, glm::dvec3 *axis, double *projection)
+{
+  // TODO: this
+}
+
 bool collide(container *c1, container *c2)
 {
   glm::dvec3 axis;
@@ -365,6 +453,32 @@ bool collide(container *c1, container *c2, glm::dvec3 *axis, double *projection)
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
     return capsule_capsule(c1, c2, axis, projection);
+  }
+  // capsule is generalised sphere, so caps-sphere can be interpreted as capsule capsule
+  if((c1 -> type == sphere) && (c2 -> type == caps))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
+    return capsule_capsule(c1, c2, axis, projection);
+  }
+  if((c1 -> type == caps) && (c2 -> type == sphere))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
+    return capsule_capsule(c1, c2, axis, projection);
+  }
+  if((c1 -> type == sphere) && (c2 -> type == sphere))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
+    return sphere_sphere(c1, c2, axis, projection);
+  }
+  if((c1 -> type == sphere) && (c2 -> type == box))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
+    return sphere_box(c1, c2, axis, projection);
+  }
+  if((c1 -> type == box) && (c2 -> type == sphere))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
+    return box_sphere(c1, c2, axis, projection);
   }
   BOOST_LOG_TRIVIAL(error) << "unknown collision type";
   return false;
