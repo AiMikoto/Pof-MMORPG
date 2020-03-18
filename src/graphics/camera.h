@@ -21,7 +21,7 @@ namespace graphics {
 		double moveSpeed, rotationSpeed;
 		float nearClipDistance, farClipDistance, fieldOfView;
 		bool moveBuffer[totalCameraMovements];
-		bool move, rotate;
+		bool rotate;
 		double yaw, pitch;
 		CameraViewport viewport;
 		std::vector<size_t> objectsInView;

@@ -28,10 +28,16 @@ out vec4 fragmentColor;
 
 vec4 determineTextureColor(int i) {
 	vec4 color = texture(material.textures[i], uvs);
-	return (i < material.texturesStrengthCount) ? color * material.texturesStrength[i]: color;
+	if(i < material.texturesStrengthCount)
+		color *= material.texturesStrength[i];
+	return color;
 }
 
 vec4 applyTexture(int i, vec4 color) {
+	if(i >= material.texturesOPCount) {
+		color = determineTextureColor(i);
+		return color;
+	}
 	switch(material.texturesOP[i]) {
 	case multiply:
 		color *= determineTextureColor(i);
@@ -63,8 +69,10 @@ vec4 applyTextureType(int i, vec4 color) {
 
 void main() {
 	vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
+	colorDiffuse = material.colorDiffuse;
 	for(int i = 0; i < material.texturesCount; i++) {
-		applyTextureType(i, colorDiffuse);
+		colorDiffuse = applyTextureType(i, colorDiffuse);
 	}
 	fragmentColor = colorDiffuse;
+	//fragmentColor.w = 1;
 }

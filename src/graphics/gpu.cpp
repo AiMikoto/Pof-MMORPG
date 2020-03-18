@@ -72,6 +72,7 @@ void gph::GPU::update() {
 		s->update();
 	}
 	gpu->draw();
+	cameras[0]->update();
 }
 
 void gph::GPU::addRenderer(MeshRenderer* renderer) {

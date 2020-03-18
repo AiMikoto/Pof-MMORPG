@@ -51,7 +51,10 @@ gph::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> childre
 	this->components = components;
 }
 
-void gph::GameObject::update() {}
+void gph::GameObject::update() {
+	for (auto c : children)
+		c->update();
+}
 
 gph::GameObject* gph::GameObject::instantiate() {
 	GameObject* gameObject = new GameObject(this->parent);

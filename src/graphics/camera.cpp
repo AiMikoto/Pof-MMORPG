@@ -65,18 +65,19 @@ void gph::Camera::setup() {
 }
 
 void gph::Camera::moveCamera(int direction) {
+	glm::dvec3 cancelDirectionMovements = { 1,1,1 };
 	switch (direction) {
 	case(cam::cameraMovements::forward):
-		gameObject->transform.position += forward() * glm::dvec3(1,0,1) * deltaTime * moveSpeed;
+		gameObject->transform.position += forward() * cancelDirectionMovements * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::backwards):
-		gameObject->transform.position -= forward()* glm::dvec3(1, 0, 1) * deltaTime * moveSpeed;
+		gameObject->transform.position -= forward() * cancelDirectionMovements * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::right):
-		gameObject->transform.position += right()* glm::dvec3(1, 0, 1) * deltaTime * moveSpeed;
+		gameObject->transform.position += right() * cancelDirectionMovements * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::left):
-		gameObject->transform.position -= right()* glm::dvec3(1, 0, 1) * deltaTime * moveSpeed;
+		gameObject->transform.position -= right() * cancelDirectionMovements * deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::up):
 		gameObject->transform.position += up() * deltaTime * moveSpeed;
@@ -85,7 +86,6 @@ void gph::Camera::moveCamera(int direction) {
 		gameObject->transform.position -= up() * deltaTime * moveSpeed;
 		break;
 	}
-	move = false;
 }
 
 void gph::Camera::rotateCamera(GLFWwindow* window) {

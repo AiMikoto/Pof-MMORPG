@@ -19,6 +19,7 @@ namespace graphics {
 		std::vector<Component*> components;
 		Transform transform;
 		uint type;
+		bool isStatic;
 
 		GameObject();
 		~GameObject();
@@ -49,9 +50,7 @@ namespace graphics {
 		}
 		template<typename T> T* getComponent() {
 			std::string type = typeidToClassName(typeid(T).name());
-			BOOST_LOG_TRIVIAL(trace) << "Attempting to get " << type << " component from " << name;
 			for (auto c : components) {
-				BOOST_LOG_TRIVIAL(trace) << c->type;
 				if (type == c->type) {
 					return static_cast<T*>(c);
 				}
