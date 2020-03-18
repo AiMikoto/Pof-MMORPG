@@ -46,6 +46,18 @@ aabb container::to_aabb()
   double oneeighty = 180;
   glm::dvec3 scale = this -> o -> transform.scale;
   glm::dvec3 size = this -> o -> meshScale;
+  if(this -> type == sphere)
+  {
+    // Assumptions
+    // scale - x = y = z = radius
+    // rotation - around any axis -> no impact on aabb	
+    ret.minx = position.x - scale.x * size.x / 2;
+    ret.maxx = position.x + scale.x * size.x / 2;
+    ret.miny = position.y - scale.y * size.y / 2;
+    ret.maxy = position.y + scale.y * size.y / 2;
+    ret.minz = position.z - scale.z * size.z / 2;
+    ret.maxz = position.z + scale.z * size.z / 2;
+  }
   if(this -> type == caps)
   {
     // Assumptions

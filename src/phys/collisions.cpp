@@ -9,7 +9,7 @@ void rotate_axis(glm::dvec3 *axis, glm::dvec3 p1, glm::dvec3 p2)
   double proj2 = axis -> x * p2.x
             + axis -> y * p2.y
             + axis -> z * p2.z;
-  if(proj1 < 0)
+  if(proj2 > proj1)
   {
     *axis *= -1;
   }
@@ -112,7 +112,7 @@ bool box_box(container *b1, container *b2, glm::dvec3 *axis, double *projection)
     if((max2p > min1p) && (max1p > min2p))
     {
       // collides on this axis
-      double projection_difference = max2p - min1p;
+      double projection_difference = std::min(max2p - min1p, max1p - min2p);
       if(i == 0)
       {
         *projection = projection_difference;
@@ -160,9 +160,9 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
   glm::dvec3 eb1 = points[0] - points[1];
   glm::dvec3 eb2 = points[0] - points[2];
   glm::dvec3 eb3 = points[0] - points[4];
-  glm::dvec3 ec = pointc1 - pointc2;
+  glm::dvec3 ec = pointc2 - pointc1;
   // compute a ton of axis
-  glm::dvec3 axi[17] = {
+  glm::dvec3 axi[15] = {
     // 3 normals from b
     glm::cross(eb1, eb2),
     glm::cross(eb1, eb3),
@@ -171,23 +171,19 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
     glm::cross(eb1, ec),
     glm::cross(eb2, ec),
     glm::cross(eb2, ec),
-    // all possible diagonals of b
-    -eb1 + -eb2 + -eb3,
-    -eb1 + -eb2       ,
-    -eb1 + -eb2 +  eb3,
-    -eb1        + -eb3,
-    -eb1        +  eb3,
-    -eb1 +  eb2 + -eb3,
-    -eb1 +  eb2       ,
-    -eb1 +  eb2 +  eb3,
-           -eb2 + -eb3,
-           -eb2 +  eb3,
-    // the capsule axis itself
+    {points[0].x - pointc1.x, 0, points[0].z - pointc1.z},
+    {points[1].x - pointc1.x, 0, points[1].z - pointc1.z},
+    {points[2].x - pointc1.x, 0, points[2].z - pointc1.z},
+    {points[3].x - pointc1.x, 0, points[3].z - pointc1.z},
+    {points[4].x - pointc1.x, 0, points[4].z - pointc1.z},
+    {points[5].x - pointc1.x, 0, points[5].z - pointc1.z},
+    {points[6].x - pointc1.x, 0, points[6].z - pointc1.z},
+    {points[7].x - pointc1.x, 0, points[7].z - pointc1.z},
     ec
   };
   double p;
   // for each axis
-  for(i = 0; i < 17; i++)
+  for(i = 0; i < 15; i++)
   {
     if(is_zero(axi[i]))
     { // pointless
@@ -229,7 +225,7 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
     if((max2p > min1p) && (max1p > min2p))
     {
       // collides on this axis
-      double projection_difference = max2p - min1p;
+      double projection_difference = std::min(max2p - min1p, max1p - min2p);
       if(i == 0)
       {
         *projection = projection_difference;

@@ -7,7 +7,8 @@
 enum container_t
 {
   caps,
-  box
+  box,
+  sphere
 };
 
 class container
