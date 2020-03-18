@@ -5,6 +5,9 @@
 #include <iostream>
 #include "mouse.h"
 #include "lib/log.h"
+#include "gpu.h"
+#include <typeinfo>
+#include "utils.h"
 
 namespace gph = graphics;
 
@@ -22,31 +25,28 @@ gph::CameraViewport::CameraViewport(float startX, float startY, float endX, floa
 	this->endY = endY;
 }
 
-gph::Camera::Camera() {
-	setup();
+gph::Camera::Camera() : Component(true) {
+	setType();
 }
 
 gph::Camera::~Camera() { }
 
-gph::Camera::Camera(gph::CameraViewport viewport, bool isPerspective, bool isFixed) {
-	setup();
+gph::Camera::Camera(gph::CameraViewport viewport, bool isPerspective, bool isFixed) : Component(true) {
 	this->viewport = viewport;
 	this->isPerspective = isPerspective;
 	this->isFixed = isFixed;
+	setType();
 }
 
-gph::Camera::Camera(gph::Transform transform, gph::CameraViewport viewport, bool isPerspective, bool isFixed) {
-	setup();
+gph::Camera::Camera(gph::Transform transform, gph::CameraViewport viewport, bool isPerspective, bool isFixed) : Component(true) {
 	this->gameObject->transform = transform;
 	this->viewport = viewport;	
 	this->isPerspective = isPerspective;
 	this->isFixed = isFixed;
+	setType();
 }
 
 void gph::Camera::setup() {
-	this->gameObject->transform = Transform(glm::dvec3(0, 0, 3),
-		glm::dquat(glm::dvec3(0, 0, 0)),
-		glm::dvec3(0, 0, 0));
 	moveSpeed = 5.0f;
 	rotationSpeed = 1;
 	fieldOfView = 45.0f;
@@ -60,7 +60,8 @@ void gph::Camera::setup() {
 		moveBuffer[i] = false;
 	}
 	updateRotation();
-	type = objectTypes::camera;
+	gpu->cameras.push_back(this);
+	Component::setup();
 }
 
 void gph::Camera::moveCamera(int direction) {
@@ -138,6 +139,7 @@ glm::mat4 gph::Camera::projection(GLFWwindow* window) {
 		return glm::perspective(glm::radians(fieldOfView),
 			((viewport.endX - viewport.startX) * width) / ((viewport.endY - viewport.startY) * height),
 			nearClipDistance, farClipDistance);
+	return glm::mat4(1);
 }
 
 glm::mat4 gph::Camera::view() {
@@ -201,9 +203,8 @@ void gph::CameraViewport::deserialize(boost::property_tree::ptree node) {
 	endY = node.get<float>("endY");
 }
 
-gph::Camera* gph::Camera::instantiate(GameObject* gameObject) {
+gph::Camera* gph::Camera::instantiate() {
 	Camera* cam = new Camera();
-	cam->gameObject = gameObject;
 	cam->viewport = this->viewport;
 	cam->isFixed = this->isFixed;
 	cam->isPerspective = this->isPerspective;
@@ -215,4 +216,18 @@ gph::Camera* gph::Camera::instantiate(GameObject* gameObject) {
 	cam->yaw = this->yaw;
 	cam->pitch = this->pitch;
 	return cam;
+}
+
+void gph::Camera::update() {
+	for (int i = 0; i < totalCameraMovements; i++) {
+		if (moveBuffer[i])
+			moveCamera(i);
+	}
+	if (rotate) {
+		rotateCamera(gpu->window);
+	}
+}
+
+void gph::Camera::setType() {
+	type = typeidToClassName(typeid(this).name());
 }

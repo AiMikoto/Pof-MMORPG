@@ -5,7 +5,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "light.h"
-#include "model.h"
+#include "mesh.h"
 #include <vector>
 #include <string>
 #include <boost/property_tree/ptree.hpp>

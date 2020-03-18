@@ -5,56 +5,19 @@
 #include "scene.h"
 #include "utils.h"
 #include "gpu.h"
+#include <typeinfo>
 
 namespace gph = graphics;
 
-gph::Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint> materialsID, std::vector<uint> indices) {
+gph::Mesh::Mesh(std::vector<Vertex> vertices, uint materialID, std::vector<uint> indices) {
 	this->vertices = vertices;
-	this->materialsIDs = materialsID;
+	this->materialID = materialID;
 	this->indices = indices;
-	this->type = objectTypes::mesh;
 }
 
 gph::Mesh::~Mesh() {
-	if (initialized) {
-		glDeleteVertexArrays(1, &vertexArrayID);
-		glDeleteBuffers(1, &vertexBufferID);
-		glDeleteBuffers(1, &elementsBufferID);
-		glDeleteBuffers(1, &outlineIndicesBufferID);
-	}
 	vertices.clear();
 	indices.clear();
-	outlineIndices.clear();
-}
-
-void gph::Mesh::draw(Camera* camera, GLFWwindow* window) {
-	float alpha = 1.0f / float(materialsIDs.size());
-	glm::mat4 mvp = camera->projection(window) * camera->view() * gameObject->transform.model();
-	gpu->shaders[gpu->materials[0]->shaderID]->setMat4("mvp", mvp);
-	for (auto i : materialsIDs) {
-		gpu->materials[i]->shaderSetup(alpha);
-
-		glBindVertexArray(vertexArrayID);
-		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-
-		glActiveTexture(GL_TEXTURE0);
-	}
-}
-
-gph::Mesh* gph::Mesh::instantiate(GameObject* gameObject) {
-	Mesh* mesh = new Mesh(this->vertices, this->materialsIDs, this->indices);
-	mesh->gameObject = gameObject;
-	return mesh;
-}
-
-void gph::Mesh::glContextSetup() {
-	if (!initialized) {
-		bindBuffers();
-		createOutline();
-		computeScale();
-		initialized = true;
-	}
 }
 
 void gph::Mesh::computeScale(){
@@ -74,58 +37,78 @@ void gph::Mesh::computeScale(){
 	BOOST_LOG_TRIVIAL(trace) << meshScale.x << ", " << meshScale.y << ", " << meshScale.z;
 }
 
-void gph::Mesh::bindBuffers() {
-	glGenVertexArrays(1, &vertexArrayID);
-	glGenBuffers(1, &vertexBufferID);
-	glGenBuffers(1, &elementsBufferID);
-	glGenBuffers(1, &outlineIndicesBufferID);
-
-	glBindVertexArray(vertexArrayID);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBufferID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), &indices[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
-
-	glBindVertexArray(0);
+gph::MeshLoader::MeshLoader() {
+	setType();
 }
-
-void gph::Mesh::createOutline() {}
 
 gph::MeshLoader::MeshLoader(std::string path, bool gammaCorrection) {
 	this->gammaCorrection = gammaCorrection;
-	loadModel(path);
+	this->path = path;
+	loadMesh(path);
+	setType();
 }
 
-gph::MeshLoader::~MeshLoader() {}
-
-void gph::MeshLoader::loadModel(std::string path) {
-	Assimp::Importer importer;
-	BOOST_LOG_TRIVIAL(trace) << "Started loading model: " << path;
-	directory = path.substr(0, path.find_last_of('/'));
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
-		return;
+void gph::MeshLoader::setup() {
+	if (!initialized) {
+		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
+		if (meshRenderer != NULL) {
+			meshRenderer->setup();
+		}
+		Component::setup();
 	}
-	processNode(scene->mRootNode, scene);
+}
+
+void gph::MeshLoader::setType(){
+	type = typeidToClassName(typeid(this).name());
+}
+
+gph::MeshLoader::~MeshLoader() {
+	if (initialized) {
+		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
+		if (meshRenderer != NULL) {
+			meshRenderer->meshLoaderRemoved();
+		}
+	}
+}
+
+void gph::MeshLoader::loadMesh(std::string path) {
+	bool preloaded = false;
+	meshLoaded = false;
+	for (auto mesh : gpu->meshes) {
+		if (mesh.second->path == path) {
+			BOOST_LOG_TRIVIAL(trace) << "Using preloaded mesh";
+			meshID = mesh.first;
+			preloaded = true;
+			break;
+		}			
+	}
+	if (!preloaded) {
+		Assimp::Importer importer;
+		BOOST_LOG_TRIVIAL(trace) << "Started loading mesh: " << path;
+		directory = path.substr(0, path.find_last_of('/'));
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+			BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
+			return;
+		}
+		processNode(scene->mRootNode, scene);
+		if(!meshLoaded)
+			BOOST_LOG_TRIVIAL(trace) << "The loaded file contains no mesh";
+	}
 }
 
 void gph::MeshLoader::processNode(aiNode* node, const aiScene* scene) {
-	for (uint i = 0; i < node->mNumMeshes; i++) {
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		loadedMeshes.push_back(processMesh(mesh, scene));
+	if (node->mNumMeshes > 1 || meshLoaded) {
+		//TODO: assimp splits meshes if they have more than 1 material
+		//either decide if all objects we're going to be dealing with will have 1 mesh 1 material, or we create a mesh merge algorithm
+		BOOST_LOG_TRIVIAL(trace) << "Expected to load 1 mesh, found multiple";
+	}
+	else if(node->mNumMeshes == 1 && !meshLoaded) {
+		Mesh* mesh = processMesh(scene->mMeshes[node->mMeshes[0]], scene);
+		mesh->path = path;
+		meshID = uint(gpu->meshes.size());
+		gpu->meshes[meshID] = mesh;
+		meshLoaded = true;
 	}
 	for (uint i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
@@ -135,8 +118,8 @@ void gph::MeshLoader::processNode(aiNode* node, const aiScene* scene) {
 gph::Mesh* gph::MeshLoader::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices = loadMeshVertices(mesh, scene);
 	std::vector<uint> indices = loadMeshIndices(mesh, scene);
-	std::vector<uint> materialsIDs = loadTextures(mesh, scene);
-	Mesh* processedMesh = new Mesh(vertices, materialsIDs, indices);
+	uint materialID = loadMaterial(mesh, scene);
+	Mesh* processedMesh = new Mesh(vertices, materialID, indices);
 	processedMesh->computeScale();
 	return processedMesh;
 }
@@ -150,6 +133,7 @@ std::vector<gph::Vertex> gph::MeshLoader::loadMeshVertices(aiMesh *mesh, const a
 		vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 		if (mesh->mTextureCoords[0])
 			// this doesn't allow us to process models with more than a pair of texture coordinates/vertex
+			//TODO: add a way to obtain, store and pass more uvs to GLSL
 			vertex.textureCoordinates = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 		if (mesh->mTangents)
 			vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
@@ -162,53 +146,73 @@ std::vector<gph::Vertex> gph::MeshLoader::loadMeshVertices(aiMesh *mesh, const a
 
 std::vector<uint> gph::MeshLoader::loadMeshIndices(aiMesh *mesh, const aiScene *scene) {
 	std::vector<uint> indices;
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+	for (uint i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
+		for (uint j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
 	return indices;
 }
 
-std::vector<uint> gph::MeshLoader::loadMaterials(aiMesh* mesh, const aiScene* scene) {
-	std::vector<uint> materialsIDs;
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	std::vector<uint> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE);
-	materialsIDs.insert(materialsIDs.end(), diffuseMaps.begin(), diffuseMaps.end());
-	std::vector<uint> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR);
-	materialsIDs.insert(materialsIDs.end(), specularMaps.begin(), specularMaps.end());
-	std::vector<uint> ambientMaps = loadMaterialTextures(material, aiTextureType_AMBIENT);
-	materialsIDs.insert(materialsIDs.end(), ambientMaps.begin(), ambientMaps.end());
-	std::vector<uint> emmisiveMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE);
-	materialsIDs.insert(materialsIDs.end(), emmisiveMaps.begin(), emmisiveMaps.end());
-	std::vector<uint> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT);
-	materialsIDs.insert(materialsIDs.end(), heightMaps.begin(), heightMaps.end());
-	std::vector<uint> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS);
-	materialsIDs.insert(materialsIDs.end(), normalMaps.begin(), normalMaps.end());
-	return materialsIDs;
+uint gph::MeshLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
+	aiMaterial* aiMat = scene->mMaterials[mesh->mMaterialIndex];
+	Material* mat = new Material();
+	aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, mat->colorDiffuse);
+	aiMat->Get(AI_MATKEY_COLOR_SPECULAR, mat->colorSpecular);
+	aiMat->Get(AI_MATKEY_COLOR_AMBIENT, mat->colorAmbient);
+	aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, mat->colorEmissive);
+	aiMat->Get(AI_MATKEY_COLOR_TRANSPARENT, mat->colorTransparent);
+	aiMat->Get(AI_MATKEY_BLEND_FUNC, mat->blend);
+	aiMat->Get(AI_MATKEY_SHADING_MODEL, mat->shading);
+	aiMat->Get(AI_MATKEY_OPACITY, mat->opacity);
+	aiMat->Get(AI_MATKEY_SHININESS, mat->shininess);
+	aiMat->Get(AI_MATKEY_SHININESS_STRENGTH, mat->shininessStrength);
+	for (int i = aiTextureType_DIFFUSE; i != aiTextureType_UNKNOWN; i++) {
+		loadMaterialTextures(aiMat, aiTextureType(i), mat);
+	}
+	uint materialID = uint(gpu->materials.size());
+	gpu->materials[materialID] = mat;
+	return materialID;
 }
 
-std::vector<uint> gph::MeshLoader::loadMaterialTextures(aiMaterial *mat, aiTextureType type) {
-	std::vector<uint> meshTextures;
-	for (uint i = 0; i < mat->GetTextureCount(type); i++) {
+void gph::MeshLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType type, Material* mat) {
+	for (uint i = 0; i < aiMat->GetTextureCount(type); i++) {
 		aiString path;
-		mat->GetTexture(type, i, &path);
+		int textureOP;
+		float textureStrength;
+		aiMat->Get(AI_MATKEY_TEXOP(type, i), textureOP);
+		aiMat->Get(AI_MATKEY_TEXBLEND(type, i), textureStrength);
+		aiMat->GetTexture(type, i, &path);
 		bool skip = false;
 		for (auto texture : gpu->textures) {
 			if (texture.second->path == std::string(path.C_Str())) {
-				meshTextures.push_back(texture.second->id);
+				mat->texturesIDs.push_back(texture.second->id);
+				
+				
+				mat->texturesOP.push_back(textureOP);
 				skip = true;
 				break;
 			}
 		}
 		if (!skip) {
 			Texture* texture = new Texture(directory + "/" + path.C_Str(), type); //textures are automatically placed in the map when instantiated
-			meshTextures.push_back(texture->id);
-			Material* mat = new Material(texture->id, gpu-);
+			mat->texturesIDs.push_back(texture->id);
 		}
 	}
-	return meshTextures;
+}
+
+boost::property_tree::ptree gph::MeshLoader::serialize() {
+	boost::property_tree::ptree node;
+	return node;
+}
+
+void gph::MeshLoader::deserialize(boost::property_tree::ptree node) {
+
+}
+
+gph::MeshLoader* gph::MeshLoader::instantiate() {
+	return this;
 }
 
 boost::property_tree::ptree gph::Vertex::serialize() {
@@ -225,33 +229,108 @@ void gph::Vertex::deserialize(boost::property_tree::ptree node) {
 
 }
 
-boost::property_tree::ptree gph::Texture::serialize() {
-	boost::property_tree::ptree node;
-	node.put("id", id);
-	node.put("type", type);
-	node.put("path", path);
-	return node;
-}
-
-void gph::Texture::deserialize(boost::property_tree::ptree node) {
-	id = node.get<uint>("id");
-	type = node.get<uint>("type");
-	path = node.get<std::string>("path");
-}
-
 boost::property_tree::ptree gph::Mesh::serialize() {
 	boost::property_tree::ptree node, verticesNode;
 	for (int i = 0; i < vertices.size(); i++) {
 		verticesNode.add_child("v" + std::to_string(i), vertices[i].serialize());
 	}
 	node.add_child("vertices", verticesNode);
-	node.put("materialIDs", vectorToString(materialsIDs, ' '));
+	node.put("materialID", materialID);
 	node.put("indices", vectorToString(indices, ' '));
-	node.put("textures", vectorToString(outlineIndices, ' '));
 	return node;
 }
 
 void gph::Mesh::deserialize(boost::property_tree::ptree node) {
 	boost::property_tree::ptree verticesNode;
+}
 
+gph::MeshRenderer::MeshRenderer() {
+	setType();
+}
+
+gph::MeshRenderer::~MeshRenderer() {
+	if (initialized) {
+		gpu->removeRenderer(this);
+	}
+}
+
+boost::property_tree::ptree gph::MeshRenderer::serialize() {
+	boost::property_tree::ptree node;
+	return node;
+}
+
+void gph::MeshRenderer::deserialize(boost::property_tree::ptree node) {}
+
+gph::MeshRenderer* gph::MeshRenderer::instantiate() {
+	return this;
+}
+
+void gph::MeshRenderer::glContextSetup() {
+	if (!initialized) {
+		bindBuffers();
+		createOutline();
+	}
+}
+
+void gph::MeshRenderer::bindBuffers() {
+	Mesh* mesh = gpu->meshes[meshID];
+	glGenVertexArrays(1, &vertexArrayID);
+	glGenBuffers(1, &vertexBufferID);
+	glGenBuffers(1, &elementsBufferID);
+	glGenBuffers(1, &outlineIndicesBufferID);
+
+	glBindVertexArray(vertexArrayID);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID);
+	glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(Vertex), &mesh->vertices[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBufferID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->indices.size() * sizeof(uint), &mesh->indices[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+
+	glBindVertexArray(0);
+}
+
+void gph::MeshRenderer::createOutline() {}
+
+void gph::MeshRenderer::draw(Camera* camera, GLFWwindow* window) {
+	Mesh* mesh = gpu->meshes[meshID];
+	Material* mat = gpu->materials[mesh->materialID];
+	Shader* shader = gpu->shaders[mat->shaderID];
+	glm::mat4 mvp = camera->projection(window) * camera->view() * gameObject->transform.model();
+	shader->setMat4("mvp", mvp);
+	glBindVertexArray(vertexArrayID);
+	glDrawElements(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void gph::MeshRenderer::setup() {
+	if (!initialized) {
+		MeshLoader* meshLoader = gameObject->getComponent<MeshLoader>();
+		if (meshLoader != NULL) {
+			meshID = meshLoader->meshID;
+			materialID = gpu->meshes[meshID]->materialID;
+			gpu->addRenderer(this);
+			glContextSetup();
+			initialized = true;
+		}		
+	}	
+}
+
+void gph::MeshRenderer::setType() {
+	type = typeidToClassName(typeid(this).name());
+}
+
+void gph::MeshRenderer::meshLoaderRemoved() {
+	initialized = false;
+	gpu->removeRenderer(this);
 }

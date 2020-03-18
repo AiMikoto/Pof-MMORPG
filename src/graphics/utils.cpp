@@ -60,3 +60,10 @@ double gph::highestCommonDenominator(double a, double b, double eps) {
 	else
 		return highestCommonDenominator(b, a - floor(a / b) * b);
 }
+
+std::string gph::typeidToClassName(std::string toConvert) {
+	std::vector<std::string> typevals = split(toConvert, ' ');
+	//this is dependent on my platform
+	typevals.erase(std::remove(typevals.begin(), typevals.end(), "class"), typevals.end());
+	return typevals[0];
+}

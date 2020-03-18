@@ -3,8 +3,6 @@
 
 namespace gph = graphics;
 
-std::map<int, gph::Shader*> gph::shaderMap;
-
 gph::ShaderLoader::ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath) {
 	this->vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	this->fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -105,6 +103,8 @@ gph::ShaderException::ShaderException(std::string info) {
 gph::Shader::Shader() {}
 
 gph::Shader::Shader(std::string vertexShaderPath, std::string fragmentShaderPath) {
+	this->vertexShaderPath = vertexShaderPath;
+	this->fragmentShaderPath = fragmentShaderPath;
 	load(vertexShaderPath, fragmentShaderPath);
 }
 

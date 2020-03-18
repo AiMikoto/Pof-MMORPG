@@ -22,15 +22,22 @@ namespace graphics {
 
 	class Material {
 	public:
-		uint textureID, shaderID;
-		glm::vec4 color;
+		uint shaderID;
+		glm::vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
+		bool twoSided;
+		int blend, shading;
+		float opacity, shininess, shininessStrength;
+		std::vector<uint> texturesIDs;
+		std::vector<int> texturesOP;
+		std::vector<float> texturesStrength;
+		std::string path;
 
 		Material();
 		~Material();
-		Material(uint textureID, uint shaderID, glm::vec4 color = gph::colors::gray);
+		Material(uint shaderID);
 
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
-		void shaderSetup(float alpha);
+		void contextSetup();
 	};
 }

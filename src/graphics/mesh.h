@@ -20,46 +20,70 @@ namespace graphics {
 		void deserialize(boost::property_tree::ptree node);
 	};	
 
-	class Mesh : public Component {
+	class Mesh {
 	public:
 		std::vector<Vertex> vertices;
-		std::vector<uint> materialsIDs;
-		std::vector<uint> indices, outlineIndices;
+		uint materialID;
+		std::vector<uint> indices;
 		glm::dvec3 meshScale;
-		int drawMode;
+		std::string path;
 
-		Mesh(std::vector<Vertex> vertices, std::vector<uint> materialsID, std::vector<uint> indices);
+		Mesh(std::vector<Vertex> vertices, uint materialID, std::vector<uint> indices);
 		~Mesh();
-		void draw(Camera* camera, GLFWwindow* window);
-		Mesh* instantiate(GameObject* gameObject);
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
-		void computeScale();
-		//only call on the rendering side
-		void glContextSetup();
+		void computeScale();	
+	};
+
+	class MeshLoader : public Component {
+	public:
+		bool gammaCorrection;
+		uint meshID;
+		std::string path;
+
+		MeshLoader();
+		MeshLoader(std::string path, bool gammaCorrection);
+		~MeshLoader();
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
+		MeshLoader* instantiate();
+		virtual void setup();
+	private:
+		std::string directory;
+		bool meshLoaded;
+		void loadMesh(std::string path);
+		void processNode(aiNode* node, const aiScene* scene);
+		Mesh* processMesh(aiMesh* mesh, const aiScene* scene);
+		std::vector<Vertex> loadMeshVertices(aiMesh* mesh, const aiScene* scene);
+		std::vector<uint> loadMeshIndices(aiMesh* mesh, const aiScene* scene);
+		uint loadMaterial(aiMesh* mesh, const aiScene* scene);
+		void loadMaterialTextures(aiMaterial* aiMat, aiTextureType type, Material* mat);
+		virtual void setType();
+	};
+
+	class MeshRenderer : public Component {
+	public:
+		uint meshID;
+		uint materialID;
+
+		MeshRenderer();
+		~MeshRenderer();
+		boost::property_tree::ptree serialize();
+		void deserialize(boost::property_tree::ptree node);
+		MeshRenderer* instantiate();
+		void draw(Camera* camera, GLFWwindow* window);
+		friend bool operator <(const MeshRenderer& r1, const MeshRenderer& r2) {
+			return r1.materialID < r2.materialID;
+		}
+		virtual void setup();
+		
+		void meshLoaderRemoved();
 	private:
 		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
 		bool initialized = false;
+		void glContextSetup();
 		void bindBuffers();
 		void createOutline();
-	};
-
-	class MeshLoader {
-	public:
-		bool gammaCorrection;
-		std::vector<Mesh*> loadedMeshes;
-
-		MeshLoader(std::string path, bool gammaCorrection);
-		~MeshLoader();
-	private:
-		std::string directory;
-		void loadModel(std::string path);
-		void processNode(aiNode *node, const aiScene *scene);
-		Mesh* processMesh(aiMesh *mesh, const aiScene *scene);
-		std::vector<Vertex> loadMeshVertices(aiMesh *mesh, const aiScene *scene);
-		std::vector<uint> loadMeshIndices(aiMesh *mesh, const aiScene *scene);
-		std::vector<uint> loadMaterials(aiMesh *mesh, const aiScene *scene);
-		std::vector<uint> loadTextures(aiMesh *mesh, const aiScene *scene);
-		std::vector<uint> loadMaterialTextures(aiMaterial *mat, aiTextureType type);
+		virtual void setType();
 	};
 }

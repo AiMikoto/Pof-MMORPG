@@ -36,11 +36,13 @@ namespace graphics {
 		glm::mat4 projection(GLFWwindow* window);
 		glm::mat4 view();
 		void setViewport(GLFWwindow* window);
-		virtual Camera* instantiate(GameObject* gameObject);
+		virtual Camera* instantiate();
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
-	private:
-		void setup();
+		virtual void update();
+		virtual void setup();
+	protected:
+		virtual void setType();
 		glm::dvec3 forward();
 		glm::dvec3 right();
 		glm::dvec3 up();

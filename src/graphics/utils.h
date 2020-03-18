@@ -6,6 +6,8 @@
 #include "constants.h"
 #include "variables.h"
 #include <boost/property_tree/ptree.hpp>
+#include <algorithm>
+#include <typeinfo>
 
 namespace graphics {
 	std::vector<std::string> charArrayToStringVector(const char* const input[], size_t arrayLength);
@@ -34,4 +36,5 @@ namespace graphics {
 	boost::property_tree::ptree dvec3serializer(glm::dvec3);
 	boost::property_tree::ptree dvec4serializer(glm::dvec4);
 	double highestCommonDenominator(double a, double b, double eps = 0.0001);
+	std::string typeidToClassName(std::string toConvert);
 }

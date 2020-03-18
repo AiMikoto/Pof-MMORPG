@@ -62,20 +62,36 @@ gph::Material::Material() {}
 
 gph::Material::~Material() {}
 
-gph::Material::Material(uint textureID, uint shaderID, glm::vec4 color) {
-	this->textureID = textureID;
+gph::Material::Material(uint shaderID) {
 	this->shaderID = shaderID;
-	this->color = color;
 }
 
-void gph::Material::shaderSetup(float alpha) {
-	gpu->shaders[shaderID]->setVec4("color", color);
-	gpu->shaders[shaderID]->setFloat("matAlpha", alpha);
-	if (gpu->textures.find(textureID) != gpu->textures.end()) {
-		glActiveTexture(GL_TEXTURE0 + textureID);
-		gpu->shaders[shaderID]->setInt("textureSampler", textureID);
-		gpu->shaders[shaderID]->setBool("useTexture", true);
-		glBindTexture(GL_TEXTURE_2D, textureID);
+void gph::Material::contextSetup() {
+	Shader* shader = gpu->shaders[shaderID];
+	shader->use();
+	shader->setVec4("material.colorDiffuse", colorDiffuse);
+	shader->setVec4("material.colorSpecular", colorSpecular);
+	shader->setVec4("material.colorAmbient", colorAmbient);
+	shader->setVec4("material.colorEmissive", colorEmissive);
+	shader->setVec4("material.colorTransparent", colorTransparent);
+	shader->setFloat("material.opacity", opacity);
+	shader->setInt("material.blend", blend);
+	shader->setInt("material.shading", shading);
+	shader->setInt("material.texturesCount", (int)texturesIDs.size());
+	shader->setInt("material.texturesStrengthCount", (int)texturesStrength.size());
+	shader->setInt("material.texturesOPCount", (int)texturesOP.size());
+	for (int i = 0; i < texturesIDs.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + texturesIDs[i]);
+		shader->setInt("material.textures[" + std::to_string(i) + "]", texturesIDs[i]);
+		shader->setInt("material.texturesType[" + std::to_string(i) + "]", gpu->textures[texturesIDs[i]]->type);
+		if(i < texturesStrength.size())
+			shader->setFloat("material.texturesStrength[" + std::to_string(i) + "]", texturesStrength[i]);
+		if(i < texturesOP.size())
+			shader->setInt("material.texturesOP[" + std::to_string(i) + "]", texturesOP[i]);
+		glBindTexture(GL_TEXTURE_2D, texturesIDs[i]);		
 	}
-	gpu->shaders[shaderID]->setBool("useTexture", false);
 }
+
+boost::property_tree::ptree gph::Material::serialize() {}
+
+void gph::Material::deserialize(boost::property_tree::ptree node) {}

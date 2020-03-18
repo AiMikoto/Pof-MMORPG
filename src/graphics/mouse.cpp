@@ -1,6 +1,7 @@
 #include "mouse.h"
 #include "scene.h"
 #include <iostream>
+#include "gpu.h"
 
 namespace gph = graphics;
 
@@ -8,7 +9,7 @@ void gph::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {}
 
 void gph::moveCursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN) {
-		activeScene->cameras[activeScene->mainCameraID]->rotate = true;
+		gpu->cameras[0]->rotate = true;
 	}
 }
 

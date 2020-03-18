@@ -29,7 +29,8 @@ namespace graphics {
 
 	class Shader {
 	public:
-		GLuint programID;		
+		GLuint programID;
+		std::string vertexShaderPath, fragmentShaderPath;
 		
 		Shader();
 		Shader(std::string vertexShaderPath, std::string fragmentShaderPath);
@@ -51,6 +52,4 @@ namespace graphics {
 	private:
 		void load(std::string vertexShaderPath, std::string fragmentShaderPath);
 	};
-
-	extern std::map<int, Shader*> shaderMap;
 }

@@ -1,5 +1,4 @@
 #include "objects.h"
-#include "lib/log.h"
 #include "constants.h"
 #include "component.h"
 #include "mesh.h"
@@ -52,23 +51,23 @@ gph::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> childre
 	this->components = components;
 }
 
+void gph::GameObject::update() {}
+
 gph::GameObject* gph::GameObject::instantiate() {
 	GameObject* gameObject = new GameObject(this->parent);
+	gameObject->transform = this->transform;
 	for (auto c : components) {
-		switch (c->type) {
-		case objectTypes::mesh:
-			Mesh* mesh = static_cast<Mesh*>(c)->instantiate();
-			gameObject->addComponent(mesh);
-			break;
-		case objectTypes::camera:
-			Camera* camera = static_cast<Camera*>(c)->instantiate(gameObject);
-			break;
-		case objectTypes::light:
-			break;
-		}
-		
+		if (static_cast<MeshLoader*>(c)->type == typeid(MeshLoader).name())
+			gameObject->addComponent(static_cast<MeshLoader*>(c)->instantiate());
+		else if (static_cast<MeshRenderer*>(c)->type == typeid(MeshRenderer).name())
+			gameObject->addComponent(static_cast<MeshRenderer*>(c)->instantiate());
+		else if (static_cast<Camera*>(c)->type == typeid(Camera).name())
+			gameObject->addComponent(static_cast<Camera*>(c)->instantiate());
 	}
-
+	gameObject->addComponents(components);
+	for (auto c : children) {
+		gameObject->addChild(c->instantiate());
+	}
 }
 
 void gph::GameObject::addChild(GameObject* child) {

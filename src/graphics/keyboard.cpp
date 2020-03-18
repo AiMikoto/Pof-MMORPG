@@ -1,12 +1,13 @@
 #include "keyboard.h"
 #include "camera.h"
 #include "scene.h"
+#include "gpu.h"
 
 namespace gph = graphics;
 
 void gph::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	bool pressOrRepeat = (action == GLFW_PRESS || action == GLFW_REPEAT);
-	Camera* mainCamera = activeScene->cameras[activeScene->mainCameraID];
+	Camera* mainCamera = gpu->cameras[0];
 	switch (key)
 	{
 	case GLFW_KEY_ESCAPE:

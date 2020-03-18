@@ -3,7 +3,7 @@
 
 namespace gph = graphics;
 
-gph::Light::Light() : GameObject() {}
+gph::Light::Light() {}
 
 gph::Light::~Light() {}
 

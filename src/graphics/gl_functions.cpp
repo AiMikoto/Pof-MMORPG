@@ -5,8 +5,9 @@
 #include "transform.h"
 #include "mouse.h"
 #include "lib/log.h"
-#include "model.h"
+#include "mesh.h"
 #include "scene.h"
+#include "gpu.h"
 
 namespace gph = graphics;
 
@@ -67,6 +68,8 @@ void gph::update(GLFWwindow* window, double& lastTime, double& check, int fps) {
 	deltaTime = currentTime - lastTime;
 	lastTime = currentTime;
 
+	gpu->update();
+
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 }
@@ -78,7 +81,7 @@ void gph::loadShaders(std::vector<std::string> shadersPath) {
 	}
 	for (int i = 0; i < shadersPath.size(); i += 2) {
 		Shader* shader = new Shader(shadersPath[i], shadersPath[i + 1]);
-		shaderMap[i/2] = shader;
+		gpu->shaders[i/2] = shader;
 	}
 }
 
@@ -94,12 +97,6 @@ void gph::setBackgroundColor(float r, float g, float b, float a) {
 
 void gph::cleanup() {
 	BOOST_LOG_TRIVIAL(trace) << "Cleaning up";
-	for (auto i : shaderMap) {
-		delete i.second;
-	}
-	shaderMap.clear();
-	delete activeScene;
-	glfwTerminate();
+	delete gpu;
 	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
 }
-
