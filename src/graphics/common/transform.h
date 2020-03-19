@@ -4,13 +4,10 @@
 #include "glm/gtc/type_ptr.hpp"
 #include <vector>
 #include <string>
-#include "constants.h"
-#include "variables.h"
 #include <boost/property_tree/ptree.hpp>
 
-namespace graphics {
-	class Transform {
-	public:
+namespace engine {
+	struct Transform {
 		glm::dvec3 position, scale;
 		glm::dquat rotation;
 

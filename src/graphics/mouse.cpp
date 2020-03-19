@@ -1,19 +1,17 @@
 #include "mouse.h"
-#include "scene.h"
+#include "common/scene.h"
 #include <iostream>
-#include "gpu.h"
+#include "render/gpu.h"
 
-namespace gph = graphics;
+void engine::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {}
 
-void gph::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {}
-
-void gph::moveCursorCallback(GLFWwindow* window, double xpos, double ypos) {
+void engine::moveCursorCallback(GLFWwindow* window, double xpos, double ypos) {
 	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN) {
-		gpu->cameras[0]->rotate = true;
+		gpu->editorCamera->rotate = true;
 	}
 }
 
-void gph::mouseButtonCallback(GLFWwindow* window, int button, int state, int mods) {
+void engine::mouseButtonCallback(GLFWwindow* window, int button, int state, int mods) {
 	switch (button) {
 	case GLFW_MOUSE_BUTTON_2:
 		switch (state) {
@@ -28,7 +26,7 @@ void gph::mouseButtonCallback(GLFWwindow* window, int button, int state, int mod
 	}
 }
 
-void gph::cursorToMiddle(GLFWwindow* window) {
+void engine::cursorToMiddle(GLFWwindow* window) {
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	glfwSetCursorPos(window, 0.5 * width, 0.5 * height);

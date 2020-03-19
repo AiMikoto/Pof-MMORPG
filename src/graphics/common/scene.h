@@ -1,16 +1,10 @@
 #pragma once
-#include "graphics_files.h"
 #include "objects.h"
-#include "transform.h"
-#include "shader.h"
-#include "camera.h"
-#include "light.h"
-#include "mesh.h"
 #include <vector>
 #include <string>
 #include <boost/property_tree/ptree.hpp>
 
-namespace graphics {
+namespace engine {
 	class Scene {
 	public:
 		std::vector<GameObject*> gameObjects;

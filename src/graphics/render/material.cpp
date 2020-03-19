@@ -1,30 +1,28 @@
-#include "material.h"
+#include "render/material.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "lib/stb_image.h"
-#include "graphics_files.h"
+#include "render/graphics_files.h"
 #include "lib/log.h"
-#include "gpu.h"
+#include "render/gpu.h"
 
-namespace gph = graphics;
+engine::Texture::Texture() {}
 
-gph::Texture::Texture() {}
-
-gph::Texture::Texture(std::string path) {
+engine::Texture::Texture(std::string path) {
 	this->path = path;
 	load();
 }
 
-gph::Texture::Texture(std::string path, uint type) {
+engine::Texture::Texture(std::string path, uint type) {
 	this->path = path;
 	this->type = type;
 	load();
 }
 
-gph::Texture::~Texture() {
+engine::Texture::~Texture() {
 	glDeleteTextures(1, &id);
 }
 
-void gph::Texture::load() {
+void engine::Texture::load() {
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id);
 
@@ -33,6 +31,8 @@ void gph::Texture::load() {
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	int width, height, totalChannels;
 	stbi_set_flip_vertically_on_load(true);
@@ -58,15 +58,15 @@ void gph::Texture::load() {
 	gpu->textures[this->id] = this;
 }
 
-gph::Material::Material() {}
+engine::Material::Material() {}
 
-gph::Material::~Material() {}
+engine::Material::~Material() {}
 
-gph::Material::Material(uint shaderID) {
+engine::Material::Material(uint shaderID) {
 	this->shaderID = shaderID;
 }
 
-void gph::Material::contextSetup() {
+void engine::Material::contextSetup() {
 	Shader* shader = gpu->shaders[shaderID];
 	shader->use();
 	shader->setVec4("material.colorDiffuse", colorDiffuse);
@@ -92,6 +92,6 @@ void gph::Material::contextSetup() {
 	}
 }
 
-boost::property_tree::ptree gph::Material::serialize() {}
+boost::property_tree::ptree engine::Material::serialize() {}
 
-void gph::Material::deserialize(boost::property_tree::ptree node) {}
+void engine::Material::deserialize(boost::property_tree::ptree node) {}

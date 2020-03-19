@@ -3,11 +3,13 @@
 #include "constants.h"
 #include "shader.h"
 #include "material.h"
-#include "camera.h"
-#include "mesh.h"
-#include "scene.h"
+#include "gl_context.h"
+#include "components/camera.h"
+#include "components/meshRenderer.h"
+#include "common/scene.h"
+#include "common/mesh.h"
 
-namespace graphics {
+namespace engine {
 	class GPU {
 	public:
 		std::map<uint, Texture*> textures;
@@ -18,16 +20,20 @@ namespace graphics {
 		//optimizing objects that use the same material not to switch context on the gpu
 		std::map<uint, glm::ivec2> sortedRendererMat;
 		std::vector<Scene*> activeScenes;
-		GLFWwindow* window;
+		GLContext* glContext;
+		Camera* editorCamera;
 
-		GPU(GLFWwindow* window);
+		GPU();
 		~GPU();
+		void initializeContext();
 		void draw();
 		void update();
 		void addRenderer(MeshRenderer* renderer);
 		void removeRenderer(MeshRenderer* renderer);
 	private:
 		void sortRenderers();
+		void drawScene();
+		void drawUI();
 		std::vector<MeshRenderer*> renderers;
 		
 	};

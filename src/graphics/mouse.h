@@ -1,10 +1,7 @@
 #pragma once
-#include "graphics_files.h"
-#include "constants.h"
-#include "variables.h"
-#include "camera.h"
+#include "render/graphics_files.h"
 
-namespace graphics {
+namespace engine {
 	void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 	void moveCursorCallback(GLFWwindow* window, double xpos, double ypos);
 	void mouseButtonCallback(GLFWwindow* window, int button, int state, int mods);

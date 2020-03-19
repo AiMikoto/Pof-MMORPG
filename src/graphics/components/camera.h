@@ -1,12 +1,19 @@
 #pragma once
-#include "objects.h"
+#include "common/objects.h"
 #include "component.h"
-#include "graphics_files.h"
+#include "render/graphics_files.h"
 #include "constants.h"
 #include "variables.h"
 #include <boost/property_tree/ptree.hpp>
 
-namespace graphics {
+namespace engine {
+	namespace cam {
+		enum cameraMovements {
+			forward, backwards, up, down, left, right,
+			movements
+		};
+	}
+
 	struct CameraViewport {
 		float startX, startY, endX, endY; // percentages relative to the window's widht/height
 		CameraViewport();
@@ -20,7 +27,7 @@ namespace graphics {
 		bool isFixed, isPerspective;
 		double moveSpeed, rotationSpeed;
 		float nearClipDistance, farClipDistance, fieldOfView;
-		bool moveBuffer[totalCameraMovements];
+		bool moveBuffer[cam::movements];
 		bool rotate;
 		double yaw, pitch;
 		CameraViewport viewport;

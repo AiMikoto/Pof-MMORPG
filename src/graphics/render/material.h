@@ -2,10 +2,8 @@
 #include <string>
 #include "constants.h"
 #include <boost/property_tree/ptree.hpp>
-#include "shader.h"
 
-namespace graphics {
-
+namespace engine {
 	struct Texture {
 		uint id, type;
 		std::string path;
@@ -20,8 +18,7 @@ namespace graphics {
 		void load();
 	};
 
-	class Material {
-	public:
+	struct Material {
 		uint shaderID;
 		glm::vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
 		bool twoSided;

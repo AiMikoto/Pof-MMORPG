@@ -8,7 +8,7 @@
 #include "constants.h"
 #include "variables.h"
 
-namespace graphics {
+namespace engine {
 	struct ShaderLoader {
 		GLuint vertexShaderID, fragmentShaderID;
 		std::string vertexShaderPath, fragmentShaderPath;

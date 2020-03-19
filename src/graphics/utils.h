@@ -2,14 +2,10 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <iostream>
-#include "constants.h"
-#include "variables.h"
 #include <boost/property_tree/ptree.hpp>
-#include <algorithm>
-#include <typeinfo>
+#include "glm/gtc/type_ptr.hpp"
 
-namespace graphics {
+namespace engine {
 	std::vector<std::string> charArrayToStringVector(const char* const input[], size_t arrayLength);
 	std::vector<std::string> split(const std::string &toSplit, char separator);
 	template <typename T> std::string vectorToString(std::vector<T> in, char separator) {

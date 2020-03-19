@@ -1,44 +1,42 @@
 #include "camera.h"
-#include "transform.h"
+#include "common/transform.h"
 #include "constants.h"
-#include "variables.h"
 #include <iostream>
 #include "mouse.h"
 #include "lib/log.h"
-#include "gpu.h"
+#include "render/gpu.h"
 #include <typeinfo>
 #include "utils.h"
+#include "common/time.h"
 
-namespace gph = graphics;
-
-gph::CameraViewport::CameraViewport() {
+engine::CameraViewport::CameraViewport() {
 	this->startX = 0;
 	this->startY = 0;
 	this->endX = 1;
 	this->endY = 1;
 }
 
-gph::CameraViewport::CameraViewport(float startX, float startY, float endX, float endY) {
+engine::CameraViewport::CameraViewport(float startX, float startY, float endX, float endY) {
 	this->startX = startX;
 	this->startY = startY;
 	this->endX = endX;
 	this->endY = endY;
 }
 
-gph::Camera::Camera() : Component(true) {
+engine::Camera::Camera() : Component(true) {
 	setType();
 }
 
-gph::Camera::~Camera() { }
+engine::Camera::~Camera() { }
 
-gph::Camera::Camera(gph::CameraViewport viewport, bool isPerspective, bool isFixed) : Component(true) {
+engine::Camera::Camera(CameraViewport viewport, bool isPerspective, bool isFixed) : Component(true) {
 	this->viewport = viewport;
 	this->isPerspective = isPerspective;
 	this->isFixed = isFixed;
 	setType();
 }
 
-gph::Camera::Camera(gph::Transform transform, gph::CameraViewport viewport, bool isPerspective, bool isFixed) : Component(true) {
+engine::Camera::Camera(Transform transform, CameraViewport viewport, bool isPerspective, bool isFixed) : Component(true) {
 	this->gameObject->transform = transform;
 	this->viewport = viewport;	
 	this->isPerspective = isPerspective;
@@ -46,7 +44,7 @@ gph::Camera::Camera(gph::Transform transform, gph::CameraViewport viewport, bool
 	setType();
 }
 
-void gph::Camera::setup() {
+void engine::Camera::setup() {
 	moveSpeed = 5.0f;
 	rotationSpeed = 1;
 	fieldOfView = 45.0f;
@@ -56,7 +54,7 @@ void gph::Camera::setup() {
 	isFixed = false;
 	pitch = 0;
 	yaw = pi;
-	for (int i = 0; i < totalCameraMovements; i++) {
+	for (int i = 0; i < cam::movements; i++) {
 		moveBuffer[i] = false;
 	}
 	updateRotation();
@@ -64,42 +62,42 @@ void gph::Camera::setup() {
 	Component::setup();
 }
 
-void gph::Camera::moveCamera(int direction) {
+void engine::Camera::moveCamera(int direction) {
 	glm::dvec3 cancelDirectionMovements = { 1,1,1 };
 	switch (direction) {
 	case(cam::cameraMovements::forward):
-		gameObject->transform.position += forward() * cancelDirectionMovements * deltaTime * moveSpeed;
+		gameObject->transform.position += forward() * cancelDirectionMovements * Time::deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::backwards):
-		gameObject->transform.position -= forward() * cancelDirectionMovements * deltaTime * moveSpeed;
+		gameObject->transform.position -= forward() * cancelDirectionMovements * Time::deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::right):
-		gameObject->transform.position += right() * cancelDirectionMovements * deltaTime * moveSpeed;
+		gameObject->transform.position += right() * cancelDirectionMovements * Time::deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::left):
-		gameObject->transform.position -= right() * cancelDirectionMovements * deltaTime * moveSpeed;
+		gameObject->transform.position -= right() * cancelDirectionMovements * Time::deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::up):
-		gameObject->transform.position += up() * deltaTime * moveSpeed;
+		gameObject->transform.position += up() * Time::deltaTime * moveSpeed;
 		break;
 	case(cam::cameraMovements::down):
-		gameObject->transform.position -= up() * deltaTime * moveSpeed;
+		gameObject->transform.position -= up() * Time::deltaTime * moveSpeed;
 		break;
 	}
 }
 
-void gph::Camera::rotateCamera(GLFWwindow* window) {
+void engine::Camera::rotateCamera(GLFWwindow* window) {
 	double xpos, ypos;
 	glfwGetCursorPos(window, &xpos, &ypos);
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 
-	yaw += rotationSpeed * deltaTime * (width / 2 - xpos);
+	yaw += rotationSpeed * Time::deltaTime * (width / 2 - xpos);
 	if (yaw > 2 * pi)
 		yaw -= 2 * pi;
 	else if (yaw < 0)
 		yaw += 2 * pi;
-	pitch += rotationSpeed * deltaTime * (height / 2 - ypos);
+	pitch += rotationSpeed * Time::deltaTime * (height / 2 - ypos);
 	if (pitch > 2 * pi)
 		pitch -=  2 * pi;
 	else if (pitch < 0)
@@ -109,30 +107,30 @@ void gph::Camera::rotateCamera(GLFWwindow* window) {
 	cursorToMiddle(window);
 }
 
-glm::vec3 gph::Camera::lookAt() {
+glm::vec3 engine::Camera::lookAt() {
 	return gameObject->transform.position + forward();
 }
 
-glm::dvec3 gph::Camera::forward() {
+glm::dvec3 engine::Camera::forward() {
 	return glm::dvec3(cos(pitch) * sin(yaw), sin(pitch), cos(pitch) * cos(yaw));
 }
 
-glm::dvec3 gph::Camera::right() {
+glm::dvec3 engine::Camera::right() {
 	return glm::dvec3(-cos(yaw), 0, sin(yaw));
 }
 
-glm::dvec3 gph::Camera::up() {
+glm::dvec3 engine::Camera::up() {
 	return glm::dvec3(0, cos(pitch), sin(pitch));
 }
 
-void gph::Camera::updateRotation() {
+void engine::Camera::updateRotation() {
 	double x = std::cos(yaw) * std::cos(pitch);
 	double y = std::sin(pitch);
 	double z = std::sin(yaw) * std::cos(pitch);
 	gameObject->transform.rotation = glm::dquat(glm::dvec3(x, y, z));
 }
 
-glm::mat4 gph::Camera::projection(GLFWwindow* window) {
+glm::mat4 engine::Camera::projection(GLFWwindow* window) {
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	if(isPerspective)
@@ -142,11 +140,11 @@ glm::mat4 gph::Camera::projection(GLFWwindow* window) {
 	return glm::mat4(1);
 }
 
-glm::mat4 gph::Camera::view() {
+glm::mat4 engine::Camera::view() {
 	return glm::lookAt(glm::vec3(gameObject->transform.position), lookAt(), glm::vec3(0, 1, 0));
 }
 
-void gph::Camera::setViewport(GLFWwindow* window) {
+void engine::Camera::setViewport(GLFWwindow* window) {
 	int x, y, width, height;
 	glfwGetWindowSize(window, &width, &height);
 	x = int(std::round(viewport.startX * width));
@@ -158,7 +156,7 @@ void gph::Camera::setViewport(GLFWwindow* window) {
 	glViewport(x, y, width, height);
 }
 
-boost::property_tree::ptree gph::Camera::serialize() {
+boost::property_tree::ptree engine::Camera::serialize() {
 	boost::property_tree::ptree node;
 	node.put("isFixed", isFixed);
 	node.put("isPerspective", isPerspective);
@@ -173,7 +171,7 @@ boost::property_tree::ptree gph::Camera::serialize() {
 	return node;
 }
 
-void gph::Camera::deserialize(boost::property_tree::ptree node) {
+void engine::Camera::deserialize(boost::property_tree::ptree node) {
 	viewport = CameraViewport();
 	viewport.deserialize(node.get_child("viewport"));
 	isFixed = node.get<bool>("isFixed");
@@ -187,7 +185,7 @@ void gph::Camera::deserialize(boost::property_tree::ptree node) {
 	pitch = node.get<double>("pitch");
 }
 
-boost::property_tree::ptree gph::CameraViewport::serialize() {
+boost::property_tree::ptree engine::CameraViewport::serialize() {
 	boost::property_tree::ptree node;
 	node.put("startX", startX);
 	node.put("startY", startY);
@@ -196,14 +194,14 @@ boost::property_tree::ptree gph::CameraViewport::serialize() {
 	return node;
 }
 
-void gph::CameraViewport::deserialize(boost::property_tree::ptree node) {
+void engine::CameraViewport::deserialize(boost::property_tree::ptree node) {
 	startX = node.get<float>("startX");
 	startY = node.get<float>("startY");
 	endX = node.get<float>("endX");
 	endY = node.get<float>("endY");
 }
 
-gph::Camera* gph::Camera::instantiate() {
+engine::Camera* engine::Camera::instantiate() {
 	Camera* cam = new Camera();
 	cam->viewport = this->viewport;
 	cam->isFixed = this->isFixed;
@@ -218,16 +216,16 @@ gph::Camera* gph::Camera::instantiate() {
 	return cam;
 }
 
-void gph::Camera::update() {
-	for (int i = 0; i < totalCameraMovements; i++) {
+void engine::Camera::update() {
+	for (int i = 0; i < cam::movements; i++) {
 		if (moveBuffer[i])
 			moveCamera(i);
 	}
 	if (rotate) {
-		rotateCamera(gpu->window);
+		rotateCamera(gpu->glContext->window);
 	}
 }
 
-void gph::Camera::setType() {
+void engine::Camera::setType() {
 	type = typeidToClassName(typeid(this).name());
 }

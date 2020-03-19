@@ -1,8 +1,7 @@
 #pragma once
-#include "constants.h"
 #include <boost/property_tree/ptree.hpp>
 
-namespace graphics {
+namespace engine {
 	class GameObject;
 
 	class Component {
@@ -13,7 +12,7 @@ namespace graphics {
 
 		Component();
 		Component(bool allowMultiple);
-		~Component();
+		virtual ~Component();
 		virtual boost::property_tree::ptree serialize();
 		virtual void deserialize();
 		virtual Component* instantiate();

@@ -5,10 +5,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <typeinfo>
 #include <algorithm>
-#include "lib/log.h"
 #include "utils.h"
 
-namespace graphics {
+namespace engine {
 	class Component;
 
 	class GameObject {
@@ -18,7 +17,6 @@ namespace graphics {
 		std::vector<GameObject*> children;
 		std::vector<Component*> components;
 		Transform transform;
-		uint type;
 		bool isStatic;
 
 		GameObject();
