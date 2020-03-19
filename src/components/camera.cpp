@@ -227,5 +227,5 @@ void engine::Camera::update() {
 }
 
 void engine::Camera::setType() {
-	type = typeidToClassName(typeid(this).name());
+	type = typeid(*this).name();
 }

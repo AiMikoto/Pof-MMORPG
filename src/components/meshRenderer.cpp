@@ -85,7 +85,7 @@ void engine::MeshRenderer::setup() {
 }
 
 void engine::MeshRenderer::setType() {
-	type = typeidToClassName(typeid(this).name());
+	type = typeid(*this).name();
 }
 
 void engine::MeshRenderer::meshLoaderRemoved() {
