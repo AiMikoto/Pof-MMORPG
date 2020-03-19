@@ -20,25 +20,149 @@ bool is_zero(glm::dvec3 v)
   return (std::abs(v.x) < 0.01) && (std::abs(v.y) < 0.01) && (std::abs(v.z) < 0.01);
 }
 
-double adjust(double origin, double sub, double sup)
+glm::dvec3 point_shortest_to_surface(glm::dvec3 point, glm::dvec3 sp1, glm::dvec3 sp2, glm::dvec3 sp3)
 {
-  // if origin is between sub and sup, return 0
-  if(origin >= sub && origin <= sup)
+  // get the 2 lengths of the surface
+  glm::dvec3 e1 = sp2 - sp1;
+  glm::dvec3 e2 = sp3 - sp1;
+  // generate 2 axis for the surface
+  glm::dvec3 avec = glm::normalize(e1);
+  glm::dvec3 bvec = glm::normalize(e2);
+  // get the surface normal
+  glm::dvec3 snor = glm::normalize(glm::cross(avec, bvec));
+  // compute surface min and max delimiters
+  double amin = 0;
+  double bmin = 0;
+  double amax = glm::dot(e1, avec);
+  double bmax = glm::dot(e2, bvec);
+  // project point onto surface plane
+  glm::dvec3 pointp = point - glm::dot(snor, point) * snor - sp1;
+  double ap = glm::dot(pointp, avec);
+  double bp = glm::dot(pointp, bvec);
+  // clamp projection's a vector component
+  if(ap < amin)
   {
-    return 0;
+    ap = amin;
   }
-  // if origin is above sup, return origin - sup
-  if(origin >= sup)
+  if(ap > amax)
   {
-    return origin - sup;
+    ap = amax;
   }
-  // if origin is under sub, return origin - sub
-  if(origin <= sub)
+  // clamp projection's b vector component
+  if(bp < bmin)
   {
-    return origin - sub;
+    bp = bmin;
   }
-  // shouldn't reach here
-  return 0;
+  if(bp > bmax)
+  {
+    bp = bmax;
+  }
+  // reconstruct closest point on the surface
+  glm::dvec3 closest_point = sp1 + ap * avec + bp * bvec;
+  return closest_point - point;
+}
+
+glm::dvec3 segment_shortest_to_surface(glm::dvec3 point1, glm::dvec3 point2, glm::dvec3 sp1, glm::dvec3 sp2, glm::dvec3 sp3)
+{
+  // get the 2 lengths of the surface
+  glm::dvec3 e1 = sp2 - sp1;
+  glm::dvec3 e2 = sp3 - sp1;
+  glm::dvec3 seg = point2 - point1;
+  // generate 2 axis for the surface
+  glm::dvec3 avec = glm::normalize(e1);
+  glm::dvec3 bvec = glm::normalize(e2);
+  // compute segment axis;
+  glm::dvec3 svec = glm::normalize(seg);
+  // get the surface normal
+  glm::dvec3 snor = glm::normalize(glm::cross(avec, bvec));
+  // compute surface min and max delimiters
+  double amin = 0;
+  double bmin = 0;
+  double amax = glm::dot(e1, avec);
+  double bmax = glm::dot(e2, bvec);
+  // compute segment min and max delimiters
+  double smin = 0;
+  double smax = glm::dot(seg, svec);
+  // compute segment offset
+  double spd = glm::dot(point1, svec);
+  // project point 1 onto surface plane
+  glm::dvec3 point1p = point1 - glm::dot(snor, point1) * snor - sp1;
+  double a1p = glm::dot(point1p, avec);
+  double b1p = glm::dot(point1p, bvec);
+  // project point 2 onto surface plane
+  glm::dvec3 point2p = point2 - glm::dot(snor, point2) * snor - sp1;
+  double a2p = glm::dot(point2p, avec);
+  double b2p = glm::dot(point2p, bvec);
+  // clamp point 1 projection's a vector component
+  if(a1p < amin)
+  {
+    a1p = amin;
+  }
+  if(a1p > amax)
+  {
+    a1p = amax;
+  }
+  // clamp point 1 projection's b vector component
+  if(b1p < bmin)
+  {
+    b1p = bmin;
+  }
+  if(b1p > bmax)
+  {
+    b1p = bmax;
+  }
+  // clamp point 2 projection's a vector component
+  if(a2p < amin)
+  {
+    a2p = amin;
+  }
+  if(a2p > amax)
+  {
+    a2p = amax;
+  }
+  // clamp point 2 projection's b vector component
+  if(b2p < bmin)
+  {
+    b2p = bmin;
+  }
+  if(b2p > bmax)
+  {
+    b2p = bmax;
+  }
+  // project point 1 back onto the segment
+  glm::dvec3 pp1 = sp1 + a1p * avec + b1p * bvec;
+  double s1p = glm::dot(pp1, svec) - spd;
+  // project point 2 back onto the segment
+  glm::dvec3 pp2 = sp1 + a2p * avec + b2p * bvec;
+  double s2p = glm::dot(pp2, svec) - spd;
+  // clamp point 1 onto segment
+  if(s1p < smin)
+  {
+    s1p = smin;
+  }
+  if(s1p > smax)
+  {
+    s1p = smax;
+  }
+  // clamp point 2 onto segment
+  if(s2p < smin)
+  {
+    s2p = smin;
+  }
+  if(s2p > smax)
+  {
+    s2p = smax;
+  }
+  // compute distances and take minimum of those
+  glm::dvec3 rp1 = point1 + s1p * svec;
+  double d1 = glm::distance(pp1, rp1);
+  glm::dvec3 rp2 = point1 + s2p * svec;
+  double d2 = glm::distance(pp2, rp2);
+  if(d1 < d2)
+  {
+    return pp1 - rp1;
+  }
+  return pp2 - rp2;
 }
 
 bool box_box(container *b1, container *b2)
@@ -177,42 +301,19 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
   glm::dvec3 pointc2 = {c -> o -> transform.position.x, maxyc, c -> o -> transform.position.z};
   // get points from b
   get_points(b, points);
-  // compute 3 edges for b
-  glm::dvec3 eb1 = points[0] - points[1];
-  glm::dvec3 eb2 = points[0] - points[2];
-  glm::dvec3 eb3 = points[0] - points[4];
-  glm::dvec3 ec = pointc2 - pointc1;
-  // compute a ton of axis
-  glm::dvec3 axi[23] = {
-    // 3 normals from b
-    glm::cross(eb1, eb2),
-    glm::cross(eb1, eb3),
-    glm::cross(eb2, eb3),
-    // 3 cross products from edges of b and the capsule segment
-    glm::cross(eb1, ec),
-    glm::cross(eb2, ec),
-    glm::cross(eb2, ec),
-    {points[0].x - pointc1.x, 0, points[0].z - pointc1.z},
-    {points[1].x - pointc1.x, 0, points[1].z - pointc1.z},
-    {points[2].x - pointc1.x, 0, points[2].z - pointc1.z},
-    {points[3].x - pointc1.x, 0, points[3].z - pointc1.z},
-    {points[4].x - pointc1.x, 0, points[4].z - pointc1.z},
-    {points[5].x - pointc1.x, 0, points[5].z - pointc1.z},
-    {points[6].x - pointc1.x, 0, points[6].z - pointc1.z},
-    {points[7].x - pointc1.x, 0, points[7].z - pointc1.z},
-    {points[0].x - pointc1.x, adjust(points[0].y, minyc, maxyc), points[0].z - pointc1.z},
-    {points[1].x - pointc1.x, adjust(points[1].y, minyc, maxyc), points[1].z - pointc1.z},
-    {points[2].x - pointc1.x, adjust(points[2].y, minyc, maxyc), points[2].z - pointc1.z},
-    {points[3].x - pointc1.x, adjust(points[3].y, minyc, maxyc), points[3].z - pointc1.z},
-    {points[4].x - pointc1.x, adjust(points[4].y, minyc, maxyc), points[4].z - pointc1.z},
-    {points[5].x - pointc1.x, adjust(points[5].y, minyc, maxyc), points[5].z - pointc1.z},
-    {points[6].x - pointc1.x, adjust(points[6].y, minyc, maxyc), points[6].z - pointc1.z},
-    {points[7].x - pointc1.x, adjust(points[7].y, minyc, maxyc), points[7].z - pointc1.z},
-    ec
+  // compute 6 axis
+  glm::dvec3 axi[6] = {
+    // 6 from minimum distance from each box surface to capsule segment
+    segment_shortest_to_surface(pointc1, pointc2, points[7], points[6], points[5]),
+    segment_shortest_to_surface(pointc1, pointc2, points[7], points[5], points[3]),
+    segment_shortest_to_surface(pointc1, pointc2, points[7], points[6], points[3]),
+    segment_shortest_to_surface(pointc1, pointc2, points[5], points[4], points[1]),
+    segment_shortest_to_surface(pointc1, pointc2, points[3], points[2], points[1]),
+    segment_shortest_to_surface(pointc1, pointc2, points[6], points[4], points[2])
   };
   double p;
   // for each axis
-  for(i = 0; i < 23; i++)
+  for(i = 0; i < 6; i++)
   {
     if(is_zero(axi[i]))
     { // pointless
@@ -421,8 +522,85 @@ bool box_sphere(container *b, container *s)
 }
 
 bool box_sphere(container *b, container *s, glm::dvec3 *axis, double *projection)
-{
-  // TODO: this
+{ // use SAT
+  int i, j;
+  bool collides = true;
+  glm::dvec4 points[8];
+  // get sphere radius and center
+  double r = s -> o -> transform.scale.x * s -> o -> meshScale.x / 2;
+  glm::dvec3 point = s -> o -> transform.position;
+  // get points from b
+  get_points(b, points);
+  // generate 6 axis
+  glm::dvec3 axi[6] = {
+    // 6 from minimum distance from each box surface to capsule segment
+    point_shortest_to_surface(point, points[7], points[6], points[5]),
+    point_shortest_to_surface(point, points[7], points[5], points[3]),
+    point_shortest_to_surface(point, points[7], points[6], points[3]),
+    point_shortest_to_surface(point, points[5], points[4], points[1]),
+    point_shortest_to_surface(point, points[3], points[2], points[1]),
+    point_shortest_to_surface(point, points[6], points[4], points[2])
+  };
+  double p;
+  // for each axis
+  for(i = 0; i < 6; i++)
+  {
+    if(is_zero(axi[i]))
+    { // pointless
+      continue;
+    }
+    axi[i] = glm::normalize(axi[i]);
+    double min1p, max1p, min2p, max2p;
+    // project b onto axis
+    for(j = 0; j < 8; j++)
+    {
+      p = axi[i].x * points[j].x
+        + axi[i].y * points[j].y
+        + axi[i].z * points[j].z;
+      if(j == 0)
+      {
+        min1p = p;
+        max1p = p;
+      }
+      else
+      {
+        min1p = std::min(min1p, p);
+        max1p = std::max(max1p, p);
+      }
+    }
+    // project the sphere onto axis
+    p = axi[i].x * point.x
+      + axi[i].y * point.y
+      + axi[i].z * point.z;
+    min2p = p;
+    max2p = p;
+    // project the radius shadow onto axis
+    min2p -= r;
+    max2p += r;
+    if((max2p > min1p) && (max1p > min2p))
+    {
+      // collides on this axis
+      double projection_difference = std::min(max2p - min1p, max1p - min2p);
+      if(i == 0)
+      {
+        *projection = projection_difference;
+        *axis = axi[i];
+      }
+      if(*projection > projection_difference)
+      {
+        *projection = projection_difference;
+        *axis = axi[i];
+      }
+    }
+    else
+    {
+      // no collision on this axis
+      collides = false;
+      break;
+    }
+  }
+  rotate_axis(axis, s -> o -> transform.position, b -> o -> transform.position);
+  return collides;
 }
 
 bool collide(container *c1, container *c2)
