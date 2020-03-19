@@ -1,15 +1,12 @@
-#include "render/gl_context.h"
-#include "utils.h"
+#include "graphics/gl_context.h"
+#include "core/utils.h"
 #include "components/camera.h"
 #include "lib/log.h"
-#include "common/mesh.h"
-#include "common/scene.h"
-#include "utils.h"
-#include "render/gpu.h"
+#include "graphics/model/mesh.h"
+#include "scene/scene.h"
+#include "graphics/gpu.h"
 #include "components/meshLoader.h"
 #include "components/meshRenderer.h"
-
-namespace gph = graphics;
 
 int main() {
 	log_init("graphics");
