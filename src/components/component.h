@@ -14,7 +14,7 @@ namespace engine {
 		Component(bool allowMultiple);
 		virtual ~Component();
 		virtual boost::property_tree::ptree serialize();
-		virtual void deserialize();
+		virtual void deserialize(boost::property_tree::ptree node);
 		virtual Component* instantiate();
 		virtual void setup();
 	protected:

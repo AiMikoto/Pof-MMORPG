@@ -10,6 +10,7 @@ engine::GLContext::GLContext(int width, int height, std::string name) {
 	this->width = width;
 	this->height = height;
 	this->name = name;
+	this->quit = false;
 	createGLFWContext();
 }
 

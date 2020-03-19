@@ -25,7 +25,7 @@ void engine::MeshLoader::setup() {
 }
 
 void engine::MeshLoader::setType() {
-	type = typeidToClassName(typeid(this).name());
+	type = typeid(*this).name();
 }
 
 engine::MeshLoader::~MeshLoader() {

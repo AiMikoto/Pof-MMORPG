@@ -39,17 +39,15 @@ namespace engine {
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
 		template<typename T> bool hasComponent() {
-			std::string type = typeidToClassName(typeid(T).name());
 			for (auto c : components) {
-				if (type == c->type)
+				if (typeid(T).name() == c->type)
 					return true;
 			}
 			return false;
 		}
 		template<typename T> T* getComponent() {
-			std::string type = typeidToClassName(typeid(T).name());
 			for (auto c : components) {
-				if (type == c->type) {
+				if (typeid(T).name() == c->type) {
 					return static_cast<T*>(c);
 				}
 			}
@@ -57,9 +55,8 @@ namespace engine {
 		}
 		template<typename T> std::vector<T*> getComponents() {
 			std::vector<T*> components;
-			std::string type = typeidToClassName(typeid(T).name());
 			for (auto c : this->components) {
-				if (type == c->type)
+				if (typeid(T).name() == c->type)
 					components.push_back(static_cast<T*>(c));
 			}
 			return components;
