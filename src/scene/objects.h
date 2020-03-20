@@ -27,6 +27,7 @@ namespace engine {
 		double im;
 		bool collides;
 		bool movable;
+		bool collidable;
 
 		GameObject();
 		~GameObject();

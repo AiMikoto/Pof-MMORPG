@@ -177,7 +177,7 @@ void test_aabb()
   engine::GameObject *go = game_object_generator();
   go -> transform.position = {4, 6, 10};
   collider *c = new collider(standard_size, box);
-  c -> gameObject = go;
+  go -> addComponent(c);
   aabb box = c -> to_aabb();
   if(equals(box.minx, 3)
   && equals(box.maxx, 5)
@@ -193,7 +193,7 @@ void test_aabb()
   {
     FAIL;
   }
-  // delete c;
+  delete go;
 }
 
 void test_collisions()
@@ -203,7 +203,6 @@ void test_collisions()
   go1 -> transform.scale = {3, 3, 3};
   collider *c1 = new collider(standard_size, box);
   go1 -> addComponent(c1);
-  c1 -> gameObject = go1;
   // obj1 is 7 -> 13
   engine::GameObject *go2 = game_object_generator();
   collider *c2 = new collider(standard_size, box);
@@ -613,16 +612,17 @@ void test_collisions()
   {
     PASS;
   }
-/*
-  graphics::Mesh *m3 = mesh_generator();
-  m3 -> transform.position = {10, 10, 10};
-  m3 -> transform.scale = {1, 6, 1};
-  container *c3 = new container(m3, caps, true, true, true);
-  graphics::Mesh *m4 = mesh_generator();
-  m4 -> transform.scale = {1, 6, 1};
-  container *c4 = new container(m4, caps, true, true, true);
+  engine::GameObject *go3 = game_object_generator();
+  go3 -> transform.position = {10, 10, 10};
+  go3 -> transform.scale = {1, 6, 1};
+  collider *c3 = new collider(standard_size, caps);
+  go3 -> addComponent(c3);
+  engine::GameObject *go4 = game_object_generator();
+  go4 -> transform.scale = {1, 6, 1};
+  collider *c4 = new collider(standard_size, caps);
+  go4 -> addComponent(c4);
   TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
-  m4 -> transform.position = {8, 10, 10};
+  go4 -> transform.position = {8, 10, 10};
   if(capsule_capsule(c3, c4))
   {
     FAIL;
@@ -632,7 +632,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
-  m4 -> transform.position = {12, 10, 10};
+  go4 -> transform.position = {12, 10, 10};
   if(capsule_capsule(c3, c4))
   {
     FAIL;
@@ -642,7 +642,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
-  m4 -> transform.position = {10, 10, 8};
+  go4 -> transform.position = {10, 10, 8};
   if(capsule_capsule(c3, c4))
   {
     FAIL;
@@ -652,7 +652,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
-  m4 -> transform.position = {10, 10, 12};
+  go4 -> transform.position = {10, 10, 12};
   if(capsule_capsule(c3, c4))
   {
     FAIL;
@@ -662,7 +662,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION NESTED");
-  m4 -> transform.position = {10, 8, 10};
+  go4 -> transform.position = {10, 8, 10};
   if(capsule_capsule(c3, c4))
   {
     PASS;
@@ -672,7 +672,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION NESTED");
-  m4 -> transform.position = {10, 12, 10};
+  go4 -> transform.position = {10, 12, 10};
   if(capsule_capsule(c3, c4))
   {
     PASS;
@@ -682,7 +682,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION TOP");
-  m4 -> transform.position = {10, 17, 10};
+  go4 -> transform.position = {10, 17, 10};
   if(capsule_capsule(c3, c4))
   {
     PASS;
@@ -692,7 +692,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION TOP");
-  m4 -> transform.position = {10, 21, 10};
+  go4 -> transform.position = {10, 21, 10};
   if(capsule_capsule(c3, c4))
   {
     PASS;
@@ -702,7 +702,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION TOP");
-  m4 -> transform.position = {10, 22, 10};
+  go4 -> transform.position = {10, 22, 10};
   if(capsule_capsule(c3, c4))
   {
     FAIL;
@@ -712,7 +712,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION BOTTOM");
-  m4 -> transform.position = {10, 3, 10};
+  go4 -> transform.position = {10, 3, 10};
   if(capsule_capsule(c3, c4))
   {
     PASS;
@@ -722,7 +722,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION BOTTOM");
-  m4 -> transform.position = {10, -1, 10};
+  go4 -> transform.position = {10, -1, 10};
   if(capsule_capsule(c3, c4))
   {
     PASS;
@@ -732,7 +732,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE CAPSULE COLLISION BOTTOM");
-  m4 -> transform.position = {10, -2, 10};
+  go4 -> transform.position = {10, -2, 10};
   if(capsule_capsule(c3, c4))
   {
     FAIL;
@@ -743,7 +743,7 @@ void test_collisions()
   }
   // gonna be lazy and treat c4 as a box
   TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
-  m4 -> transform.position = {8, 10, 10};
+  go4 -> transform.position = {8, 10, 10};
   if(capsule_box(c3, c4))
   {
     FAIL;
@@ -753,7 +753,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
-  m4 -> transform.position = {12, 10, 10};
+  go4 -> transform.position = {12, 10, 10};
   if(capsule_box(c3, c4))
   {
     FAIL;
@@ -763,7 +763,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
-  m4 -> transform.position = {10, 10, 12};
+  go4 -> transform.position = {10, 10, 12};
   if(capsule_box(c3, c4))
   {
     FAIL;
@@ -773,7 +773,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE BOX COLLISION PARALLEL");
-  m4 -> transform.position = {10, 10, 8};
+  go4 -> transform.position = {10, 10, 8};
   if(capsule_box(c3, c4))
   {
     FAIL;
@@ -783,7 +783,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE BOX COLLISION NESTED");
-  m4 -> transform.position = {10, 8, 10};
+  go4 -> transform.position = {10, 8, 10};
   if(capsule_box(c3, c4))
   {
     PASS;
@@ -793,7 +793,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE BOX COLLISION NESTED");
-  m4 -> transform.position = {10, 12, 10};
+  go4 -> transform.position = {10, 12, 10};
   if(capsule_box(c3, c4))
   {
     PASS;
@@ -803,7 +803,7 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE BOX ROTATED NESTED");
-  m4 -> transform.rotateTo(1, {2, 3, 4});
+  go4 -> transform.rotateTo(1, {2, 3, 4});
   if(capsule_box(c3, c4))
   {
     PASS;
@@ -813,8 +813,8 @@ void test_collisions()
     FAIL;
   }
   TEST("TESTING CAPSULE BOX ROTATED TOUCHING EDGE");
-  m4 -> transform.rotateTo(pi/4, {0, 1, 0});
-  m4 -> transform.position = {10 - 1 - sq2 - 0.001, 10, 10};
+  go4 -> transform.rotateTo(pi/4, {0, 1, 0});
+  go4 -> transform.position = {10 - 1 - sq2 - 0.001, 10, 10};
   if(capsule_box(c3, c4))
   {
     FAIL;
@@ -824,7 +824,7 @@ void test_collisions()
     PASS;
   }
   TEST("TESTING CAPSULE BOX ROTATED TOUCHING TANGENT");
-  m4 -> transform.position = {10 - sq2 - 0.001, 10, 10 - sq2 - 0.001};
+  go4 -> transform.position = {10 - sq2 - 0.001, 10, 10 - sq2 - 0.001};
   if(capsule_box(c3, c4))
   {
     FAIL;
@@ -835,26 +835,26 @@ void test_collisions()
   }
   delete go3;
   delete go4;
-*/
   delete go1;
   delete go2;
 }
-/*
+
 void test_slicing()
 {
   TEST("TESTING TICKING OF EMPTY ENVIRONMENT");
-  environment *e = new environment();
+  engine::Scene *e = new engine::Scene();
   tick(e);
   PASS;
   TEST("TESTING TICKING OF STATIC OBJECT");
-  graphics::Mesh *m = mesh_generator();
-  m -> transform.position = {0, 0, 0};
-  m -> transform.scale = {10, 10, 10};
-  container *c = new container(m, box, false, true, false);
-  e -> add(c);
+  engine::GameObject *go = game_object_generator();
+  go -> transform.position = {0, 0, 0};
+  go -> transform.scale = {10, 10, 10};
+  collider *c = new collider(standard_size, box);
+  go -> addComponent(c);
+  e -> gameObjects.push_back(go);
   tick(e);
-  bool velo_equals = equals(c -> velocity, {0, 0, 0});
-  bool pos_equals = equals(c -> o -> transform.position, {0, 0, 0});
+  bool velo_equals = equals(go -> velocity, {0, 0, 0});
+  bool pos_equals = equals(go -> transform.position, {0, 0, 0});
   if(velo_equals && pos_equals)
   {
     PASS;
@@ -863,6 +863,7 @@ void test_slicing()
   {
     FAIL;
   }
+/*
   TEST("TESTING TICKING OF STILL MOVABLE OBJECT");
   m = mesh_generator();
   m -> transform.position = {0, 12, 0};
@@ -966,8 +967,9 @@ void test_slicing()
   {
     PASS;
   }
-  // delete e;
-}*/
+*/
+  delete e;
+}
 
 int main()
 {
@@ -975,7 +977,7 @@ int main()
   test_octree();
   test_aabb();
   test_collisions();
-  // test_slicing();
+  test_slicing();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
 }

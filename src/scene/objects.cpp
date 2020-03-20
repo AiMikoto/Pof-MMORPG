@@ -63,6 +63,9 @@ void engine::GameObject::initialise()
 	force_acc = {0, 0, 0};
 	m = 1;
 	im = 1;
+	collidable = false;
+	collides = false;
+	movable = false;
 }
 
 void engine::GameObject::tick(double delta)
