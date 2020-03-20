@@ -851,7 +851,8 @@ void test_slicing()
   go -> transform.scale = {10, 10, 10};
   collider *c = new collider(standard_size, box);
   go -> addComponent(c);
-  e -> gameObjects.push_back(go);
+  go -> collidable = true;
+  e -> add_GameObject(go);
   tick(e);
   bool velo_equals = equals(go -> velocity, {0, 0, 0});
   bool pos_equals = equals(go -> transform.position, {0, 0, 0});
@@ -863,19 +864,21 @@ void test_slicing()
   {
     FAIL;
   }
-/*
   TEST("TESTING TICKING OF STILL MOVABLE OBJECT");
-  m = mesh_generator();
-  m -> transform.position = {0, 12, 0};
-  m -> transform.scale = {1, 2, 1};
-  c = new container(m, caps, true, false, true);
-  e -> add(c);
+  go = game_object_generator();
+  go -> transform.position = {0, 12, 0};
+  go -> transform.scale = {1, 2, 1};
+  c = new collider(standard_size, caps);
+  go -> addComponent(c);
+  go -> movable = true;
+  go -> collides = true;
+  e -> add_GameObject(go);
   int ticks = 300;
   while(ticks--)
   {
     tick(e);
   }
-  pos_equals = equals(c -> o -> transform.position, {0, 12, 0});
+  pos_equals = equals(go -> transform.position, {0, 12, 0});
   if(pos_equals)
   {
     PASS;
@@ -885,14 +888,16 @@ void test_slicing()
     FAIL;
   }
   TEST("TESTING TICKING OF MOVABLE OBJECT");
-  m = mesh_generator();
-  m -> transform.position = {0, 100, 0};
-  m -> transform.scale = {1, 2, 1};
-  c = new container(m, caps, true, false, true);
-  e -> add(c);
+  go = game_object_generator();
+  go -> transform.position = {0, 100, 0};
+  go -> transform.scale = {1, 2, 1};
+  c = new collider(standard_size, caps);
+  go -> addComponent(c);
+  go -> movable = true;
+  go -> collides = true;
   tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e))))))))));
-  velo_equals = equals(c -> velocity, {0, 0, 0});
-  pos_equals = equals(c -> o -> transform.position, {0, 100, 0});
+  velo_equals = equals(go -> velocity, {0, 0, 0});
+  pos_equals = equals(go -> transform.position, {0, 100, 0});
   if(velo_equals || pos_equals)
   {
     FAIL;
@@ -907,7 +912,7 @@ void test_slicing()
   {
     tick(e);
   }
-  pos_equals = equals(c -> o -> transform.position, {0, 12, 0});
+  pos_equals = equals(go -> transform.position, {0, 12, 0});
   if(pos_equals)
   {
     PASS;
@@ -916,33 +921,40 @@ void test_slicing()
   {
     FAIL;
   }
-  pos_equals = equals(c -> o -> transform.position, {0, 1, 0});
-  // delete e;
+  pos_equals = equals(go -> transform.position, {0, 1, 0});
+  delete e;
   TEST("TESTING THROW ONTO CORNER WILL EVENTUALLY SETTLE");
-  e = new environment();
-  m = mesh_generator();
-  m -> transform.position = {0, 0, 0};
-  m -> transform.scale = {300, 10, 300};
-  c = new container(m, box, false, true, false);
-  e -> add(c);
-  m = mesh_generator();
-  m -> transform.position = {0, 0, 0};
-  m -> transform.scale = {10, 300, 300};
-  c = new container(m, box, false, true, false);
-  e -> add(c);
-  m = mesh_generator();
-  m -> transform.position = {-20, 20, 20};
-  m -> transform.scale = {1, 2, 1};
-  c = new container(m, box, true, false, true);
-  c -> velocity = {10, 0, -10};
-  e -> add(c);
+  e = new engine::Scene();
+  go = game_object_generator();
+  go -> transform.position = {0, 0, 0};
+  go -> transform.scale = {300, 10, 300};
+  c = new collider(standard_size, box);
+  go -> addComponent(c);
+  go -> collidable = true;
+  e -> add_GameObject(go);
+  go = game_object_generator();
+  go -> transform.position = {0, 0, 0};
+  go -> transform.scale = {10, 300, 300};
+  c = new collider(standard_size, box);
+  go -> addComponent(c);
+  go -> collidable = true;
+  e -> add_GameObject(go);
+  go = game_object_generator();
+  go -> transform.position = {-20, 20, 20};
+  go -> transform.scale = {1, 2, 1};
+  go -> velocity = {10, 0, -10};
+  c = new collider(standard_size, box);
+  go -> addComponent(c);
+  go -> movable = true;
+  go -> collides = true;
+  e -> add_GameObject(go);
   ticks = 1000;
   while(ticks--)
   {
     tick(e);
   }
-  bool xeq = equals(c -> o -> transform.position.x, -11);
-  bool yeq = equals(c -> o -> transform.position.y, 12);
+  bool xeq = equals(go -> transform.position.x, -11);
+  bool yeq = equals(go -> transform.position.y, 12);
   if(xeq && yeq)
   {
     PASS;
@@ -957,8 +969,8 @@ void test_slicing()
   {
     tick(e);
   }
-  velo_equals = equals(c -> velocity, {0, 0, -10});
-  yeq = equals(c -> o -> transform.position.y, 11);
+  velo_equals = equals(go -> velocity, {0, 0, -10});
+  yeq = equals(go -> transform.position.y, 11);
   if(velo_equals || yeq)
   {
     FAIL;
@@ -967,7 +979,6 @@ void test_slicing()
   {
     PASS;
   }
-*/
   delete e;
 }
 

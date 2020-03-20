@@ -1,6 +1,7 @@
 #include "scene/scene.h"
 #include "lib/log.h"
 #include <boost/property_tree/json_parser.hpp>
+#include "components/collider.h"
 
 engine::Scene::Scene() : ctree(root_aabb()) {
 }
@@ -16,6 +17,15 @@ void engine::Scene::update() {
 	for (auto g : gameObjects) {
 		g->update();
 	}
+}
+
+int engine::Scene::add_GameObject(GameObject* go) {
+	int spot = gameObjects.size();
+	gameObjects.push_back(go);
+	if(go -> collidable) {
+		ctree.insert(spot, go -> getComponent<collider>() -> to_aabb());
+	}
+	return spot;
 }
 
 void engine::Scene::sceneToJSON(std::string path) {

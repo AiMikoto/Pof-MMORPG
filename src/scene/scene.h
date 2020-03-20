@@ -12,6 +12,7 @@ namespace engine {
 
 		Scene();
 		~Scene();
+		int add_GameObject(GameObject* go);
 		void update();
 		void sceneToJSON(std::string path);
 		void sceneFromJSON(std::string data);
