@@ -18,6 +18,7 @@ namespace engine {
 		std::vector<Component*> components;
 		Transform transform;
 		bool isStatic;
+		void initialise();
 		void tick(double delta);
 		void add_force(glm::dvec3 force);
 		glm::dvec3 velocity;

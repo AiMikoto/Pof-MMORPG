@@ -2,7 +2,9 @@
 #include "core/constants.h"
 #include "components/component.h"
 
-engine::GameObject::GameObject() {}
+engine::GameObject::GameObject() {
+	initialise();
+}
 
 engine::GameObject::~GameObject() {
 	for (auto c : components) {
@@ -17,35 +19,62 @@ engine::GameObject::~GameObject() {
 
 engine::GameObject::GameObject(GameObject* parent) {
 	this->parent = parent;
+	initialise();
 }
 
 engine::GameObject::GameObject(std::vector<GameObject*> children) {
 	this->children = children;
+	initialise();
 }
 
 engine::GameObject::GameObject(std::vector<Component*> components) {
 	this->components = components;
+	initialise();
 }
 
 engine::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> children) {
 	this->parent = parent;
 	this->children = children;
+	initialise();
 }
 
 engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> components) {
 	this->parent = parent;
 	this->components = components;
+	initialise();
 }
 
 engine::GameObject::GameObject(std::vector<GameObject*> children, std::vector<Component*> components) {
 	this->children = children;
 	this->components = components;
+	initialise();
 }
 
 engine::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> children, std::vector<Component*> components) {
 	this->parent = parent;
 	this->children = children;
 	this->components = components;
+	initialise();
+}
+
+void engine::GameObject::initialise()
+{
+	velocity = {0, 0, 0};
+	force_acc = {0, 0, 0};
+	m = 1;
+	im = 1;
+}
+
+void engine::GameObject::tick(double delta)
+{
+	velocity += im * force_acc * delta;
+	force_acc = {0, 0, 0};
+	transform.position += velocity * delta;
+}
+
+void engine::GameObject::add_force(glm::dvec3 force)
+{
+  this -> force_acc += force;
 }
 
 void engine::GameObject::update() {
