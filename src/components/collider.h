@@ -1,5 +1,5 @@
-#ifndef PHYS_COLLIDER_H
-#define PHYS_COLLIDER_H
+#ifndef COMPONENTS_COLLIDER_H
+#define COMPONENTS_COLLIDER_H
 
 #include "components/component.h"
 #include "phys/aabb.h"
@@ -26,4 +26,4 @@ public:
 // exclusively for box
 void get_points(collider *c, glm::dvec4 *points);
 
-#endif // PHYS_CONTAINER_H
+#endif // COMPONENTS_CONTAINER_H

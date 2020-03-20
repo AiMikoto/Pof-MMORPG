@@ -1,6 +1,7 @@
 #include "phys/slicing.h"
 #include "lib/log.h"
 #include "phys/collisions.h"
+#include "components/physical.h"
 #include <set>
 
 glm::dvec3 gravity_vector = {0, -2, 0};
@@ -16,11 +17,16 @@ engine::Scene *tick(engine::Scene *e)
   for(int i = 0; i < e -> gameObjects.size(); i++)
   {
     engine::GameObject *go = e -> gameObjects[i];
-    if(go -> movable)
+    physical *gop = go -> getComponent<physical>();
+    if(!gop)
     {
-      go -> add_force(gravity_vector);
-      go -> tick(dt);
-      if(go -> collides)
+      continue;
+    }
+    if(gop -> movable)
+    {
+      gop -> add_force(gravity_vector);
+      gop -> tick(dt);
+      if(gop -> collides)
       {
         collider *c = go -> getComponent<collider>();
         aabb caabb = c -> to_aabb();
@@ -40,14 +46,14 @@ engine::Scene *tick(engine::Scene *e)
               continue;
             }
             BOOST_LOG_TRIVIAL(trace) << "handling collision";
-            double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-go -> velocity, axis);
+            double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-gop -> velocity, axis);
             glm::dvec3 j = axis;
-            glm::dmat3 im = {{go -> im, 0, 0}, {0, go -> im, 0}, {0, 0, go -> im}};
-            glm::dvec3 v = go -> velocity;
+            glm::dmat3 im = {{gop -> im, 0, 0}, {0, gop -> im, 0}, {0, 0, gop -> im}};
+            glm::dvec3 v = gop -> velocity;
             double em = glm::dot(j, im * j);
             double lam = (-glm::dot(j, v) + bias) / em;
             glm::dvec3 dv = (im * j) * lam;
-            go -> velocity += dv;
+            gop -> velocity += dv;
           }
           else
           {

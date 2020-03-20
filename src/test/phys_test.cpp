@@ -6,6 +6,7 @@
 #include <string>
 #include "lib/log.h"
 #include <cmath>
+#include "components/physical.h"
 
 #define TEST(x) printf(x " - ");tests++;
 #define PASS printf("PASSED\n");
@@ -851,10 +852,11 @@ void test_slicing()
   go -> transform.scale = {10, 10, 10};
   collider *c = new collider(standard_size, box);
   go -> addComponent(c);
-  go -> collidable = true;
+  physical *gop = new physical(false, false, true);
+  go -> addComponent(gop);
   e -> add_GameObject(go);
   tick(e);
-  bool velo_equals = equals(go -> velocity, {0, 0, 0});
+  bool velo_equals = equals(gop -> velocity, {0, 0, 0});
   bool pos_equals = equals(go -> transform.position, {0, 0, 0});
   if(velo_equals && pos_equals)
   {
@@ -870,8 +872,8 @@ void test_slicing()
   go -> transform.scale = {1, 2, 1};
   c = new collider(standard_size, caps);
   go -> addComponent(c);
-  go -> movable = true;
-  go -> collides = true;
+  gop = new physical(true, true, false);
+  go -> addComponent(gop);
   e -> add_GameObject(go);
   int ticks = 300;
   while(ticks--)
@@ -893,11 +895,11 @@ void test_slicing()
   go -> transform.scale = {1, 2, 1};
   c = new collider(standard_size, caps);
   go -> addComponent(c);
-  go -> movable = true;
-  go -> collides = true;
+  gop = new physical(true, true, false);
+  go -> addComponent(gop);
   e -> add_GameObject(go);
   tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e))))))))));
-  velo_equals = equals(go -> velocity, {0, 0, 0});
+  velo_equals = equals(gop -> velocity, {0, 0, 0});
   pos_equals = equals(go -> transform.position, {0, 100, 0});
   if(velo_equals || pos_equals)
   {
@@ -922,7 +924,6 @@ void test_slicing()
   {
     FAIL;
   }
-  pos_equals = equals(go -> transform.position, {0, 1, 0});
   delete e;
   TEST("TESTING THROW ONTO CORNER WILL EVENTUALLY SETTLE");
   e = new engine::Scene();
@@ -931,23 +932,25 @@ void test_slicing()
   go -> transform.scale = {300, 10, 300};
   c = new collider(standard_size, box);
   go -> addComponent(c);
-  go -> collidable = true;
+  gop = new physical(false, false, true);
+  go -> addComponent(gop);
   e -> add_GameObject(go);
   go = game_object_generator();
   go -> transform.position = {0, 0, 0};
   go -> transform.scale = {10, 300, 300};
   c = new collider(standard_size, box);
   go -> addComponent(c);
-  go -> collidable = true;
+  gop = new physical(false, false, true);
+  go -> addComponent(gop);
   e -> add_GameObject(go);
   go = game_object_generator();
   go -> transform.position = {-20, 20, 20};
   go -> transform.scale = {1, 2, 1};
-  go -> velocity = {10, 0, -10};
   c = new collider(standard_size, box);
   go -> addComponent(c);
-  go -> movable = true;
-  go -> collides = true;
+  gop = new physical(true, true, false);
+  gop -> velocity = {10, 0, -10};
+  go -> addComponent(gop);
   e -> add_GameObject(go);
   ticks = 1000;
   while(ticks--)
@@ -970,7 +973,7 @@ void test_slicing()
   {
     tick(e);
   }
-  velo_equals = equals(go -> velocity, {0, 0, -10});
+  velo_equals = equals(gop -> velocity, {0, 0, -10});
   yeq = equals(go -> transform.position.y, 11);
   if(velo_equals || yeq)
   {

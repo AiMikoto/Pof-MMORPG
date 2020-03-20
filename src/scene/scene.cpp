@@ -2,6 +2,7 @@
 #include "lib/log.h"
 #include <boost/property_tree/json_parser.hpp>
 #include "components/collider.h"
+#include "components/physical.h"
 
 engine::Scene::Scene() : ctree(root_aabb()) {
 }
@@ -22,7 +23,7 @@ void engine::Scene::update() {
 int engine::Scene::add_GameObject(GameObject* go) {
 	int spot = gameObjects.size();
 	gameObjects.push_back(go);
-	if(go -> collidable) {
+	if(go -> getComponent<physical>() -> collidable) {
 		aabb caabb = go -> getComponent<collider>() -> to_aabb();
 		ctree.insert(spot, caabb);
 	}
