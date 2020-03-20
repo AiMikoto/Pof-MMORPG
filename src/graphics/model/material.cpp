@@ -37,22 +37,21 @@ void engine::Texture::load() {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	int width, height, totalChannels;
-	stbi_set_flip_vertically_on_load(true);
 	uchar* data = stbi_load(path.c_str(), &width, &height, &totalChannels, 0);
 	if (data) {
-		GLenum internalFormat, format;
+		GLenum format;
 		switch (totalChannels) {
 		case 1:
-			internalFormat = GL_RED;
 			format = GL_RED;
+			break;
 		case 3:
-			internalFormat = GL_RGB8;
-			format = GL_RGB8;
+			format = GL_RGB;
+			break;
 		case 4:
-			internalFormat = GL_RGBA8;
-			format = GL_RGBA8;
+			format = GL_RGBA;
+			break;
 		}
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else {
