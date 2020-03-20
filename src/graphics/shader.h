@@ -1,14 +1,13 @@
 #pragma once
-#include "graphics_files.h"
+#include "include/glad.h"
+#include "include/glfw3.h"
 #include <string>
 #include <glm/glm.hpp>
 #include <map>
 #include <iostream>
 #include <fstream>
-#include "constants.h"
-#include "variables.h"
 
-namespace graphics {
+namespace engine {
 	struct ShaderLoader {
 		GLuint vertexShaderID, fragmentShaderID;
 		std::string vertexShaderPath, fragmentShaderPath;
@@ -29,7 +28,8 @@ namespace graphics {
 
 	class Shader {
 	public:
-		GLuint programID;		
+		GLuint programID;
+		std::string vertexShaderPath, fragmentShaderPath;
 		
 		Shader();
 		Shader(std::string vertexShaderPath, std::string fragmentShaderPath);
@@ -51,6 +51,4 @@ namespace graphics {
 	private:
 		void load(std::string vertexShaderPath, std::string fragmentShaderPath);
 	};
-
-	extern std::map<int, Shader*> shaderMap;
 }
