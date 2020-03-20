@@ -5,6 +5,7 @@
 #include "graphics/gpu.h"
 #include "include/glad.h"
 #include "include/glfw3.h"
+#include <iostream>
 
 engine::Texture::Texture() {}
 
@@ -38,18 +39,20 @@ void engine::Texture::load() {
 	int width, height, totalChannels;
 	stbi_set_flip_vertically_on_load(true);
 	uchar* data = stbi_load(path.c_str(), &width, &height, &totalChannels, 0);
-
 	if (data) {
-		GLenum format;
+		GLenum internalFormat, format;
 		switch (totalChannels) {
 		case 1:
+			internalFormat = GL_RED;
 			format = GL_RED;
 		case 3:
-			format = GL_RGB;
+			internalFormat = GL_RGB8;
+			format = GL_RGB8;
 		case 4:
-			format = GL_RGBA;
+			internalFormat = GL_RGBA8;
+			format = GL_RGBA8;
 		}
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else {
@@ -89,7 +92,7 @@ void engine::Material::contextSetup() {
 			shader->setFloat("material.texturesStrength[" + std::to_string(i) + "]", texturesStrength[i]);
 		if(i < texturesOP.size())
 			shader->setInt("material.texturesOP[" + std::to_string(i) + "]", texturesOP[i]);
-		glBindTexture(GL_TEXTURE_2D, texturesIDs[i]);		
+		glBindTexture(GL_TEXTURE_2D, texturesIDs[i]);
 	}
 }
 

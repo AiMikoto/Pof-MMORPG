@@ -5,6 +5,7 @@
 #include "controls/mouse.h"
 #include "lib/log.h"
 #include "graphics/gpu.h"
+#include "core/time_values.h"
 
 engine::GLContext::GLContext(int width, int height, std::string name) {
 	this->width = width;
@@ -80,6 +81,9 @@ void engine::GLContext::setGLvalues() {
 	glCullFace(GL_BACK);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	int texSize;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
+	BOOST_LOG_TRIVIAL(trace) << "max size:" << texSize;
 }
 
 void engine::windowResizeCallback(GLFWwindow* window, int width, int height) {
@@ -89,6 +93,13 @@ void engine::windowResizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void engine::GLContext::update() {
+	check += Time::deltaTime;
+	fps++;
+	if (check > 1) {
+		BOOST_LOG_TRIVIAL(trace) << "fps: " << fps;
+		check = 0;
+		fps = 0;
+	}
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 }

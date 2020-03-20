@@ -1,10 +1,13 @@
 #include "components/component.h"
 #include "scene/objects.h"
 
-engine::Component::Component() {}
+engine::Component::Component() {
+	this->gameObject = NULL;
+}
 
 engine::Component::Component(bool allowMultiple) {
 	this->allowMultiple = allowMultiple;
+	this->gameObject = NULL;
 }
 
 engine::Component::~Component() {}

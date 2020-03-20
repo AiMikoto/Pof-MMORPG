@@ -1,21 +1,34 @@
 #include "components/meshLoader.h"
 #include "components/meshRenderer.h"
+#include "components/meshFilter.h"
 #include "graphics/gpu.h"
 #include "lib/log.h"
 
 engine::MeshLoader::MeshLoader() {
 	setType();
+	gammaCorrection = false;
+	reloadChildren = false;
 }
 
-engine::MeshLoader::MeshLoader(std::string path, bool gammaCorrection) {
+engine::MeshLoader::MeshLoader(std::string path, bool gammaCorrection, bool reloadChildren) {
 	this->gammaCorrection = gammaCorrection;
 	this->path = path;
-	loadMesh(path);
+	this->reloadChildren = reloadChildren;
 	setType();
 }
 
 void engine::MeshLoader::setup() {
 	if (!initialized) {
+		if (reloadChildren) {
+			for (auto c : gameObject->children) {
+				delete c;
+			}
+			MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
+			if (meshFilter != NULL) {
+				gameObject->removeComponent<MeshFilter>(meshFilter);
+			}
+		}
+		loadMesh(path);
 		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
 		if (meshRenderer != NULL) {
 			meshRenderer->setup();
@@ -28,58 +41,46 @@ void engine::MeshLoader::setType() {
 	type = typeid(*this).name();
 }
 
-engine::MeshLoader::~MeshLoader() {
-	if (initialized) {
-		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
-		if (meshRenderer != NULL) {
-			meshRenderer->meshLoaderRemoved();
-		}
-	}
-}
+engine::MeshLoader::~MeshLoader() {}
 
 void engine::MeshLoader::loadMesh(std::string path) {
-	bool preloaded = false;
-	meshLoaded = false;
-	for (auto mesh : gpu->meshes) {
-		if (mesh.second->path == path) {
-			BOOST_LOG_TRIVIAL(trace) << "Using preloaded mesh";
-			meshID = mesh.first;
-			preloaded = true;
-			break;
-		}
+	Assimp::Importer importer;
+	BOOST_LOG_TRIVIAL(trace) << "Started loading mesh: " << path;
+	directory = path.substr(0, path.find_last_of('/'));
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace |
+		aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph);
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+		BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
+		return;
 	}
-	if (!preloaded) {
-		Assimp::Importer importer;
-		BOOST_LOG_TRIVIAL(trace) << "Started loading mesh: " << path;
-		directory = path.substr(0, path.find_last_of('/'));
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace |
-			aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph);
-		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
-			return;
-		}
-		processNode(scene->mRootNode, scene);
-		if (!meshLoaded)
-			BOOST_LOG_TRIVIAL(trace) << "The loaded file contains no mesh";
-	}
+	processNode(scene->mRootNode, scene, gameObject);
 }
 
-void engine::MeshLoader::processNode(aiNode* node, const aiScene* scene) {
-	if (node->mNumMeshes > 1 || meshLoaded) {
-		//TODO: assimp splits meshes if they have more than 1 material
-		//either decide if all objects we're going to be dealing with will have 1 mesh 1 material, or we create a mesh merge algorithm
-		//thinking on the latter, will use assimp's functions to merge them back, but I need to figure out how to store the materials
-		BOOST_LOG_TRIVIAL(trace) << "Expected to load 1 mesh, found multiple";
-	}
-	else if (node->mNumMeshes == 1 && !meshLoaded) {
-		Mesh* mesh = processMesh(scene->mMeshes[node->mMeshes[0]], scene);
-		mesh->path = path;
-		meshID = uint(gpu->meshes.size());
-		gpu->meshes[meshID] = mesh;
-		meshLoaded = true;
+void engine::MeshLoader::processNode(aiNode* node, const aiScene* scene, GameObject* gameObject) {
+	for (uint i = 0; i < node->mNumMeshes; i++) {
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		bool preloaded = false;
+		GameObject* object = new GameObject();
+		gameObject->addChild(object);
+		for (auto m : gpu->meshes) {
+			if (m.second->name == std::string(mesh->mName.C_Str())) {
+				object->addComponent<MeshFilter>(new MeshFilter(m.first));
+				preloaded = true;
+			}
+		}
+		if (!preloaded) {
+			Mesh* processedMesh = processMesh(mesh, scene);
+			processedMesh->name = mesh->mName.C_Str();
+			uint meshID = uint(gpu->meshes.size());
+			gpu->meshes[meshID] = processedMesh;
+			object->addComponent<MeshFilter>(new MeshFilter(meshID));
+		}
+
 	}
 	for (uint i = 0; i < node->mNumChildren; i++) {
-		processNode(node->mChildren[i], scene);
+		GameObject* object = new GameObject();
+		gameObject->addChild(object);
+		processNode(node->mChildren[i], scene, object);
 	}
 }
 
@@ -126,11 +127,23 @@ std::vector<uint> engine::MeshLoader::loadMeshIndices(aiMesh *mesh, const aiScen
 uint engine::MeshLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
 	aiMaterial* aiMat = scene->mMaterials[mesh->mMaterialIndex];
 	Material* mat = new Material();
-	aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, mat->colorDiffuse);
-	aiMat->Get(AI_MATKEY_COLOR_SPECULAR, mat->colorSpecular);
-	aiMat->Get(AI_MATKEY_COLOR_AMBIENT, mat->colorAmbient);
-	aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, mat->colorEmissive);
-	aiMat->Get(AI_MATKEY_COLOR_TRANSPARENT, mat->colorTransparent);
+
+	aiColor4D aiColor;
+	aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor);
+	mat->colorDiffuse = glm::vec4(aiColor.r, aiColor.g, aiColor.b, aiColor.a);
+
+	aiMat->Get(AI_MATKEY_COLOR_SPECULAR, aiColor);
+	mat->colorSpecular = glm::vec4(aiColor.r, aiColor.g, aiColor.b, aiColor.a);
+
+	aiMat->Get(AI_MATKEY_COLOR_AMBIENT, aiColor);
+	mat->colorAmbient = glm::vec4(aiColor.r, aiColor.g, aiColor.b, aiColor.a);
+
+	aiMat->Get(AI_MATKEY_COLOR_EMISSIVE, aiColor);
+	mat->colorEmissive = glm::vec4(aiColor.r, aiColor.g, aiColor.b, aiColor.a);
+
+	aiMat->Get(AI_MATKEY_COLOR_TRANSPARENT, aiColor);
+	mat->colorTransparent = glm::vec4(aiColor.r, aiColor.g, aiColor.b, aiColor.a);
+
 	aiMat->Get(AI_MATKEY_BLEND_FUNC, mat->blend);
 	aiMat->Get(AI_MATKEY_SHADING_MODEL, mat->shading);
 	aiMat->Get(AI_MATKEY_OPACITY, mat->opacity);

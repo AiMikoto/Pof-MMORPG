@@ -14,7 +14,7 @@ namespace engine {
 		std::string name;
 		int width, height;
 		bool quit, windowResized;
-		double fps;
+		double fps, check;
 
 		GLContext(int width, int height, std::string name);
 		~GLContext();

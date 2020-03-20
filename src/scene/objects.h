@@ -53,6 +53,28 @@ namespace engine {
 			}
 			return NULL;
 		}
+		template<typename T> T* getComponentInParents() {
+			if (parent != NULL) {
+				for (auto c : parent->components) {
+					if (typeid(T).name() == c->type) {
+						return static_cast<T*>(c);
+					}
+				}
+				parent->getComponentInParents<T>();
+			}
+			return NULL;
+		}
+		template<typename T> T* getComponentInChildren() {
+			for(auto child : children) {
+				for (auto c : child->components) {
+					if (typeid(T).name() == c->type) {
+						return static_cast<T*>(c);
+					}
+				}
+				child->getComponentInChildren<T>();
+			}
+			return NULL;
+		}
 		template<typename T> std::vector<T*> getComponents() {
 			std::vector<T*> components;
 			for (auto c : this->components) {
@@ -70,9 +92,10 @@ namespace engine {
 			component->setup();
 			return true;
 		}
-		//only ever called from the components destructor, don't call it separately, as a component can't exist outside of a game object
-		template<typename T> void removeComponent(const T* component) {
+		//don't call a component destructor separate from this function
+		template<typename T> void removeComponent(T* component) {
 			components.erase(std::remove(components.begin(), components.end(), component), components.end());
+			delete component;
 		}
 	};
 }

@@ -7,6 +7,7 @@
 #include "graphics/gpu.h"
 #include "components/meshLoader.h"
 #include "components/meshRenderer.h"
+#include "components/meshFilter.h"
 
 int main() {
 	log_init("graphics");
@@ -22,9 +23,9 @@ int main() {
 	BOOST_LOG_TRIVIAL(trace) << "Loading cube";
 	engine::GameObject* cube = new engine::GameObject();
 	cube->transform.position = glm::dvec3(5, 2, -20);
-	cube->transform.rotateTo(glm::dvec3(30, 20, 150));
+	//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
 	cube->transform.scale = glm::dvec3(2, 2, 2);
-	cube->addComponent(new engine::MeshLoader("../src/graphics/assets/objects/cube.obj", false));
+	cube->addComponent(new engine::MeshLoader("../src/graphics/assets/objects/kaguya.obj", false));
 	cube->addComponent(new engine::MeshRenderer());
 	scene->gameObjects.push_back(cube);
 

@@ -11,11 +11,11 @@ namespace engine {
 	class MeshLoader : public Component {
 	public:
 		bool gammaCorrection;
-		uint meshID;
+		bool reloadChildren;
 		std::string path;
 
 		MeshLoader();
-		MeshLoader(std::string path, bool gammaCorrection);
+		MeshLoader(std::string path, bool gammaCorrection = false, bool reloadChildren = false);
 		~MeshLoader();
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
@@ -25,7 +25,7 @@ namespace engine {
 		std::string directory;
 		bool meshLoaded;
 		void loadMesh(std::string path);
-		void processNode(aiNode* node, const aiScene* scene);
+		void processNode(aiNode* node, const aiScene* scene, GameObject* gameObject);
 		Mesh* processMesh(aiMesh* mesh, const aiScene* scene);
 		std::vector<Vertex> loadMeshVertices(aiMesh* mesh, const aiScene* scene);
 		std::vector<uint> loadMeshIndices(aiMesh* mesh, const aiScene* scene);
