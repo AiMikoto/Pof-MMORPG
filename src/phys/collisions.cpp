@@ -165,14 +165,14 @@ glm::dvec3 segment_shortest_to_surface(glm::dvec3 point1, glm::dvec3 point2, glm
   return pp2 - rp2;
 }
 
-bool box_box(container *b1, container *b2)
+bool box_box(collider *b1, collider *b2)
 {
   glm::dvec3 axis;
   double projection;
   return box_box(b1, b2, &axis, &projection);
 }
 
-bool box_box(container *b1, container *b2, glm::dvec3 *axis, double *projection)
+bool box_box(collider *b1, collider *b2, glm::dvec3 *axis, double *projection)
 { // use SAT
   int i, j;
   bool collides = true;
@@ -276,29 +276,29 @@ bool box_box(container *b1, container *b2, glm::dvec3 *axis, double *projection)
       break;
     }
   }
-  rotate_axis(axis, b1 -> o -> transform.position, b2 -> o -> transform.position);
+  rotate_axis(axis, b1 -> gameObject -> transform.position, b2 -> gameObject -> transform.position);
   return collides;
 }
 
 
-bool capsule_box(container *c, container *b)
+bool capsule_box(collider *c, collider *b)
 {
   glm::dvec3 axis;
   double projection;
   return capsule_box(c, b, &axis, &projection);
 }
 
-bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projection)
+bool capsule_box(collider *c, collider *b, glm::dvec3 *axis, double *projection)
 { // use SAT
   int i, j;
   bool collides = true;
   glm::dvec4 points[8];
   // get details of capsule, namely the radius and the 2 segment delimiters
-  double r = c -> o -> transform.scale.x * c -> o -> meshScale.x / 2;
-  double minyc = c -> o -> transform.position.y - c -> o -> transform.scale.y * c -> o -> meshScale.y / 2 + r;
-  double maxyc = c -> o -> transform.position.y + c -> o -> transform.scale.y * c -> o -> meshScale.y / 2 - r;
-  glm::dvec3 pointc1 = {c -> o -> transform.position.x, minyc, c -> o -> transform.position.z};
-  glm::dvec3 pointc2 = {c -> o -> transform.position.x, maxyc, c -> o -> transform.position.z};
+  double r = c -> gameObject -> transform.scale.x * c -> size.x / 2;
+  double minyc = c -> gameObject -> transform.position.y - c -> gameObject -> transform.scale.y * c -> size.y / 2 + r;
+  double maxyc = c -> gameObject -> transform.position.y + c -> gameObject -> transform.scale.y * c -> size.y / 2 - r;
+  glm::dvec3 pointc1 = {c -> gameObject -> transform.position.x, minyc, c -> gameObject -> transform.position.z};
+  glm::dvec3 pointc2 = {c -> gameObject -> transform.position.x, maxyc, c -> gameObject -> transform.position.z};
   // get points from b
   get_points(b, points);
   // compute 6 axis
@@ -374,42 +374,42 @@ bool capsule_box(container *c, container *b, glm::dvec3 *axis, double *projectio
       break;
     }
   }
-  rotate_axis(axis, c -> o -> transform.position, b -> o -> transform.position);
+  rotate_axis(axis, c -> gameObject -> transform.position, b -> gameObject -> transform.position);
   return collides;
 }
 
-bool box_capsule(container *b, container *c)
+bool box_capsule(collider *b, collider *c)
 {
   return capsule_box(c, b);
 }
 
-bool box_capsule(container *b, container *c, glm::dvec3 *axis, double *projection)
+bool box_capsule(collider *b, collider *c, glm::dvec3 *axis, double *projection)
 {
   bool ret = capsule_box(c, b, axis, projection);
   *axis = -*axis;
   return ret;
 }
 
-bool capsule_capsule(container *c1, container *c2)
+bool capsule_capsule(collider *c1, collider *c2)
 {
   glm::dvec3 axis;
   double projection;
   return capsule_capsule(c1, c2, &axis, &projection);
 }
 
-bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *projection)
+bool capsule_capsule(collider *c1, collider *c2, glm::dvec3 *axis, double *projection)
 {
   // Assumptions
   // scale - x = z = radius, y = height
   // rotation - only around y axis -> no impact on aabb
-  double r1 = c1 -> o -> transform.scale.x * c1 -> o -> meshScale.x / 2;
-  double r2 = c2 -> o -> transform.scale.x * c2 -> o -> meshScale.x / 2;
-  double miny1 = c1 -> o -> transform.position.y - c1 -> o -> transform.scale.y * c1 -> o -> meshScale.y / 2 + r1;
-  double maxy1 = c1 -> o -> transform.position.y + c1 -> o -> transform.scale.y * c1 -> o -> meshScale.y / 2 - r1;
-  double miny2 = c2 -> o -> transform.position.y - c2 -> o -> transform.scale.y * c2 -> o -> meshScale.y / 2 + r2;
-  double maxy2 = c2 -> o -> transform.position.y + c2 -> o -> transform.scale.y * c2 -> o -> meshScale.y / 2 - r2;
-  double dx = c1 -> o -> transform.position.x - c2 -> o -> transform.position.x;
-  double dz = c1 -> o -> transform.position.z - c2 -> o -> transform.position.z;
+  double r1 = c1 -> gameObject -> transform.scale.x * c1 -> size.x / 2;
+  double r2 = c2 -> gameObject -> transform.scale.x * c2 -> size.x / 2;
+  double miny1 = c1 -> gameObject -> transform.position.y - c1 -> gameObject -> transform.scale.y * c1 -> size.y / 2 + r1;
+  double maxy1 = c1 -> gameObject -> transform.position.y + c1 -> gameObject -> transform.scale.y * c1 -> size.y / 2 - r1;
+  double miny2 = c2 -> gameObject -> transform.position.y - c2 -> gameObject -> transform.scale.y * c2 -> size.y / 2 + r2;
+  double maxy2 = c2 -> gameObject -> transform.position.y + c2 -> gameObject -> transform.scale.y * c2 -> size.y / 2 - r2;
+  double dx = c1 -> gameObject -> transform.position.x - c2 -> gameObject -> transform.position.x;
+  double dz = c1 -> gameObject -> transform.position.z - c2 -> gameObject -> transform.position.z;
   if((maxy2 > miny1) && (maxy1 > miny2))
   {
     // Just radius check
@@ -423,7 +423,7 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
         *axis = {0, 1, 0};
       }
       *axis = glm::normalize(*axis);
-      rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
+      rotate_axis(axis, c1 -> gameObject -> transform.position, c2 -> gameObject -> transform.position);
       return true;
     }
     return false;
@@ -441,7 +441,7 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
         *axis = {0, 1, 0};
       }
       *axis = glm::normalize(*axis);
-      rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
+      rotate_axis(axis, c1 -> gameObject -> transform.position, c2 -> gameObject -> transform.position);
       return true;
     }
     return false;
@@ -459,7 +459,7 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
         *axis = {0, 1, 0};
       }
       *axis = glm::normalize(*axis);
-      rotate_axis(axis, c1 -> o -> transform.position, c2 -> o -> transform.position);
+      rotate_axis(axis, c1 -> gameObject -> transform.position, c2 -> gameObject -> transform.position);
       return true;
     }
     return false;
@@ -467,17 +467,17 @@ bool capsule_capsule(container *c1, container *c2, glm::dvec3 *axis, double *pro
   return false;
 }
 
-bool sphere_sphere(container *s1, container *s2)
+bool sphere_sphere(collider *s1, collider *s2)
 {
   glm::dvec3 axis;
   double projection;
   return sphere_sphere(s1, s2, &axis, &projection);
 }
 
-bool sphere_sphere(container *s1, container *s2, glm::dvec3 *axis, double *projection)
+bool sphere_sphere(collider *s1, collider *s2, glm::dvec3 *axis, double *projection)
 {
-  glm::dvec3 point1 = s1 -> o -> transform.position;
-  glm::dvec3 point2 = s2 -> o -> transform.position;
+  glm::dvec3 point1 = s1 -> gameObject -> transform.position;
+  glm::dvec3 point2 = s2 -> gameObject -> transform.position;
   *axis = point2 - point1;
   if(is_zero(*axis))
   {
@@ -485,12 +485,12 @@ bool sphere_sphere(container *s1, container *s2, glm::dvec3 *axis, double *proje
   }
   *axis = glm::normalize(*axis);
   rotate_axis(axis, point1, point2);
-  double dx = s1 -> o -> transform.position.x - s2 -> o -> transform.position.x;
-  double dy = s1 -> o -> transform.position.y - s2 -> o -> transform.position.y;
-  double dz = s1 -> o -> transform.position.z - s2 -> o -> transform.position.z;
+  double dx = s1 -> gameObject -> transform.position.x - s2 -> gameObject -> transform.position.x;
+  double dy = s1 -> gameObject -> transform.position.y - s2 -> gameObject -> transform.position.y;
+  double dz = s1 -> gameObject -> transform.position.z - s2 -> gameObject -> transform.position.z;
   double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-  double radius1 = s1 -> o -> transform.scale.x * s1 -> o -> meshScale.x / 2;
-  double radius2 = s2 -> o -> transform.scale.x * s2 -> o -> meshScale.x / 2;
+  double radius1 = s1 -> gameObject -> transform.scale.x * s1 -> size.x / 2;
+  double radius2 = s2 -> gameObject -> transform.scale.x * s2 -> size.x / 2;
   if(distance >= radius1 + radius2)
   {
     return false;
@@ -502,33 +502,33 @@ bool sphere_sphere(container *s1, container *s2, glm::dvec3 *axis, double *proje
   }
 }
 
-bool sphere_box(container *s, container *b)
+bool sphere_box(collider *s, collider *b)
 {
   return box_sphere(b, s);
 }
 
-bool sphere_box(container *s, container *b, glm::dvec3 *axis, double *projection)
+bool sphere_box(collider *s, collider *b, glm::dvec3 *axis, double *projection)
 {
   bool ret = box_sphere(b, s, axis, projection);
   *axis = -*axis;
   return ret;
 }
 
-bool box_sphere(container *b, container *s)
+bool box_sphere(collider *b, collider *s)
 {
   glm::dvec3 axis;
   double projection;
   return capsule_capsule(b, s, &axis, &projection);
 }
 
-bool box_sphere(container *b, container *s, glm::dvec3 *axis, double *projection)
+bool box_sphere(collider *b, collider *s, glm::dvec3 *axis, double *projection)
 { // use SAT
   int i, j;
   bool collides = true;
   glm::dvec4 points[8];
   // get sphere radius and center
-  double r = s -> o -> transform.scale.x * s -> o -> meshScale.x / 2;
-  glm::dvec3 point = s -> o -> transform.position;
+  double r = s -> gameObject -> transform.scale.x * s -> size.x / 2;
+  glm::dvec3 point = s -> gameObject -> transform.position;
   // get points from b
   get_points(b, points);
   // generate 6 axis
@@ -599,61 +599,61 @@ bool box_sphere(container *b, container *s, glm::dvec3 *axis, double *projection
       break;
     }
   }
-  rotate_axis(axis, s -> o -> transform.position, b -> o -> transform.position);
+  rotate_axis(axis, s -> gameObject -> transform.position, b -> gameObject -> transform.position);
   return collides;
 }
 
-bool collide(container *c1, container *c2)
+bool collide(collider *c1, collider *c2)
 {
   glm::dvec3 axis;
   double projection;
   return collide(c1, c2, &axis, &projection);
 }
 
-bool collide(container *c1, container *c2, glm::dvec3 *axis, double *projection)
+bool collide(collider *c1, collider *c2, glm::dvec3 *axis, double *projection)
 {
-  if((c1 -> type == box) && (c2 -> type == box))
+  if((c1 -> c_type == box) && (c2 -> c_type == box))
   {
     BOOST_LOG_TRIVIAL(trace) << "box to box collision";
     return box_box(c1, c2, axis, projection);
   }
-  if((c1 -> type == box) && (c2 -> type == caps))
+  if((c1 -> c_type == box) && (c2 -> c_type == caps))
   {
     BOOST_LOG_TRIVIAL(trace) << "box to capsule collision";
     return box_capsule(c1, c2, axis, projection);
   }
-  if((c1 -> type == caps) && (c2 -> type == box))
+  if((c1 -> c_type == caps) && (c2 -> c_type == box))
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to box collision";
     return capsule_box(c1, c2, axis, projection);
   }
-  if((c1 -> type == caps) && (c2 -> type == caps))
+  if((c1 -> c_type == caps) && (c2 -> c_type == caps))
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
     return capsule_capsule(c1, c2, axis, projection);
   }
   // capsule is generalised sphere, so caps-sphere can be interpreted as capsule capsule
-  if((c1 -> type == sphere) && (c2 -> type == caps))
+  if((c1 -> c_type == sphere) && (c2 -> c_type == caps))
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
     return capsule_capsule(c1, c2, axis, projection);
   }
-  if((c1 -> type == caps) && (c2 -> type == sphere))
+  if((c1 -> c_type == caps) && (c2 -> c_type == sphere))
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
     return capsule_capsule(c1, c2, axis, projection);
   }
-  if((c1 -> type == sphere) && (c2 -> type == sphere))
+  if((c1 -> c_type == sphere) && (c2 -> c_type == sphere))
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
     return sphere_sphere(c1, c2, axis, projection);
   }
-  if((c1 -> type == sphere) && (c2 -> type == box))
+  if((c1 -> c_type == sphere) && (c2 -> c_type == box))
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
     return sphere_box(c1, c2, axis, projection);
   }
-  if((c1 -> type == box) && (c2 -> type == sphere))
+  if((c1 -> c_type == box) && (c2 -> c_type == sphere))
   {
     BOOST_LOG_TRIVIAL(trace) << "capsule to capsule collision";
     return box_sphere(c1, c2, axis, projection);
