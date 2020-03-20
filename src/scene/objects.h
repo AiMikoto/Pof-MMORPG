@@ -18,6 +18,14 @@ namespace engine {
 		std::vector<Component*> components;
 		Transform transform;
 		bool isStatic;
+		void tick(double delta);
+		void add_force(glm::dvec3 force);
+		glm::dvec3 velocity;
+		glm::dvec3 force_acc;
+		double m;
+		double im;
+		bool collides;
+		bool movable;
 
 		GameObject();
 		~GameObject();

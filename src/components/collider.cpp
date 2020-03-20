@@ -1,7 +1,7 @@
 #include "components/collider.h"
 #include <algorithm>
 
-collider::collider(glm::dvec3 size, collider_t c_type) : Component(true)
+collider::collider(glm::dvec3 size, collider_t c_type) : Component(false)
 {
   this -> c_type = c_type;
   this -> size = size;

@@ -2,7 +2,8 @@
 #include "lib/log.h"
 #include <boost/property_tree/json_parser.hpp>
 
-engine::Scene::Scene() {}
+engine::Scene::Scene() : ctree(root_aabb()) {
+}
 
 engine::Scene::~Scene() {
 	for (auto g : gameObjects) {
