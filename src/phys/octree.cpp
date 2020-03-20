@@ -123,8 +123,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
     if(mxsplit && mysplit && pzsplit)
@@ -147,8 +146,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
     if(mxsplit && pysplit && mzsplit)
@@ -171,8 +169,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
     if(mxsplit && pysplit && pzsplit)
@@ -195,8 +192,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
     if(pxsplit && mysplit && mzsplit)
@@ -219,8 +215,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
     if(pxsplit && mysplit && pzsplit)
@@ -243,8 +238,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
     if(pxsplit && pysplit && mzsplit)
@@ -267,8 +261,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
     if(pxsplit && pysplit && pzsplit)
@@ -291,8 +284,7 @@ void octree::get_collisions_h(aabb box, std::set<int> *ret)
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
       {
-        std::set<int> partial = children[index] -> get_collisions(box);
-        ret -> insert(partial.begin(), partial.end());
+	children[index] -> get_collisions_h(box, ret);
       }
     }
   }

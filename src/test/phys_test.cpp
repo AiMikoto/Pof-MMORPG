@@ -895,6 +895,7 @@ void test_slicing()
   go -> addComponent(c);
   go -> movable = true;
   go -> collides = true;
+  e -> add_GameObject(go);
   tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e))))))))));
   velo_equals = equals(go -> velocity, {0, 0, 0});
   pos_equals = equals(go -> transform.position, {0, 100, 0});

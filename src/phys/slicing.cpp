@@ -25,8 +25,8 @@ engine::Scene *tick(engine::Scene *e)
         collider *c = go -> getComponent<collider>();
         aabb caabb = c -> to_aabb();
         BOOST_LOG_TRIVIAL(trace) << "Checking for colisions";
-        std::set<int> collisions, partial;
-        partial = e -> ctree.get_collisions(caabb);
+        std::set<int> collisions;
+        collisions = e -> ctree.get_collisions(caabb);
         collisions.erase(i);
         BOOST_LOG_TRIVIAL(trace) << "Handling collision";
         for(auto collision:collisions)

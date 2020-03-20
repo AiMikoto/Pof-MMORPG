@@ -23,7 +23,8 @@ int engine::Scene::add_GameObject(GameObject* go) {
 	int spot = gameObjects.size();
 	gameObjects.push_back(go);
 	if(go -> collidable) {
-		ctree.insert(spot, go -> getComponent<collider>() -> to_aabb());
+		aabb caabb = go -> getComponent<collider>() -> to_aabb();
+		ctree.insert(spot, caabb);
 	}
 	return spot;
 }
