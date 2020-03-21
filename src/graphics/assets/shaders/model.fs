@@ -34,15 +34,18 @@ vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
 
 void main() {
 	for(int i = 0; i < material.texturesCount; i++) {
-		switch(i) {
+		switch(material.texturesType[i]) {
 		case diffuseTexture:
-			colorDiffuse = texture(material.textures[i], uvs) * material.colorDiffuse;
+			colorDiffuse = texture(material.textures[i], uvs);// * material.colorDiffuse;
 			break;
 		case specularTexture:
-			colorSpecular = texture(material.textures[i], uvs) * material.colorSpecular;
+			colorSpecular = texture(material.textures[i], uvs);// * material.colorSpecular;
 			break;
 		}
 	}
-	fragmentColor = colorDiffuse;
+
+	fragmentColor = colorDiffuse + colorSpecular;
+
+
 	//fragmentColor = vec4(uvs.x, uvs.y, 1, 1);
 }

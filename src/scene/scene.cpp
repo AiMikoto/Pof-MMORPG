@@ -9,25 +9,29 @@ engine::Scene::Scene() : ctree(root_aabb()) {
 
 engine::Scene::~Scene() {
 	for (auto g : gameObjects) {
-		delete g;
+		delete g.second;
 	}
 	gameObjects.clear();
 }
 
 void engine::Scene::update() {
 	for (auto g : gameObjects) {
-		g->update();
+		g.second->update();
 	}
 }
 
-int engine::Scene::add_GameObject(GameObject* go) {
-	int spot = gameObjects.size();
-	gameObjects.push_back(go);
-	if(go -> getComponent<physical>() -> collidable) {
-		aabb caabb = go -> getComponent<collider>() -> to_aabb();
-		ctree.insert(spot, caabb);
+ullong engine::Scene::addGameObject(GameObject* go) {
+	ullong id = ullong(gameObjects.size() + 1);
+	gameObjects[id] = go;
+	go->id = id;
+	physical* phys = go->getComponent<physical>();
+	if( phys!= NULL) {
+		if (phys->collidable) {
+			aabb caabb = go->getComponent<collider>()->to_aabb();
+			ctree.insert(int(id), caabb);
+		}
 	}
-	return spot;
+	return id;
 }
 
 void engine::Scene::sceneToJSON(std::string path) {
@@ -40,7 +44,7 @@ void engine::Scene::sceneFromJSON(std::string data) {}
 boost::property_tree::ptree engine::Scene::serialize() {
 	boost::property_tree::ptree root, cNode, tNode, mNode, goNode;
 	for (auto g : gameObjects) {
-		root.add_child("Game Object", g->serialize());
+		root.add_child("Game Object", g.second->serialize());
 	}
 	return root;
 }

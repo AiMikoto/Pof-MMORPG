@@ -27,7 +27,7 @@ int main() {
 	cube->transform.scale = glm::dvec3(2, 2, 2);
 	cube->addComponent(new engine::MeshLoader("../src/graphics/assets/objects/kaguya.obj", false));
 	cube->addComponent(new engine::MeshRenderer());
-	scene->gameObjects.push_back(cube);
+	scene->addGameObject(cube);
 
 	glfwSwapInterval(0);
 

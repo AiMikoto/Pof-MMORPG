@@ -2,17 +2,19 @@
 #include "scene/objects.h"
 #include <vector>
 #include <string>
+#include <map>
 #include <boost/property_tree/ptree.hpp>
 #include "phys/octree.h"
+#include "core/constants.h"
 
 namespace engine {
 	class Scene {
 	public:
-		std::vector<GameObject*> gameObjects;
+		std::map<ullong, GameObject*> gameObjects;
 
 		Scene();
 		~Scene();
-		int add_GameObject(GameObject* go);
+		ullong addGameObject(GameObject* go);
 		void update();
 		void sceneToJSON(std::string path);
 		void sceneFromJSON(std::string data);
