@@ -11,14 +11,17 @@
 #include "instance/crypto.h"
 #include "instance/ioc.h"
 #include "instance/chat_client.h"
+#include "instance/shutdown.h"
+#include "instance/token.h"
 
 client *master = NULL;
 
-std::string my_tok = "fish"; // TODO: export this
+boost::asio::io_context irc_context;
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
+  ept.add(OP_SHUTDOWN, boost::bind(&client::handle_shutdown, this, _1));
   ept.add(OP_AUTH_TOKEN, boost::bind(&client::handle_auth, this, _1));
   ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
   start();
@@ -31,7 +34,7 @@ client::~client()
 // throws instead of returning.
 void client::validate_authority(std::string auth_tok)
 {
-  if(auth_tok != my_tok)
+  if(auth_tok != my_token)
   {
     throw std::logic_error("wrong authority token");
   }
@@ -158,8 +161,8 @@ void client::handle_cmd(call c)
     std::string hostname = c.tree().get<std::string>("target.host");
     int port = c.tree().get<int>("target.port");
     std::string token = c.tree().get<std::string>("target.token");
-    boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
-    boost::asio::ip::tcp::resolver resolver(ioc);
+    boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(irc_context);
+    boost::asio::ip::tcp::resolver resolver(irc_context);
     boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), hostname, std::to_string(port));
     boost::asio::connect(*sock, endpoint);
     chat = new chatter(sock);
@@ -185,6 +188,15 @@ void client::handle_cmd(call c)
       unload();
     }
     load();
+    return;
+  }
+  if(command == "rcon")
+  { // uses RSA
+    BOOST_LOG_TRIVIAL(warning) << "received rcon authentication";
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -214,4 +226,11 @@ void client::handle_irc_request(call c)
     chat -> safe_write(c);
   }
   ucl.apply(boost::bind(send_message, _1, c));
+}
+
+void client::handle_shutdown(call c)
+{
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  BOOST_LOG_TRIVIAL(trace) << "remote shutdown initiated";
+  shutdown();
 }

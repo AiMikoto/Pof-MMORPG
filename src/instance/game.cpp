@@ -7,6 +7,10 @@ user_card_library uclp;
 
 bool loaded = false;
 
+void ucl_destroy()
+{
+}
+
 void unload()
 {
   BOOST_LOG_TRIVIAL(trace) << "unloading instance";

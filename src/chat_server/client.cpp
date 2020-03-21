@@ -7,21 +7,14 @@
 #include <exception>
 #include "lib/chat.h"
 #include "chat_server/rooms.h"
-
-std::string my_tok = "lion"; // TODO: export this
-
-rsa_crypto *g_rsa;
-
-void init_crypto(std::string priv)
-{
-  BIO *keybio = BIO_new(BIO_s_file());
-  BIO_read_filename(keybio, priv.c_str());
-  g_rsa = new rsa_crypto(NULL, keybio);
-}
+#include "chat_server/crypto.h"
+#include "chat_server/shutdown.h"
+#include "chat_server/token.h"
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa, 10)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
+  ept.add(OP_SHUTDOWN, boost::bind(&client::handle_shutdown, this, _1));
   ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
   start();
 }
@@ -33,7 +26,7 @@ client::~client()
 // throws instead of returning.
 void client::validate_authority(std::string auth_tok)
 {
-  if(auth_tok != my_tok)
+  if(auth_tok != my_token)
   {
     throw std::logic_error("wrong authority token");
   }
@@ -54,7 +47,23 @@ void client::handle_cmd(call c)
     ept.add(OP_IRC_U, boost::bind(&client::handle_unsubscribe, this, _1));
     return;
   }
+  if(command == "rcon")
+  { // uses RSA
+    BOOST_LOG_TRIVIAL(warning) << "received rcon authentication";
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
+    return;
+  }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
+}
+
+void client::handle_shutdown(call c)
+{
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  BOOST_LOG_TRIVIAL(trace) << "remote shutdown initiated";
+  shutdown();
 }
 
 void client::handle_irc_request(call c)

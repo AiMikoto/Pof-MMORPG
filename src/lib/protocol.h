@@ -25,6 +25,8 @@
 #define OP_IRC_U "irc_unsub"
 #define OP_INSTANCE_MANAGEMENT_DEACTIVATE "ins_de"
 #define OP_INSTANCE_MANAGEMENT_REACTIVATE "ins_re"
+#define OP_RCON_SHUTDOWN "rcon_shutdown"
+#define OP_SHUTDOWN "shutdown"
 
 class protocol
 {
@@ -57,6 +59,7 @@ private:
   boost::thread *t_routine;
   boost::thread *t_pinger;
   std::map<std::string, boost::chrono::high_resolution_clock::time_point> pings;
+  bool terminated;
 };
 
 #endif // LIB_PROTOCOL_H

@@ -34,6 +34,21 @@ void room::unsubscribe(client *c)
   }
 }
 
+void chat_init()
+{
+}
+
+void chat_destroy()
+{
+  BOOST_LOG_TRIVIAL(trace) << "purging rooms";
+  for(auto room:rooms)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "purging room " << room.first;
+    delete room.second;
+  }
+  rooms.clear();
+}
+
 void give_message(std::string target, call c)
 {
   if(rooms.find(target) != rooms.end())

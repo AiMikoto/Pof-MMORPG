@@ -2,6 +2,7 @@
 #include "instance/client.h"
 #include "lib/chat.h"
 #include "lib/log.h"
+#include "instance/ioc.h"
 #include <cstdio>
 
 void send_message(user_card& uc, call c)
@@ -25,3 +26,7 @@ void send_message(user_card& uc, call c)
   }
 }
 
+void saver(user_card &uc)
+{
+  db -> uc_save(uc.tree().get<std::string>("user.name"), uc);
+}

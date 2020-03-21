@@ -11,7 +11,6 @@
 #define LOGIN_SV_HOST "localhost"
 #define LOGIN_SV_PORT 7777
 
-boost::asio::io_context ioc;
 instance *current_instance;
 std::mutex init_l;
 std::string username;

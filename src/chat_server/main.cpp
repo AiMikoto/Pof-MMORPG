@@ -3,10 +3,16 @@
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <iostream>
-#include "chat_server/ioc.h"
-#include <boost/thread/barrier.hpp>
+#include "chat_server/shutdown.h"
+#include "chat_server/rooms.h"
+#include "chat_server/crypto.h"
+#include "chat_server/token.h"
 
-boost::asio::io_context ioc;
+#ifdef __linux__
+#include <csignal>
+#endif
+
+std::string my_token = "lion";
 
 int main(int argc, char **argv)
 {
@@ -20,6 +26,11 @@ int main(int argc, char **argv)
   }
   for(int i = 1; i < argc; i++)
   {
+    if(args[i] == "-tok")
+    {
+      my_token = args[++i];
+      continue;
+    }
     if(args[i] == "-priv")
     {
       pri = args[++i];
@@ -33,14 +44,25 @@ int main(int argc, char **argv)
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
   log_init("chat_server");
+#ifdef __linux__
+  BOOST_LOG_TRIVIAL(trace) << "loading handler for SIGINT";
+  std::signal(SIGINT, shutdown);
+#endif
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pri);
+  BOOST_LOG_TRIVIAL(trace) << "initialising chat rooms";
+  chat_init(); 
   BOOST_LOG_TRIVIAL(trace) << "creating server";
-  server s(port);
-  // block current thread
+  server *s = new server(port);
   BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
-  boost::barrier b(2);
-  b.wait();
-  free(args);
+  main_barrier.wait();
+  BOOST_LOG_TRIVIAL(trace) << "cleaning up server";
+  delete s;
+  BOOST_LOG_TRIVIAL(trace) << "destroying chat rooms";
+  chat_destroy();
+  BOOST_LOG_TRIVIAL(trace) << "destroying keys";
+  destroy_crypto();
+  BOOST_LOG_TRIVIAL(trace) << "deleting argument array";
+  delete[] args;
   return 0;
 }

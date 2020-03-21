@@ -18,3 +18,8 @@ void init_crypto(std::string pub, std::string priv)
   g_rsa = new rsa_crypto(keybio1, keybio2);
 }
 
+void destroy_crypto()
+{
+  delete g_rsa;
+  delete g_aes;
+}

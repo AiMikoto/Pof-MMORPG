@@ -2,7 +2,8 @@
 #include "core/constants.h"
 #include "components/component.h"
 
-engine::GameObject::GameObject() {}
+engine::GameObject::GameObject() {
+}
 
 engine::GameObject::~GameObject() {
 	for (auto c : components) {

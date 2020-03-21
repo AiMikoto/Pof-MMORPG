@@ -6,8 +6,18 @@
 #include "instance/ioc.h"
 #include "instance/crypto.h"
 #include <boost/thread/barrier.hpp>
+#include "instance/shutdown.h"
+#include "instance/chat_client.h"
+#include "instance/game.h"
+#include "instance/misc.h"
+#include "instance/token.h"
 
-boost::asio::io_context ioc;
+#ifdef __linux__
+#include <csignal>
+#endif
+
+std::string my_token = "fish";
+
 database *db;
 
 int main(int argc, char **argv)
@@ -23,6 +33,11 @@ int main(int argc, char **argv)
   }
   for(int i = 1; i < argc; i++)
   {
+    if(args[i] == "-tok")
+    {
+      my_token = args[++i];
+      continue;
+    }
     if(args[i] == "-pub")
     {
       pub = args[++i];
@@ -41,15 +56,41 @@ int main(int argc, char **argv)
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
   log_init("instance");
+#ifdef __linux__
+  BOOST_LOG_TRIVIAL(trace) << "loading handler for SIGINT";
+  std::signal(SIGINT, shutdown);
+#endif
   BOOST_LOG_TRIVIAL(trace) << "initialising database";
   db = db_init();
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pub, pri);
   BOOST_LOG_TRIVIAL(trace) << "creating server";
-  server s(port);
-  // block current thread
+  server *s = new server(port);
   BOOST_LOG_TRIVIAL(trace) << "blocking current thread";
-  boost::barrier b(2);
-  b.wait();
+  main_barrier.wait();
+  BOOST_LOG_TRIVIAL(trace) << "cleaning up server";
+  delete s;
+  if(chat)
+  {
+    BOOST_LOG_TRIVIAL(trace) << "cleaning up chat client";
+    delete chat;
+  }
+  BOOST_LOG_TRIVIAL(trace) << "saving users";
+  ucl.apply(saver);
+  BOOST_LOG_TRIVIAL(trace) << "saving pending users";
+  uclp.apply(saver);
+  BOOST_LOG_TRIVIAL(trace) << "destroying user card libraries";
+  ucl_destroy();
+  if(is_loaded())
+  {
+    BOOST_LOG_TRIVIAL(trace) << "unloading instance";
+    unload();
+  }
+  BOOST_LOG_TRIVIAL(trace) << "destroying keys";
+  destroy_crypto();
+  BOOST_LOG_TRIVIAL(trace) << "closing database";
+  delete db;
+  BOOST_LOG_TRIVIAL(trace) << "deleting argument array";
+  delete[] args;
   return 0;
 }
