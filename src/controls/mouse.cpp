@@ -21,6 +21,7 @@ void engine::mouseButtonCallback(GLFWwindow* window, int button, int state, int 
 			break;
 		case GLFW_RELEASE:
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			break;
 		}
 		break;
 	}

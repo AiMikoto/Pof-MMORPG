@@ -23,7 +23,8 @@ engine::GPU::~GPU() {
 	shaders.clear();
 	meshes.clear();
 	cameras.clear();
-	renderers.clear();
+	renderLayers.clear();
+	renderLayersMap.clear();
 	for (auto s : activeScenes) {
 		delete s;
 	}
@@ -41,7 +42,7 @@ void engine::GPU::initializeContext() {
 	editorCamera->addComponent(new Camera());
 	editorCamera->transform.position = glm::dvec3(0, 0, 3);
 	this->editorCamera = editorCamera->getComponent<Camera>();
-	cameras.erase(cameras.begin(), cameras.end());
+	cameras.erase(cameras.begin());
 }
 
 void engine::GPU::draw() {
@@ -56,10 +57,8 @@ void engine::GPU::drawScene() {
 	glContext->setBackgroundColor(colors::bgColor);
 	for (auto mat : materials) {
 		mat.second->contextSetup();
-		int start = sortedRendererMat[mat.first].x;
-		int end = sortedRendererMat[mat.first].y;
-		for (int i = start; i <= end; i++) {
-			renderers[i]->draw(editorCamera, glContext->window);
+		for (auto r : renderLayers[renderLayersMap[mat.first]]) {
+			r->draw(editorCamera, glContext->window, mat.first);
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
@@ -67,22 +66,6 @@ void engine::GPU::drawScene() {
 
 void engine::GPU::drawUI() {
 	glDisable(GL_DEPTH_TEST);
-}
-
-void engine::GPU::sortRenderers() {
-	std::sort(renderers.begin(), renderers.end());
-	uint lastMatID = renderers[0]->materialID;
-	glm::ivec2 matToRenderer = glm::ivec2(0, 0);
-	for (int i = 1; i < renderers.size(); i++) {
-		if (renderers[i]->materialID != lastMatID) {
-			matToRenderer.y = i - 1;
-			sortedRendererMat[lastMatID] = matToRenderer;
-			matToRenderer.x = i;
-		}
-		lastMatID = renderers[i]->materialID;
-	}
-	matToRenderer.y = int(renderers.size() - 1);
-	sortedRendererMat[lastMatID] = matToRenderer;
 }
 
 void engine::GPU::update() {
@@ -96,11 +79,20 @@ void engine::GPU::update() {
 }
 
 void engine::GPU::addRenderer(MeshRenderer* renderer) {
-	renderers.push_back(renderer);
-	sortRenderers();
+	determineRenderLayers(renderer);
 }
 
 void engine::GPU::removeRenderer(MeshRenderer* renderer) {
-	renderers.erase(std::remove(renderers.begin(), renderers.end(), renderer), renderers.end());
-	sortRenderers();
+	for (auto i : renderer->materialIDs) {
+		renderLayers[renderLayersMap[i]].erase(std::remove(renderLayers[renderLayersMap[i]].begin(),
+			renderLayers[renderLayersMap[i]].end(),
+			renderer),
+			renderLayers[renderLayersMap[i]].end());
+	}	
+}
+
+void engine::GPU::determineRenderLayers(MeshRenderer* renderer) {
+	for (auto i : renderer->materialIDs) {
+		renderLayers[renderLayersMap[i]].push_back(renderer);
+	}
 }

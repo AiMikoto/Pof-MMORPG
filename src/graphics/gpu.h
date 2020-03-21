@@ -17,7 +17,7 @@ namespace engine {
 		std::map<uint, Mesh*> meshes;
 		std::vector<Camera*> cameras;
 		//optimizing objects that use the same material not to switch context on the gpu
-		std::map<uint, glm::ivec2> sortedRendererMat;
+		
 		std::vector<Scene*> activeScenes;
 		GLContext* glContext;
 		Camera* editorCamera;
@@ -30,11 +30,11 @@ namespace engine {
 		void addRenderer(MeshRenderer* renderer);
 		void removeRenderer(MeshRenderer* renderer);
 	private:
-		void sortRenderers();
+		std::map<uint, uint> renderLayersMap;
+		std::map<uint, std::vector<MeshRenderer*>> renderLayers;
+		void determineRenderLayers(MeshRenderer* renderer);
 		void drawScene();
 		void drawUI();
-		std::vector<MeshRenderer*> renderers;
-		
 	};
 
 	extern GPU* gpu;

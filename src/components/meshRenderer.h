@@ -9,26 +9,26 @@
 namespace engine {
 	class MeshRenderer : public Component {
 	public:
-		uint meshID;
-		uint materialID;
+		std::vector<uint> meshIDs;
+		std::vector<uint> materialIDs;
 
 		MeshRenderer();
 		~MeshRenderer();
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
 		MeshRenderer* instantiate();
-		void draw(Camera* camera, GLFWwindow* window);
-		friend bool operator <(const MeshRenderer& r1, const MeshRenderer& r2) {
-			return r1.materialID < r2.materialID;
-		}
+		void draw(Camera* camera, GLFWwindow* window, uint materialID);
 		virtual void setup();
-		void meshLoaderRemoved();
+		void meshFilterRemoved(uint meshID);
 	private:
-		GLuint vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
+		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
 		bool initialized = false;
 		void glContextSetup();
 		void bindBuffers();
 		void createOutline();
+		void removeMeshAt(int i);
+		void fillMeshIDs(GameObject* current);
+		void deleteBuffers(int i);
 		virtual void setType();
 	};
 }

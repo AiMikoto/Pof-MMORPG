@@ -18,7 +18,7 @@ namespace engine {
 		uint materialID;
 		std::vector<uint> indices;
 		glm::dvec3 meshScale;
-		std::string path;
+		std::string name;
 
 		Mesh(std::vector<Vertex> vertices, uint materialID, std::vector<uint> indices);
 		~Mesh();

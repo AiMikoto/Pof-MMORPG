@@ -8,7 +8,11 @@ const int divide = 3;
 const int smoothAdd = 4;
 const int signedAdd = 5;
 
-const int diffuseTexture = 1;
+const int diffuseTexture = 0;
+const int specularTexture = 1;
+const int ambientTexture = 2;
+const int emmisiveTexture = 3;
+const int transparentColor = 4;
 
 in vec4 vertexColor;
 in vec2 uvs;
@@ -26,53 +30,19 @@ uniform Material material;
 
 out vec4 fragmentColor;
 
-vec4 determineTextureColor(int i) {
-	vec4 color = texture(material.textures[i], uvs);
-	if(i < material.texturesStrengthCount)
-		color *= material.texturesStrength[i];
-	return color;
-}
-
-vec4 applyTexture(int i, vec4 color) {
-	if(i >= material.texturesOPCount) {
-		color = determineTextureColor(i);
-		return color;
-	}
-	switch(material.texturesOP[i]) {
-	case multiply:
-		color *= determineTextureColor(i);
-		break;
-	case add:
-		color += determineTextureColor(i);
-		break;
-	case substract:
-		color -= determineTextureColor(i);
-		break;
-	case smoothAdd:
-		vec4 t1 = color;
-		vec4 t2 = determineTextureColor(i);
-		color = t1 + t2 - t1*t2;
-	case signedAdd:
-		color += determineTextureColor(i) - vec4(0.5, 0.5, 0.5, 0.5);
-	}
-	return color;
-}
-
-vec4 applyTextureType(int i, vec4 color) {
-	switch(material.texturesType[i]) {
-	case diffuseTexture:
-		color = applyTexture(i, color);
-		break;
-	}
-	return color;
-}
+vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
 
 void main() {
-	vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
-	colorDiffuse = material.colorDiffuse;
 	for(int i = 0; i < material.texturesCount; i++) {
-		colorDiffuse = applyTextureType(i, colorDiffuse);
+		switch(i) {
+		case diffuseTexture:
+			colorDiffuse = texture(material.textures[i], uvs) * material.colorDiffuse;
+			break;
+		case specularTexture:
+			colorSpecular = texture(material.textures[i], uvs) * material.colorSpecular;
+			break;
+		}
 	}
 	fragmentColor = colorDiffuse;
-	//fragmentColor.w = 1;
+	//fragmentColor = vec4(uvs.x, uvs.y, 1, 1);
 }
