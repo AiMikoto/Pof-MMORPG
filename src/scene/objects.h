@@ -6,6 +6,7 @@
 #include <typeinfo>
 #include <algorithm>
 #include "core/utils.h"
+#include "core/constants.h"
 
 namespace engine {
 	class Component;
@@ -18,6 +19,7 @@ namespace engine {
 		std::vector<Component*> components;
 		Transform transform;
 		bool isStatic;
+		ullong id = 0;
 
 		GameObject();
 		~GameObject();
