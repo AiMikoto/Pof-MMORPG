@@ -6,6 +6,8 @@
 extern user_card_library ucl;
 extern user_card_library uclp;
 
+void ucl_destroy();
+
 void unload();
 
 void load();

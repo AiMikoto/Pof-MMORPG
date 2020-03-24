@@ -9,6 +9,8 @@
 #include "client/game.h"
 #include "lib/uuid.h"
 
+boost::asio::io_context client_ioc;
+
 rsa_crypto *g_rsa;
 aes_crypto *g_aes;
 
@@ -26,8 +28,8 @@ void init_crypto(std::string pub)
 
 instance *instance_builder(std::string host, int port)
 {
-  boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(ioc);
-  boost::asio::ip::tcp::resolver resolver(ioc);
+  boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(client_ioc);
+  boost::asio::ip::tcp::resolver resolver(client_ioc);
   boost::asio::ip::tcp::resolver::results_type endpoint = resolver.resolve(boost::asio::ip::tcp::v4(), host, std::to_string(port));
   boost::asio::connect(*sock, endpoint);
   return new instance(sock);

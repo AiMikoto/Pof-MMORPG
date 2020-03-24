@@ -12,16 +12,29 @@
 #include "lib/uuid.h"
 #include "server/ioc.h"
 #include "server/crypto.h"
+#include "server/shutdown.h"
+#include "server/token.h"
 
 client::client(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa)
 {
   BOOST_LOG_TRIVIAL(info) << "received new connection from " << socket -> remote_endpoint().address().to_string();
+  ept.add(OP_SHUTDOWN, boost::bind(&client::handle_shutdown, this, _1));
+  ept.add(OP_CMD, boost::bind(&client::handle_cmd, this, _1));
   ept.add(OP_AUTH, boost::bind(&client::handle_auth, this, _1));
   start();
 }
 
 client::~client()
 {
+}
+
+// throws instead of returning.
+void client::validate_authority(std::string auth_tok)
+{
+  if(auth_tok != my_token)
+  {
+    throw std::logic_error("wrong authority token");
+  }
 }
 
 void client::handle_auth(call c)
@@ -60,4 +73,27 @@ void client::handle_auth(call c)
     safe_write(answer);
   }
   this -> close();
+}
+
+void client::handle_cmd(call c)
+{
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  std::string command = c.tree().get<std::string>("command");
+  if(command == "rcon")
+  { // uses RSA
+    BOOST_LOG_TRIVIAL(warning) << "received rcon authentication";
+    std::string key = c.tree().get<std::string>("aes.key");
+    std::string iv = c.tree().get<std::string>("aes.iv");
+    aes = new aes_crypto(key, iv);
+    replace_crypto(aes);
+    return;
+  }
+  BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
+}
+
+void client::handle_shutdown(call c)
+{
+  validate_authority(c.tree().get<std::string>("authority.token"));
+  BOOST_LOG_TRIVIAL(trace) << "remote shutdown initiated";
+  shutdown();
 }

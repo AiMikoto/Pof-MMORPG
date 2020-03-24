@@ -24,26 +24,33 @@ protocol::protocol(boost::asio::ip::tcp::socket *sock, crypto *c, int ping_freq)
   t_routine = NULL;
   aes = NULL;
   aes_enabled = false;
+  terminated = false;
 }
 
 protocol::~protocol()
 {
-  socket -> close();
+  BOOST_LOG_TRIVIAL(trace) << "Protocol shutdown - closing socket";
+  this -> close();
+  BOOST_LOG_TRIVIAL(trace) << "Protocol shutdown - ending ping service";
   if(t_pinger)
   {
     t_pinger -> join();
     delete t_pinger;
   }
+  BOOST_LOG_TRIVIAL(trace) << "Protocol shutdown - ending routine service";
   if(t_routine)
   {
     t_routine -> join();
     delete t_routine;
   }
+  BOOST_LOG_TRIVIAL(trace) << "Protocol shutdown - deleting socket";
   delete socket;
+  BOOST_LOG_TRIVIAL(trace) << "Protocol shutdown - deleting aes";
   if(aes)
   {
     delete aes;
   }
+  BOOST_LOG_TRIVIAL(trace) << "Protocol shutdown - success";
 }
 
 void protocol::start_ping()
@@ -87,9 +94,15 @@ int protocol::safe_write(call c)
 
 void protocol::close()
 {
+  if(terminated)
+  {
+    return;
+  }
+  terminated = true;
   BOOST_LOG_TRIVIAL(info) << "ending connection";
   if(aes_enabled)
   {
+    BOOST_LOG_TRIVIAL(info) << "sending aes encrypted terminate call";
     call c;
     c.tree().put(OPCODE, OP_TERMINATE);
     try

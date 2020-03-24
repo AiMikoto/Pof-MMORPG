@@ -9,12 +9,17 @@ class server
 {
 public:
   server(int port);
-private:
-  void routine();
-  void cleanup();
+  ~server();
   boost::asio::ip::tcp::endpoint endpoint;
   boost::asio::ip::tcp::acceptor acceptor;
   std::vector<client*> clients;
+  bool shutdown;
+  boost::thread *t_routine;
+  boost::thread *t_cleanup;
 };
+
+void routine(server *that);
+
+void cleanup(server *that);
 
 #endif // INSTANCE_SERVER_H

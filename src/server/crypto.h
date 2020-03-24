@@ -8,4 +8,6 @@ extern aes_crypto *g_aes;
 
 void init_crypto(std::string pub, std::string priv);
 
+void destroy_crypto();
+
 #endif // SERVER_CRYPTO_H

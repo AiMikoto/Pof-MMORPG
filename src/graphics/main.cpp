@@ -1,47 +1,40 @@
-#include "gl_functions.h"
-#include "utils.h"
-#include "camera.h"
+#include "graphics/gl_context.h"
+#include "core/utils.h"
+#include "components/camera.h"
 #include "lib/log.h"
-#include "model.h"
-#include "scene.h"
-#include "utils.h"
-
-namespace gph = graphics;
+#include "graphics/model/mesh.h"
+#include "scene/scene.h"
+#include "graphics/gpu.h"
+#include "components/meshLoader.h"
+#include "components/meshRenderer.h"
+#include "components/meshFilter.h"
 
 int main() {
 	log_init("graphics");
-	BOOST_LOG_TRIVIAL(trace) << "Creating window";
-	GLFWwindow* window = gph::createGLFWContext(gph::windowWidth, gph::windowHeight, gph::windowName);
-	BOOST_LOG_TRIVIAL(trace) << "Window created";
+	BOOST_LOG_TRIVIAL(trace) << "Initializing GPU context";
+	engine::gpu = new engine::GPU();
+	engine::gpu->initializeContext();
+	BOOST_LOG_TRIVIAL(trace) << "GPU context initialized";
 
 	BOOST_LOG_TRIVIAL(trace) << "Creating scene";
-	gph::activeScene = new gph::Scene();
-	BOOST_LOG_TRIVIAL(trace) << gph::activeScene->id;
-	BOOST_LOG_TRIVIAL(trace) << "Creating camera";
-	gph::activeScene->addCamera(new gph::Camera(), true);
+	engine::Scene* scene = new engine::Scene();
+	engine::gpu->activeScenes.push_back(scene);
 
-	BOOST_LOG_TRIVIAL(trace) << "Creating shaders";
-	std::vector<std::string> shaders = gph::charArrayToStringVector(gph::requiredShadersPath,
-		(size_t)gph::requiredShadersPathLength);
-	gph::loadShaders(shaders);
-	BOOST_LOG_TRIVIAL(trace) << "Loading model";
-	gph::Model* model = new gph::Model("../src/graphics/objects/cube.obj", false);
-	model->transform.position = glm::dvec3(5, 2, -20);
-	model->transform.rotateTo(glm::radians(45.0), glm::dvec3(1, 1, 1));
-	model->transform.scale = glm::dvec3(2, 2, 2);
-	gph::activeScene->addChild(model->id);	
+	BOOST_LOG_TRIVIAL(trace) << "Loading cube";
+	engine::GameObject* cube = new engine::GameObject();
+	cube->transform.position = glm::dvec3(5, 2, -20);
+	//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
+	cube->transform.scale = glm::dvec3(2, 2, 2);
+	cube->addComponent(new engine::MeshLoader("../src/graphics/assets/objects/kaguya.obj", false));
+	cube->addComponent(new engine::MeshRenderer());
+	scene->addGameObject(cube);
 
-	gph::activeScene->sceneToJSON("../src/graphics/scenes/test.json");
-
-	double lastTime = glfwGetTime();
-	double check = 0;
-	int fps = 0;
 	glfwSwapInterval(0);
 
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
-	while (!gph::quit) {
-		gph::update(window, lastTime, check, fps);
+	while (!engine::gpu->glContext->quit) {
+		engine::gpu->update();
 	}
-	gph::cleanup();
+	delete engine::gpu;
 	return 0;
 }

@@ -17,3 +17,9 @@ void init_crypto(std::string pub, std::string priv)
   BIO_read_filename(keybio2, priv.c_str());
   g_rsa = new rsa_crypto(keybio1, keybio2);
 }
+
+void destroy_crypto()
+{
+  delete g_rsa;
+  delete g_aes;
+}

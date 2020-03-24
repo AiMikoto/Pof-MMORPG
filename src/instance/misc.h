@@ -6,4 +6,6 @@
 
 void send_message(user_card& uc, call c);
 
+void saver(user_card& uc);
+
 #endif // INSTANCE_MISC_H
