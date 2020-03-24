@@ -6,7 +6,8 @@
 #include <string>
 #include "lib/log.h"
 #include <cmath>
-#include "components/physical.h"
+#include "components/solid_object.h"
+#include "components/phys_collider.h"
 
 #define TEST(x) printf(x " - ");tests++;
 #define PASS printf("PASSED\n");
@@ -175,7 +176,7 @@ void test_aabb()
   TEST("TESTING AABB SIZE");
   engine::GameObject *go = game_object_generator();
   go -> transform.position = {4, 6, 10};
-  collider *c = new collider(standard_size, box);
+  collider *c = new physical_collider(standard_size, box);
   go -> addComponent(c);
   aabb box = c -> to_aabb();
   if(equals(box.minx, 3)
@@ -200,11 +201,11 @@ void test_collisions()
   engine::GameObject *go1 = game_object_generator();
   go1 -> transform.position = {10, 10, 10};
   go1 -> transform.scale = {3, 3, 3};
-  collider *c1 = new collider(standard_size, box);
+  collider *c1 = new physical_collider(standard_size, box);
   go1 -> addComponent(c1);
   // obj1 is 7 -> 13
   engine::GameObject *go2 = game_object_generator();
-  collider *c2 = new collider(standard_size, box);
+  collider *c2 = new physical_collider(standard_size, box);
   go2 -> addComponent(c2);
   TEST("TESTING BOX-BOX COLLISION NESTED");
   go2 -> transform.position = {10, 10, 10};
@@ -614,11 +615,11 @@ void test_collisions()
   engine::GameObject *go3 = game_object_generator();
   go3 -> transform.position = {10, 10, 10};
   go3 -> transform.scale = {1, 6, 1};
-  collider *c3 = new collider(standard_size, caps);
+  collider *c3 = new physical_collider(standard_size, caps);
   go3 -> addComponent(c3);
   engine::GameObject *go4 = game_object_generator();
   go4 -> transform.scale = {1, 6, 1};
-  collider *c4 = new collider(standard_size, caps);
+  collider *c4 = new physical_collider(standard_size, caps);
   go4 -> addComponent(c4);
   TEST("TESTING CAPSULE CAPSULE COLLISION PARALLEL");
   go4 -> transform.position = {8, 10, 10};
@@ -848,15 +849,12 @@ void test_slicing()
   engine::GameObject *go = game_object_generator();
   go -> transform.position = {0, 0, 0};
   go -> transform.scale = {10, 10, 10};
-  collider *c = new collider(standard_size, box);
+  collider *c = new physical_collider(standard_size, box);
   go -> addComponent(c);
-  physical *gop = new physical(false, false, true);
-  go -> addComponent(gop);
   e -> addGameObject(go);
   tick(e);
-  bool velo_equals = equals(gop -> velocity, {0, 0, 0});
   bool pos_equals = equals(go -> transform.position, {0, 0, 0});
-  if(velo_equals && pos_equals)
+  if(pos_equals)
   {
     PASS;
   }
@@ -868,9 +866,10 @@ void test_slicing()
   go = game_object_generator();
   go -> transform.position = {0, 12, 0};
   go -> transform.scale = {1, 2, 1};
-  c = new collider(standard_size, caps);
+  c = new physical_collider(standard_size, caps);
   go -> addComponent(c);
-  gop = new physical(true, true, false);
+  solid_object *gop = new solid_object();
+  go -> addComponent(gop);
   go -> addComponent(gop);
   e -> addGameObject(go);
   int ticks = 300;
@@ -891,13 +890,13 @@ void test_slicing()
   go = game_object_generator();
   go -> transform.position = {0, 100, 0};
   go -> transform.scale = {1, 2, 1};
-  c = new collider(standard_size, caps);
+  c = new physical_collider(standard_size, caps);
   go -> addComponent(c);
-  gop = new physical(true, true, false);
+  gop = new solid_object();
   go -> addComponent(gop);
   e -> addGameObject(go);
   tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e))))))))));
-  velo_equals = equals(gop -> velocity, {0, 0, 0});
+  bool velo_equals = equals(gop -> velocity, {0, 0, 0});
   pos_equals = equals(go -> transform.position, {0, 100, 0});
   if(velo_equals || pos_equals)
   {
@@ -928,25 +927,21 @@ void test_slicing()
   go = game_object_generator();
   go -> transform.position = {0, 0, 0};
   go -> transform.scale = {300, 10, 300};
-  c = new collider(standard_size, box);
+  c = new physical_collider(standard_size, box);
   go -> addComponent(c);
-  gop = new physical(false, false, true);
-  go -> addComponent(gop);
   e -> addGameObject(go);
   go = game_object_generator();
   go -> transform.position = {0, 0, 0};
   go -> transform.scale = {10, 300, 300};
-  c = new collider(standard_size, box);
+  c = new physical_collider(standard_size, box);
   go -> addComponent(c);
-  gop = new physical(false, false, true);
-  go -> addComponent(gop);
   e -> addGameObject(go);
   go = game_object_generator();
   go -> transform.position = {-20, 20, 20};
   go -> transform.scale = {1, 2, 1};
-  c = new collider(standard_size, box);
+  c = new physical_collider(standard_size, box);
   go -> addComponent(c);
-  gop = new physical(true, true, false);
+  gop = new solid_object();
   gop -> velocity = {10, 0, -10};
   go -> addComponent(gop);
   e -> addGameObject(go);

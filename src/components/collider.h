@@ -18,7 +18,7 @@ public:
   collider(glm::dvec3 size, collider_t c_type);
   ~collider();
   aabb to_aabb();
-  void setType();
+  virtual void setType() = 0;
   collider_t c_type;
   glm::dvec3 size;
 };
