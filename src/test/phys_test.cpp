@@ -15,8 +15,6 @@
 int failures;
 int tests;
 
-double pi = M_PI;
-
 void test_octree()
 {
   octree t(root_aabb());
@@ -44,7 +42,7 @@ void test_octree()
   box.maxx =  3.5;
   box.maxy =  3.5;
   box.maxz =  3.5;
-  std::set<int> collisions = t.get_collisions(box);
+  std::set<unsigned long long> collisions = t.get_collisions(box);
   if((collisions.size() == 1) && (collisions.find(2) != collisions.end()))
   {
     PASS;
@@ -854,7 +852,7 @@ void test_slicing()
   go -> addComponent(c);
   physical *gop = new physical(false, false, true);
   go -> addComponent(gop);
-  e -> add_GameObject(go);
+  e -> addGameObject(go);
   tick(e);
   bool velo_equals = equals(gop -> velocity, {0, 0, 0});
   bool pos_equals = equals(go -> transform.position, {0, 0, 0});
@@ -874,7 +872,7 @@ void test_slicing()
   go -> addComponent(c);
   gop = new physical(true, true, false);
   go -> addComponent(gop);
-  e -> add_GameObject(go);
+  e -> addGameObject(go);
   int ticks = 300;
   while(ticks--)
   {
@@ -897,7 +895,7 @@ void test_slicing()
   go -> addComponent(c);
   gop = new physical(true, true, false);
   go -> addComponent(gop);
-  e -> add_GameObject(go);
+  e -> addGameObject(go);
   tick(tick(tick(tick(tick(tick(tick(tick(tick(tick(e))))))))));
   velo_equals = equals(gop -> velocity, {0, 0, 0});
   pos_equals = equals(go -> transform.position, {0, 100, 0});
@@ -934,7 +932,7 @@ void test_slicing()
   go -> addComponent(c);
   gop = new physical(false, false, true);
   go -> addComponent(gop);
-  e -> add_GameObject(go);
+  e -> addGameObject(go);
   go = game_object_generator();
   go -> transform.position = {0, 0, 0};
   go -> transform.scale = {10, 300, 300};
@@ -942,7 +940,7 @@ void test_slicing()
   go -> addComponent(c);
   gop = new physical(false, false, true);
   go -> addComponent(gop);
-  e -> add_GameObject(go);
+  e -> addGameObject(go);
   go = game_object_generator();
   go -> transform.position = {-20, 20, 20};
   go -> transform.scale = {1, 2, 1};
@@ -951,7 +949,7 @@ void test_slicing()
   gop = new physical(true, true, false);
   gop -> velocity = {10, 0, -10};
   go -> addComponent(gop);
-  e -> add_GameObject(go);
+  e -> addGameObject(go);
   ticks = 1000;
   while(ticks--)
   {
