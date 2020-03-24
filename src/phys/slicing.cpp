@@ -15,12 +15,10 @@ const double COEFFICIENT_OF_RESTITUTION = 0.3;
 engine::Scene *tick(engine::Scene *e)
 {
   double dt = 1 / SPS;
-  for(int i = 0; i < e -> gameObjects.size(); i++)
+  for(auto it : e -> gameObjects)
   {
-    engine::GameObject *go = e -> gameObjects[i];
-  printf("attempting to get component\n");
+    engine::GameObject *go = it.second;
     solid_object *gop = go -> getComponent<solid_object>();
-  printf("component received\n");
     if(!gop)
     {
       continue;
@@ -34,7 +32,7 @@ engine::Scene *tick(engine::Scene *e)
       BOOST_LOG_TRIVIAL(trace) << "Checking for colisions";
       std::set<unsigned long long> collisions;
       collisions = e -> ctree.get_collisions(caabb);
-      collisions.erase(i);
+      collisions.erase(it.first);
       BOOST_LOG_TRIVIAL(trace) << "Handling collisions";
       for(auto collision:collisions)
       {
