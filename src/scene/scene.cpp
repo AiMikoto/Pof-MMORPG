@@ -25,7 +25,8 @@ ullong engine::Scene::addGameObject(GameObject* go) {
 	gameObjects[id] = go;
 	go->id = id;
 	collider* phys = go->getComponent<physical_collider>();
-	if (phys) {
+	solid_object* so = go->getComponent<solid_object>();
+	if (phys && !so) {
 		aabb caabb = phys->to_aabb();
 		ctree.insert(int(id), caabb);
 	}

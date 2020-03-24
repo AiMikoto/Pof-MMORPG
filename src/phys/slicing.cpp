@@ -27,7 +27,7 @@ engine::Scene *tick(engine::Scene *e)
     {
       gop -> add_force(gravity_vector);
       gop -> tick(dt);
-      collider *c = go -> getComponent<collider>();
+      collider *c = go -> getComponent<physical_collider>();
       aabb caabb = c -> to_aabb();
       BOOST_LOG_TRIVIAL(trace) << "Checking for colisions";
       std::set<unsigned long long> collisions;
