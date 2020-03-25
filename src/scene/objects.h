@@ -39,7 +39,7 @@ namespace engine {
 		void addComponent(Component* component);
 		void addComponents(std::vector<Component*> components);
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
+		GameObject* deserialize(boost::property_tree::ptree node);
 		template<typename T> bool hasComponent() {
 			for (auto c : components) {
 				if (typeid(T).name() == c->type)
@@ -87,14 +87,27 @@ namespace engine {
 		}
 		//a component can't exist outside a game object, so this will only receive new references
 		template<typename T> bool addComponent(T* component) {
-			if (!component->allowMultiple && hasComponent<T>())
+			if (!component->allowMultiple && hasComponent<T>()) {
+				delete component;
 				return false;
-			this->components.push_back(component);
+			}
+			this->components.push_back(component);		
 			component->gameObject = this;
 			component->setup();
 			return true;
 		}
-		//don't call a component destructor separate from this function
+		//don't call a component destructor separate from the functions in this file
+		//only call this function if you know for sure the component is unique
+		template<typename T> void removeComponent() {
+			for (int i = 0; i < int(components.size()); i++) {
+				if (components[i]->type == typeid(T).name()) {
+					T* component = static_cast<T*>(components[i]);
+					delete component;
+					components.erase(components.begin() + i);
+					break;
+				}
+			}
+		}
 		template<typename T> void removeComponent(T* component) {
 			components.erase(std::remove(components.begin(), components.end(), component), components.end());
 			delete component;

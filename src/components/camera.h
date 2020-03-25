@@ -19,7 +19,7 @@ namespace engine {
 		CameraViewport();
 		CameraViewport(float startX, float startY, float endX, float endY);
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
+		CameraViewport deserialize(boost::property_tree::ptree node);
 	};
 
 	class Camera : public Component {
@@ -45,7 +45,7 @@ namespace engine {
 		void setViewport(GLFWwindow* window);
 		virtual Camera* instantiate();
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
+		Camera* deserialize(boost::property_tree::ptree node);
 		virtual void update();
 		virtual void setup();
 	protected:

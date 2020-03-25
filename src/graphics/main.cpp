@@ -25,11 +25,20 @@ int main() {
 	cube->transform.position = glm::dvec3(5, 2, -20);
 	//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
 	cube->transform.scale = glm::dvec3(2, 2, 2);
-	cube->addComponent(new engine::MeshLoader("../src/graphics/assets/objects/kaguya.obj", false));
 	cube->addComponent(new engine::MeshRenderer());
+	engine::gpu->meshLoader->loadMesh(cube, "../src/graphics/assets/objects/kaguya.obj", false);	
 	scene->addGameObject(cube);
 
+	cube->removeComponent<engine::MeshFilter>();
+	engine::gpu->meshLoader->loadMesh(cube, "../src/graphics/assets/objects/kaguya.obj", false);
+	cube->removeComponent<engine::MeshRenderer>();
+	cube->addComponent(new engine::MeshRenderer);
+
 	glfwSwapInterval(0);
+	bool deleted1 = false;
+	bool deleted2 = false;
+	bool added1 = false;
+	bool added2 = false;
 
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!engine::gpu->glContext->quit) {

@@ -15,11 +15,11 @@ namespace engine {
 		MeshRenderer();
 		~MeshRenderer();
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
+		MeshRenderer* deserialize(boost::property_tree::ptree node);
 		MeshRenderer* instantiate();
 		void draw(Camera* camera, GLFWwindow* window, uint materialID);
 		virtual void setup();
-		void meshFilterRemoved(uint meshID);
+		void meshFilterRemoved();
 	private:
 		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
 		bool initialized = false;
@@ -27,7 +27,6 @@ namespace engine {
 		void bindBuffers();
 		void createOutline();
 		void removeMeshAt(int i);
-		void fillMeshIDs(GameObject* current);
 		void deleteBuffers(int i);
 		virtual void setType();
 	};

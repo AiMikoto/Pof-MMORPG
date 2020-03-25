@@ -40,13 +40,15 @@ void engine::Scene::sceneToJSON(std::string path) {
 void engine::Scene::sceneFromJSON(std::string data) {}
 
 boost::property_tree::ptree engine::Scene::serialize() {
-	boost::property_tree::ptree root, cNode, tNode, mNode, goNode;
+	boost::property_tree::ptree root, scene;
+	root.add_child("Scene", scene);
 	for (auto g : gameObjects) {
-		root.add_child("Game Object", g.second->serialize());
+		scene.add_child("Game Object", g.second->serialize());
 	}
 	return root;
 }
 
-void engine::Scene::deserialize(boost::property_tree::ptree node) {
-
+void engine::Scene::deserialize(boost::property_tree::ptree root) {
+	for (auto v : root.get_child("Scene")) {
+	}
 }

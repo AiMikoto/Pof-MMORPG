@@ -2,6 +2,7 @@
 #include "meshLoader.h"
 #include "meshFilter.h"
 #include "graphics/gpu.h"
+#include "lib/log.h"
 
 engine::MeshRenderer::MeshRenderer() {
 	setType();
@@ -13,7 +14,13 @@ engine::MeshRenderer::~MeshRenderer() {
 		for (int i = 0; i < meshIDs.size(); i++) {
 			deleteBuffers(i);
 		}
-	}
+		meshIDs.clear();
+		materialIDs.clear();
+		vertexArrayID.clear();
+		vertexBufferID.clear();
+		elementsBufferID.clear();
+		outlineIndicesBufferID.clear();
+	}	
 }
 
 void engine::MeshRenderer::deleteBuffers(int i) {
@@ -28,7 +35,9 @@ boost::property_tree::ptree engine::MeshRenderer::serialize() {
 	return node;
 }
 
-void engine::MeshRenderer::deserialize(boost::property_tree::ptree node) {}
+engine::MeshRenderer* engine::MeshRenderer::deserialize(boost::property_tree::ptree node) {
+	return this;
+}
 
 engine::MeshRenderer* engine::MeshRenderer::instantiate() {
 	return this;
@@ -86,7 +95,7 @@ void engine::MeshRenderer::draw(Camera* camera, GLFWwindow* window, uint materia
 		}
 	}
 	Mesh* mesh = gpu->meshes[meshIDs[pos]];
-	Material* mat = gpu->materials[materialID];
+	Material* mat = gpu->materials[mesh->materialID];
 	Shader* shader = gpu->shaders[mat->shaderID];
 	glm::mat4 mvp = camera->projection(window) * camera->view() * gameObject->transform.model();
 	shader->setMat4("mvp", mvp);
@@ -97,23 +106,19 @@ void engine::MeshRenderer::draw(Camera* camera, GLFWwindow* window, uint materia
 
 void engine::MeshRenderer::setup() {
 	if (!initialized) {
-		fillMeshIDs(gameObject);
-		for (auto i : meshIDs) {
-			materialIDs.push_back(gpu->meshes[meshIDs[i]]->materialID);
+		MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
+		if (meshFilter != NULL) {
+			for (auto id : meshFilter->subMeshesID) {
+				meshIDs.push_back(id);
+			}
+			for (auto i : meshIDs) {
+				BOOST_LOG_TRIVIAL(trace) << i;
+				materialIDs.push_back(gpu->meshes[i]->materialID);
+			}
+			gpu->addRenderer(this);
+			glContextSetup();
+			initialized = true;
 		}
-		gpu->addRenderer(this);
-		glContextSetup();
-		initialized = true;
-	}
-}
-
-void engine::MeshRenderer::fillMeshIDs(GameObject* current) {
-	MeshFilter* meshFilter = current->getComponent<MeshFilter>();
-	if (meshFilter != NULL) {
-		meshIDs.push_back(meshFilter->meshID);
-	}
-	for (auto c : current->children) {
-		fillMeshIDs(c);
 	}
 }
 
@@ -121,13 +126,15 @@ void engine::MeshRenderer::setType() {
 	type = typeid(*this).name();
 }
 
-void engine::MeshRenderer::meshFilterRemoved(uint meshID) {
-	for (int i = 0; i < meshIDs.size(); i++) {
-		if (meshID == meshIDs[i]) {
-			removeMeshAt(i);
-			break;
-		}
-	}	
+void engine::MeshRenderer::meshFilterRemoved() {
+	BOOST_LOG_TRIVIAL(trace) << "mesh filter removed";
+	for (int i = int(meshIDs.size()) - 1; i >= 0; i--)
+		removeMeshAt(i);
+	initialized = false;
+	vertexArrayID.clear();
+	vertexBufferID.clear();
+	elementsBufferID.clear();
+	outlineIndicesBufferID.clear();
 }
 
 void engine::MeshRenderer::removeMeshAt(int i) {

@@ -7,6 +7,8 @@
 #include "components/meshRenderer.h"
 #include "scene/scene.h"
 #include "graphics/model/mesh.h"
+#include "components/meshFilter.h"
+#include "components/meshLoader.h"
 
 namespace engine {
 	class GPU {
@@ -21,6 +23,7 @@ namespace engine {
 		std::vector<Scene*> activeScenes;
 		GLContext* glContext;
 		Camera* editorCamera;
+		MeshLoader* meshLoader;
 
 		GPU();
 		~GPU();

@@ -109,6 +109,7 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	boost::property_tree::ptree node;
 	node.put("name", name);
 	node.put("tag", tag);
+	node.put("id", id);
 	for (auto c : components) {
 		node.add_child("component", c->serialize());
 	}
@@ -119,6 +120,6 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	return node;
 }
 
-void engine::GameObject::deserialize(boost::property_tree::ptree node) {
+engine::GameObject* engine::GameObject::deserialize(boost::property_tree::ptree node) {
 	
 }

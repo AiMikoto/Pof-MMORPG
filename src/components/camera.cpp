@@ -49,7 +49,7 @@ void engine::Camera::setup() {
 	rotationSpeed = 1;
 	fieldOfView = 45.0f;
 	nearClipDistance = 0.1f;
-	farClipDistance = 100.0f;
+	farClipDistance = 400.0f;
 	isPerspective = true;
 	isFixed = false;
 	pitch = 0;
@@ -171,7 +171,7 @@ boost::property_tree::ptree engine::Camera::serialize() {
 	return node;
 }
 
-void engine::Camera::deserialize(boost::property_tree::ptree node) {
+engine::Camera* engine::Camera::deserialize(boost::property_tree::ptree node) {
 	viewport = CameraViewport();
 	viewport.deserialize(node.get_child("viewport"));
 	isFixed = node.get<bool>("isFixed");
@@ -183,6 +183,7 @@ void engine::Camera::deserialize(boost::property_tree::ptree node) {
 	fieldOfView = node.get<float>("fieldOfView");
 	yaw = node.get<double>("yaw");
 	pitch = node.get<double>("pitch");
+	return this;
 }
 
 boost::property_tree::ptree engine::CameraViewport::serialize() {
@@ -194,11 +195,12 @@ boost::property_tree::ptree engine::CameraViewport::serialize() {
 	return node;
 }
 
-void engine::CameraViewport::deserialize(boost::property_tree::ptree node) {
+engine::CameraViewport engine::CameraViewport::deserialize(boost::property_tree::ptree node) {
 	startX = node.get<float>("startX");
 	startY = node.get<float>("startY");
 	endX = node.get<float>("endX");
 	endY = node.get<float>("endY");
+	return *this;
 }
 
 engine::Camera* engine::Camera::instantiate() {

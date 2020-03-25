@@ -4,48 +4,13 @@
 #include "graphics/gpu.h"
 #include "lib/log.h"
 
-engine::MeshLoader::MeshLoader() {
-	setType();
-	gammaCorrection = false;
-	reloadChildren = false;
-}
-
-engine::MeshLoader::MeshLoader(std::string path, bool gammaCorrection, bool reloadChildren) {
-	this->gammaCorrection = gammaCorrection;
-	this->path = path;
-	this->reloadChildren = reloadChildren;
-	setType();
-}
-
-void engine::MeshLoader::setup() {
-	if (!initialized) {
-		if (reloadChildren) {
-			for (auto c : gameObject->children) {
-				delete c;
-			}
-			MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
-			if (meshFilter != NULL) {
-				gameObject->removeComponent<MeshFilter>(meshFilter);
-			}
-		}
-		loadMesh(path);
-		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
-		if (meshRenderer != NULL) {
-			meshRenderer->setup();
-		}
-		Component::setup();
-	}
-}
-
-void engine::MeshLoader::setType() {
-	type = typeid(*this).name();
-}
+engine::MeshLoader::MeshLoader() {}
 
 engine::MeshLoader::~MeshLoader() {}
 
-void engine::MeshLoader::loadMesh(std::string path) {
-	Assimp::Importer importer;
+void engine::MeshLoader::loadMesh(GameObject* gameObject, std::string path, bool gammaCorrection) {
 	BOOST_LOG_TRIVIAL(trace) << "Started loading mesh: " << path;
+	Assimp::Importer importer;
 	directory = path.substr(0, path.find_last_of('/'));
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace |
 		aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph);
@@ -53,29 +18,23 @@ void engine::MeshLoader::loadMesh(std::string path) {
 		BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
 		return;
 	}
+	gameObject->addComponent(new MeshFilter(path));
+	//TODO: add a model class so we don't have to load similar models multiple times
 	processNode(scene->mRootNode, scene, gameObject);
+	MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
+	meshFilter->meshesLoaded = true;
+	meshFilter->setup();
 }
 
 void engine::MeshLoader::processNode(aiNode* node, const aiScene* scene, GameObject* gameObject) {
+	MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
 	for (uint i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		bool preloaded = false;
-		GameObject* object = new GameObject();
-		gameObject->addChild(object);
-		for (auto m : gpu->meshes) {
-			if (m.second->name == std::string(mesh->mName.C_Str())) {
-				object->addComponent<MeshFilter>(new MeshFilter(m.first));
-				preloaded = true;
-			}
-		}
-		if (!preloaded) {
-			Mesh* processedMesh = processMesh(mesh, scene);
-			processedMesh->name = mesh->mName.C_Str();
-			uint meshID = uint(gpu->meshes.size());
-			gpu->meshes[meshID] = processedMesh;
-			object->addComponent<MeshFilter>(new MeshFilter(meshID));
-		}
-
+		Mesh* processedMesh = processMesh(mesh, scene);
+		processedMesh->name = mesh->mName.C_Str();
+		uint meshID = uint(gpu->meshes.size());
+		gpu->meshes[meshID] = processedMesh;
+		meshFilter->subMeshesID.push_back(meshID);
 	}
 	for (uint i = 0; i < node->mNumChildren; i++) {
 		GameObject* object = new GameObject();
@@ -168,10 +127,8 @@ void engine::MeshLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType t
 		aiMat->GetTexture(type, i, &path);
 		bool skip = false;
 		for (auto texture : gpu->textures) {
-			if (texture.second->path == std::string(path.C_Str())) {
+			if (texture.second->path == directory + "/" + std::string(path.C_Str())) {
 				mat->texturesIDs.push_back(texture.second->id);
-
-
 				mat->texturesOP.push_back(textureOP);
 				skip = true;
 				break;
@@ -182,17 +139,4 @@ void engine::MeshLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType t
 			mat->texturesIDs.push_back(texture->id);
 		}
 	}
-}
-
-boost::property_tree::ptree engine::MeshLoader::serialize() {
-	boost::property_tree::ptree node;
-	return node;
-}
-
-void engine::MeshLoader::deserialize(boost::property_tree::ptree node) {
-
-}
-
-engine::MeshLoader* engine::MeshLoader::instantiate() {
-	return this;
 }

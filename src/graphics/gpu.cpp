@@ -31,18 +31,20 @@ engine::GPU::~GPU() {
 	activeScenes.clear();
 	delete glContext;
 	delete editorCamera->gameObject;
+	delete meshLoader;
 	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
 }
 
 void engine::GPU::initializeContext() {
 	BOOST_LOG_TRIVIAL(trace) << "Creating openGL context";
-	this->glContext = new GLContext(1280, 720, "Pof Engine");
+	glContext = new GLContext(1280, 720, "Pof Engine");
 	BOOST_LOG_TRIVIAL(trace) << "Creating editor camera";
 	GameObject* editorCamera = new GameObject();
 	editorCamera->addComponent(new Camera());
 	editorCamera->transform.position = glm::dvec3(0, 0, 3);
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
+	meshLoader = new MeshLoader();
 }
 
 void engine::GPU::draw() {

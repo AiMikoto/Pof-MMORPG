@@ -19,7 +19,9 @@ boost::property_tree::ptree engine::Component::serialize() {
 	return node;
 }
 
-void engine::Component::deserialize(boost::property_tree::ptree node) {}
+engine::Component* engine::Component::deserialize(boost::property_tree::ptree node) {
+	return this;
+}
 
 engine::Component* engine::Component::instantiate() {
 	return NULL;
