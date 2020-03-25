@@ -6,7 +6,7 @@ namespace engine {
 
 	class Component {
 	public:
-		std::string type;
+		std::string type = "change_me";
 		bool allowMultiple = false; // specifies wheter a game object can have multiple components of the same type
 		GameObject* gameObject;
 

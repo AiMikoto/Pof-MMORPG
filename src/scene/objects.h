@@ -7,9 +7,9 @@
 #include <algorithm>
 #include "core/utils.h"
 #include "core/constants.h"
+#include "components/component.h"
 
 namespace engine {
-	class Component;
 
 	class GameObject {
 	public:

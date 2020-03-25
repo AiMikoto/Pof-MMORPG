@@ -1,8 +1,8 @@
 #include "scene/scene.h"
 #include "lib/log.h"
 #include <boost/property_tree/json_parser.hpp>
-#include "components/collider.h"
-#include "components/physical.h"
+#include "components/phys_collider.h"
+#include "components/solid_object.h"
 
 engine::Scene::Scene() : ctree(root_aabb()) {
 }
@@ -24,12 +24,10 @@ ullong engine::Scene::addGameObject(GameObject* go) {
 	ullong id = ullong(gameObjects.size() + 1);
 	gameObjects[id] = go;
 	go->id = id;
-	physical* phys = go->getComponent<physical>();
-	if( phys!= NULL) {
-		if (phys->collidable) {
-			aabb caabb = go->getComponent<collider>()->to_aabb();
-			ctree.insert(int(id), caabb);
-		}
+	collider* phys = go->getComponent<physical_collider>();
+	if (phys && !go->hasComponent<solid_object>()) {
+		aabb caabb = phys->to_aabb();
+		ctree.insert(int(id), caabb);
 	}
 	return id;
 }

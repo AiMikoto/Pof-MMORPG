@@ -12,17 +12,17 @@ public:
   octree(aabb base);
   ~octree();
   void assert_split();
-  void insert(int id, aabb box);
-  std::set<int> get_collisions(aabb box);
+  void insert(unsigned long long id, aabb box);
+  std::set<unsigned long long> get_collisions(aabb box);
 protected:
-  void get_collisions_h(aabb box, std::set<int> *ret);
+  void get_collisions_h(aabb box, std::set<unsigned long long> *ret);
   octree(aabb base, int depth);
   aabb base;
   octree *children[8];
   int weight;
-  std::set<int> boxes_i;
-  std::map<int, aabb> boxes;
-  std::map<int, aabb> lazy_boxes[8];
+  std::set<unsigned long long> boxes_i;
+  std::map<unsigned long long, aabb> boxes;
+  std::map<unsigned long long, aabb> lazy_boxes[8];
   int depth;
 };
 

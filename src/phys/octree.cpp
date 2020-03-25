@@ -54,7 +54,7 @@ octree::~octree()
   }
 }
 
-void octree::insert(int id, aabb box)
+void octree::insert(unsigned long long id, aabb box)
 {
   if(no_intersect(box, this -> base))
   {
@@ -69,14 +69,14 @@ void octree::insert(int id, aabb box)
   }
 }
 
-std::set<int> octree::get_collisions(aabb box)
+std::set<unsigned long long> octree::get_collisions(aabb box)
 {
-  std::set<int> ret;
+  std::set<unsigned long long> ret;
   get_collisions_h(box, &ret);
   return ret;
 }
 
-void octree::get_collisions_h(aabb box, std::set<int> *ret)
+void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
 {
   if(weight == 0)
   {

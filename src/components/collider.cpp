@@ -1,11 +1,10 @@
 #include "components/collider.h"
 #include <algorithm>
 
-collider::collider(glm::dvec3 size, collider_t c_type) : Component(false)
+collider::collider(glm::dvec3 size, collider_t c_type) : Component(true)
 {
   this -> c_type = c_type;
   this -> size = size;
-  setType();
 }
 
 collider::~collider()
@@ -65,11 +64,6 @@ aabb collider::to_aabb()
     }
   }
   return ret;
-}
-
-void collider::setType()
-{
-  type = typeid(*this).name();
 }
 
 void get_points(collider *c, glm::dvec4 *points)
