@@ -44,11 +44,12 @@ bool is_loaded()
 
 void slicer()
 {
-  // TODO: update last timestamp
+  boost::chrono::system_clock::time_point last = boost::chrono::system_clock::now();
   forever
   {
-    // TODO: sleep until next tick
-    // TODO: update last timestamp
+    boost::chrono::duration<double> duration = last - boost::chrono::system_clock::now() + boost::chrono::milliseconds(10);
+    boost::this_thread::sleep_for(boost::chrono::duration_cast<boost::chrono::microseconds>(duration));
+    last = boost::chrono::system_clock::now();
     tick(current);
   }
 }
