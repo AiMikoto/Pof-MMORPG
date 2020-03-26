@@ -25,6 +25,7 @@ private:
   void uc_transfer(call c);
   void move_cb(call c);
   void irc_cb(call c);
+  void slice_cb(call c);
 };
 
 instance *instance_builder(std::string host, int port);

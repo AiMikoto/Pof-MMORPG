@@ -18,6 +18,8 @@ extern std::string username;
 
 void move(std::string host, int port);
 
+void add_slice(slice_t next_slice);
+
 void send_message(chat_target target, std::string payload);
 
 #endif // CLIENT_GAME_H

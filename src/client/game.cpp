@@ -23,7 +23,7 @@ void move(std::string host, int port)
   BOOST_LOG_TRIVIAL(trace) << "finished instance movement";
 }
 
-void apply_slice(slice_t next_slice)
+void add_slice(slice_t next_slice)
 {
   apply_slice(current, next_slice);
 }
