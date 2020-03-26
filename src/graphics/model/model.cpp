@@ -1,49 +1,61 @@
-#include "components/meshLoader.h"
+#include "graphics/model/model.h"
 #include "components/meshRenderer.h"
 #include "components/meshFilter.h"
 #include "graphics/gpu.h"
 #include "lib/log.h"
+#include "core/exceptions.h"
+#include <typeinfo>
 
-engine::MeshLoader::MeshLoader() {}
+engine::Model::Model(std::string path) {
+	this->path = path;
+	this->name = path.substr(path.find_last_of('/'), path.size() - 1);
+	BOOST_LOG_TRIVIAL(trace) << this->name;
+}
 
-engine::MeshLoader::~MeshLoader() {}
+engine::Model::~Model() {
+	for (auto mesh : meshes) {
+		delete mesh;
+	}
+	meshes.clear();
+	gpu->removeModel(modelID);
+}
 
-void engine::MeshLoader::loadMesh(GameObject* gameObject, std::string path, bool gammaCorrection) {
-	BOOST_LOG_TRIVIAL(trace) << "Started loading mesh: " << path;
+engine::ModelLoader::ModelLoader() {}
+
+engine::ModelLoader::~ModelLoader() {}
+
+void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection) {
+	if (gpu->modelsPaths.count(path)) {
+		BOOST_LOG_TRIVIAL(trace) << "Model already loaded: " << path;
+		return;
+	}
+	BOOST_LOG_TRIVIAL(trace) << "Started loading model: " << path;
 	Assimp::Importer importer;
 	directory = path.substr(0, path.find_last_of('/'));
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace |
 		aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph);
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		BOOST_LOG_TRIVIAL(trace) << "ERROR::ASSIMP:: " << importer.GetErrorString();
-		return;
-	}
-	gameObject->addComponent(new MeshFilter(path));
-	//TODO: add a model class so we don't have to load similar models multiple times
-	processNode(scene->mRootNode, scene, gameObject);
-	MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
-	meshFilter->meshesLoaded = true;
-	meshFilter->setup();
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+		throw assimp_error(importer.GetErrorString());
+	Model* model = new Model(path);
+	processNode(scene->mRootNode, scene, model);
+	uint modelID = uint(gpu->models.size());
+	gpu->models[modelID] = model;
+	model->modelID = modelID;
 }
 
-void engine::MeshLoader::processNode(aiNode* node, const aiScene* scene, GameObject* gameObject) {
-	MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
+void engine::ModelLoader::processNode(aiNode* node, const aiScene* scene, Model* model) {
 	for (uint i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		Mesh* processedMesh = processMesh(mesh, scene);
 		processedMesh->name = mesh->mName.C_Str();
-		uint meshID = uint(gpu->meshes.size());
-		gpu->meshes[meshID] = processedMesh;
-		meshFilter->subMeshesID.push_back(meshID);
+		model->meshes.push_back(processedMesh);
 	}
 	for (uint i = 0; i < node->mNumChildren; i++) {
-		GameObject* object = new GameObject();
-		gameObject->addChild(object);
-		processNode(node->mChildren[i], scene, object);
+		processNode(node->mChildren[i], scene, model);
 	}
 }
 
-engine::Mesh* engine::MeshLoader::processMesh(aiMesh *mesh, const aiScene *scene) {
+engine::Mesh* engine::ModelLoader::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices = loadMeshVertices(mesh, scene);
 	std::vector<uint> indices = loadMeshIndices(mesh, scene);
 	uint materialID = loadMaterial(mesh, scene);
@@ -52,7 +64,7 @@ engine::Mesh* engine::MeshLoader::processMesh(aiMesh *mesh, const aiScene *scene
 	return processedMesh;
 }
 
-std::vector<engine::Vertex> engine::MeshLoader::loadMeshVertices(aiMesh *mesh, const aiScene *scene) {
+std::vector<engine::Vertex> engine::ModelLoader::loadMeshVertices(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices;
 	for (uint i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex;
@@ -72,7 +84,7 @@ std::vector<engine::Vertex> engine::MeshLoader::loadMeshVertices(aiMesh *mesh, c
 	return vertices;
 }
 
-std::vector<uint> engine::MeshLoader::loadMeshIndices(aiMesh *mesh, const aiScene *scene) {
+std::vector<uint> engine::ModelLoader::loadMeshIndices(aiMesh *mesh, const aiScene *scene) {
 	std::vector<uint> indices;
 	for (uint i = 0; i < mesh->mNumFaces; i++)
 	{
@@ -83,7 +95,7 @@ std::vector<uint> engine::MeshLoader::loadMeshIndices(aiMesh *mesh, const aiScen
 	return indices;
 }
 
-uint engine::MeshLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
+uint engine::ModelLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
 	aiMaterial* aiMat = scene->mMaterials[mesh->mMaterialIndex];
 	Material* mat = new Material();
 
@@ -117,7 +129,7 @@ uint engine::MeshLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
 	return materialID;
 }
 
-void engine::MeshLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType type, Material* mat) {
+void engine::ModelLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType type, Material* mat) {
 	for (uint i = 0; i < aiMat->GetTextureCount(type); i++) {
 		aiString path;
 		int textureOP;

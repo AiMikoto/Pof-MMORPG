@@ -9,8 +9,8 @@
 namespace engine {
 	class MeshRenderer : public Component {
 	public:
-		std::vector<uint> meshIDs;
 		std::vector<uint> materialIDs;
+		uint modelID;
 
 		MeshRenderer();
 		~MeshRenderer();
@@ -26,7 +26,7 @@ namespace engine {
 		void glContextSetup();
 		void bindBuffers();
 		void createOutline();
-		void removeMeshAt(int i);
+		void cleanup();
 		void deleteBuffers(int i);
 		virtual void setType();
 	};

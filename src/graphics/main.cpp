@@ -5,7 +5,7 @@
 #include "graphics/model/mesh.h"
 #include "scene/scene.h"
 #include "graphics/gpu.h"
-#include "components/meshLoader.h"
+#include "graphics/model/model.h"
 #include "components/meshRenderer.h"
 #include "components/meshFilter.h"
 
@@ -21,18 +21,21 @@ int main() {
 	engine::gpu->activeScenes.push_back(scene);
 
 	BOOST_LOG_TRIVIAL(trace) << "Loading cube";
-	engine::GameObject* cube = new engine::GameObject();
-	cube->transform.position = glm::dvec3(5, 2, -20);
+	engine::GameObject* model = new engine::GameObject();
+	model->transform.position = glm::dvec3(5, 2, -20);
 	//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
-	cube->transform.scale = glm::dvec3(2, 2, 2);
-	cube->addComponent(new engine::MeshRenderer());
-	engine::gpu->meshLoader->loadMesh(cube, "../src/graphics/assets/objects/kaguya.obj", false);	
-	scene->addGameObject(cube);
+	model->transform.scale = glm::dvec3(2, 2, 2);
+	engine::gpu->meshLoader->loadModel("../src/graphics/assets/objects/kaguya.obj");
+	model->addComponent(new engine::MeshFilter());
+	engine::MeshFilter* meshFilter = model->getComponent<engine::MeshFilter>();
+	meshFilter->modelID = engine::gpu->models.begin()->first;
+	model->addComponent(new engine::MeshRenderer());
+	scene->addGameObject(model);
 
-	cube->removeComponent<engine::MeshFilter>();
-	engine::gpu->meshLoader->loadMesh(cube, "../src/graphics/assets/objects/kaguya.obj", false);
-	cube->removeComponent<engine::MeshRenderer>();
-	cube->addComponent(new engine::MeshRenderer);
+	/*model->removeComponent<engine::MeshFilter>();
+	engine::gpu->meshLoader->loadModel("../src/graphics/assets/objects/kaguya.obj");
+	model->removeComponent<engine::MeshRenderer>();
+	model->addComponent(new engine::MeshRenderer);*/
 
 	glfwSwapInterval(0);
 	bool deleted1 = false;

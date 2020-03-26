@@ -1,5 +1,5 @@
 #include "meshRenderer.h"
-#include "meshLoader.h"
+#include "graphics/model/model.h"
 #include "meshFilter.h"
 #include "graphics/gpu.h"
 #include "lib/log.h"
@@ -9,18 +9,7 @@ engine::MeshRenderer::MeshRenderer() {
 }
 
 engine::MeshRenderer::~MeshRenderer() {
-	if (initialized) {
-		gpu->removeRenderer(this);
-		for (int i = 0; i < meshIDs.size(); i++) {
-			deleteBuffers(i);
-		}
-		meshIDs.clear();
-		materialIDs.clear();
-		vertexArrayID.clear();
-		vertexBufferID.clear();
-		elementsBufferID.clear();
-		outlineIndicesBufferID.clear();
-	}	
+	cleanup();
 }
 
 void engine::MeshRenderer::deleteBuffers(int i) {
@@ -51,12 +40,12 @@ void engine::MeshRenderer::glContextSetup() {
 }
 
 void engine::MeshRenderer::bindBuffers() {
-	for (int i = 0; i < meshIDs.size(); i++) {
+	for (int i = 0; i < materialIDs.size(); i++) {
 		vertexArrayID.push_back(0);
 		vertexBufferID.push_back(0);
 		elementsBufferID.push_back(0);
 		outlineIndicesBufferID.push_back(0);
-		Mesh* mesh = gpu->meshes[meshIDs[i]];
+		Mesh* mesh = gpu->models[modelID]->meshes[i];
 		glGenVertexArrays(1, &vertexArrayID[i]);
 		glGenBuffers(1, &vertexBufferID[i]);
 		glGenBuffers(1, &elementsBufferID[i]);
@@ -94,8 +83,8 @@ void engine::MeshRenderer::draw(Camera* camera, GLFWwindow* window, uint materia
 			break;
 		}
 	}
-	Mesh* mesh = gpu->meshes[meshIDs[pos]];
-	Material* mat = gpu->materials[mesh->materialID];
+	Mesh* mesh = gpu->models[modelID]->meshes[pos];
+	Material* mat = gpu->materials[materialID];
 	Shader* shader = gpu->shaders[mat->shaderID];
 	glm::mat4 mvp = camera->projection(window) * camera->view() * gameObject->transform.model();
 	shader->setMat4("mvp", mvp);
@@ -108,12 +97,9 @@ void engine::MeshRenderer::setup() {
 	if (!initialized) {
 		MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
 		if (meshFilter != NULL) {
-			for (auto id : meshFilter->subMeshesID) {
-				meshIDs.push_back(id);
-			}
-			for (auto i : meshIDs) {
-				BOOST_LOG_TRIVIAL(trace) << i;
-				materialIDs.push_back(gpu->meshes[i]->materialID);
+			Model* model = gpu->models[meshFilter->modelID];
+			for (auto mesh : model->meshes) {
+				materialIDs.push_back(mesh->materialID);
 			}
 			gpu->addRenderer(this);
 			glContextSetup();
@@ -127,18 +113,20 @@ void engine::MeshRenderer::setType() {
 }
 
 void engine::MeshRenderer::meshFilterRemoved() {
-	BOOST_LOG_TRIVIAL(trace) << "mesh filter removed";
-	for (int i = int(meshIDs.size()) - 1; i >= 0; i--)
-		removeMeshAt(i);
+	cleanup();
 	initialized = false;
-	vertexArrayID.clear();
-	vertexBufferID.clear();
-	elementsBufferID.clear();
-	outlineIndicesBufferID.clear();
 }
 
-void engine::MeshRenderer::removeMeshAt(int i) {
-	deleteBuffers(i);
-	meshIDs.erase(meshIDs.begin() + i);
-	materialIDs.erase(materialIDs.begin() + i);
+void engine::MeshRenderer::cleanup() {
+	if (initialized) {
+		gpu->removeRenderer(this);
+		for (int i = 0; i < materialIDs.size(); i++) {
+			deleteBuffers(i);
+		}
+		materialIDs.clear();
+		vertexArrayID.clear();
+		vertexBufferID.clear();
+		elementsBufferID.clear();
+		outlineIndicesBufferID.clear();
+	}
 }

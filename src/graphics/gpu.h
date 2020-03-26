@@ -8,7 +8,7 @@
 #include "scene/scene.h"
 #include "graphics/model/mesh.h"
 #include "components/meshFilter.h"
-#include "components/meshLoader.h"
+#include "graphics/model/model.h"
 
 namespace engine {
 	class GPU {
@@ -16,14 +16,15 @@ namespace engine {
 		std::map<uint, Texture*> textures;
 		std::map<uint, Shader*> shaders;
 		std::map<uint, Material*> materials;
-		std::map<uint, Mesh*> meshes;
+		std::map<std::string, uint> modelsPaths;
+		std::map<uint, Model*> models;
 		std::vector<Camera*> cameras;
 		//optimizing objects that use the same material not to switch context on the gpu
 		
 		std::vector<Scene*> activeScenes;
 		GLContext* glContext;
 		Camera* editorCamera;
-		MeshLoader* meshLoader;
+		ModelLoader* meshLoader;
 
 		GPU();
 		~GPU();
@@ -32,6 +33,7 @@ namespace engine {
 		void update();
 		void addRenderer(MeshRenderer* renderer);
 		void removeRenderer(MeshRenderer* renderer);
+		void removeModel(uint modelID);
 	private:
 		std::map<uint, uint> renderLayersMap;
 		std::map<uint, std::vector<MeshRenderer*>> renderLayers;

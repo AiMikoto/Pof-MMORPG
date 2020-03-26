@@ -7,17 +7,16 @@
 namespace engine {
 	class MeshFilter : public Component {
 	public:
-		std::vector<uint> subMeshesID;
-		std::string path;
-		bool meshesLoaded;
+		uint modelID;
 
-		MeshFilter(std::string path);
+		MeshFilter();
 		MeshFilter(const MeshFilter& meshFilter);
 		~MeshFilter();
 
 		void setType();
 		void setup();
 		boost::property_tree::ptree serialize();
-		MeshFilter* deserialize(boost::property_tree::ptree node);		
+		MeshFilter* deserialize(boost::property_tree::ptree node);
+		bool hasModel();
 	};
 }

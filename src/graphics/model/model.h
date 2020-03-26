@@ -1,21 +1,31 @@
 #pragma once
 #include "components/component.h"
 #include "graphics/model/mesh.h"
-#include <map>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "graphics/model/material.h"
 
 namespace engine {
-	class MeshLoader {
+	class Model {
 	public:
-		MeshLoader();
-		~MeshLoader();
-		void loadMesh(GameObject* gameObject, std::string path, bool gammaCorrection);
+		std::vector<Mesh*> meshes;
+		std::string path;
+		std::string name;
+		uint modelID;
+
+		Model(std::string path);
+		~Model();
+	};
+
+	class ModelLoader {
+	public:
+		ModelLoader();
+		~ModelLoader();
+		void loadModel(std::string path, bool gammaCorrection = false);
 	private:
 		std::string directory;		
-		void processNode(aiNode* node, const aiScene* scene, GameObject* gameObject);
+		void processNode(aiNode* node, const aiScene* scene, Model* model);
 		Mesh* processMesh(aiMesh* mesh, const aiScene* scene);
 		std::vector<Vertex> loadMeshVertices(aiMesh* mesh, const aiScene* scene);
 		std::vector<uint> loadMeshIndices(aiMesh* mesh, const aiScene* scene);

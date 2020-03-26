@@ -2,18 +2,12 @@
 #include "components/meshRenderer.h"
 #include "graphics/gpu.h"
 
-engine::MeshFilter::MeshFilter(std::string path) {
-	this->path = path;
-	this->meshesLoaded = false;
+engine::MeshFilter::MeshFilter() {
 	setType();
 }
 
 engine::MeshFilter::MeshFilter(const MeshFilter& meshFilter) {
-	this->path = meshFilter.path;
-	for (auto id : meshFilter.subMeshesID) {
-		this->subMeshesID.push_back(id);
-	}
-	this->meshesLoaded = true;
+	this->modelID = meshFilter.modelID;
 	this->initialized = false;
 }
 
@@ -31,7 +25,7 @@ void engine::MeshFilter::setType() {
 }
 
 void engine::MeshFilter::setup() {
-	if (meshesLoaded && !initialized) {
+	if (hasModel() && !initialized) {
 		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
 		if (meshRenderer != NULL) {
 			meshRenderer->setup();
@@ -42,10 +36,14 @@ void engine::MeshFilter::setup() {
 
 boost::property_tree::ptree engine::MeshFilter::serialize() {
 	boost::property_tree::ptree node;
-	node.add("path", path);
+	//node.add_child("model", gpu->models[modelID].serialize());
 	return node;
 }
 
 engine::MeshFilter* engine::MeshFilter::deserialize(boost::property_tree::ptree node) {
 	return this;
+}
+
+bool engine::MeshFilter::hasModel() {
+	return gpu->models.count(modelID) == 1;
 }

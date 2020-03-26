@@ -21,7 +21,6 @@ engine::GPU::~GPU() {
 		delete s.second;
 	}
 	shaders.clear();
-	meshes.clear();
 	cameras.clear();
 	renderLayers.clear();
 	renderLayersMap.clear();
@@ -44,7 +43,7 @@ void engine::GPU::initializeContext() {
 	editorCamera->transform.position = glm::dvec3(0, 0, 3);
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
-	meshLoader = new MeshLoader();
+	meshLoader = new ModelLoader();
 }
 
 void engine::GPU::draw() {
@@ -96,5 +95,17 @@ void engine::GPU::removeRenderer(MeshRenderer* renderer) {
 void engine::GPU::determineRenderLayers(MeshRenderer* renderer) {
 	for (auto i : renderer->materialIDs) {
 		renderLayers[renderLayersMap[i]].push_back(renderer);
+	}
+}
+
+void engine::GPU::removeModel(uint modelID) {
+	for (auto layer : renderLayers) {
+		for (auto renderer : layer.second) {
+			if (renderer->modelID == modelID) {
+				layer.second.erase(std::remove(layer.second.begin(), layer.second.end(), renderer),
+					layer.second.end());
+				renderer->meshFilterRemoved();
+			}
+		}
 	}
 }
