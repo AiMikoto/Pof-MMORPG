@@ -3,6 +3,7 @@
 #include "lib/log.h"
 
 user_card_library ucl;
+engine::Scene *current;
 chat_log cl;
 
 void move(std::string host, int port)
@@ -20,6 +21,11 @@ void move(std::string host, int port)
   current_instance -> authenticate_token(username, tok);
   // TODO: take down loading screen
   BOOST_LOG_TRIVIAL(trace) << "finished instance movement";
+}
+
+void apply_slice(slice_t next_slice)
+{
+  apply_slice(current, next_slice);
 }
 
 void send_message(chat_target target, std::string payload)

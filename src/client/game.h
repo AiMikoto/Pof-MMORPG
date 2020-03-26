@@ -4,8 +4,11 @@
 #include "common/user_card.h"
 #include "lib/chat.h"
 #include <mutex>
+#include "phys/slicing.h"
 
 extern user_card_library ucl;
+
+extern engine::Scene *current;
 
 extern chat_log cl;
 
