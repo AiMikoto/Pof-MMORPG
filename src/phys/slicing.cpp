@@ -5,12 +5,67 @@
 #include "components/phys_collider.h"
 #include <set>
 
+// a few helper functions
+
+glm::dvec3 decode_dvec3(boost::property_tree::ptree tree)
+{
+  return {tree.get<double>("x"), tree.get<double>("y"), tree.get<double>("z")};
+}
+
+boost::property_tree::ptree encode_dvec3(glm::dvec3 vector)
+{
+  boost::property_tree::ptree ret;
+  ret.put("x", vector.x);
+  ret.put("y", vector.y);
+  ret.put("z", vector.z);
+  return ret;
+}
+
+// slice_t implementation
+
+slice_t::slice_t()
+{
+}
+
+slice_t::slice_t(boost::property_tree::ptree tree)
+{
+  boost::property_tree::ptree pos_node = tree.get_child("pos");
+  boost::property_tree::ptree vel_node = tree.get_child("vel");
+  for(auto it : pos_node)
+  {
+    this -> pos_delta[std::stoi(it.first)] = decode_dvec3(it.second);
+  }
+  for(auto it : vel_node)
+  {
+    this -> vel_delta[std::stoi(it.first)] = decode_dvec3(it.second);
+  }
+}
+
+boost::property_tree::ptree slice_t::encode()
+{
+  boost::property_tree::ptree ret, pos_node, vel_node;
+  for(auto it : this -> pos_delta)
+  {
+    pos_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+  }
+  for(auto it : this -> vel_delta)
+  {
+    vel_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+  }
+  ret.put_child("pos", pos_node);
+  ret.put_child("vel", vel_node);
+  return ret;
+}
+
 glm::dvec3 gravity_vector = {0, -2, 0};
 
-// Slices per second
-const double SPS = 100;
+// slicing constants
+
+const double SPS = 100; // Slices per second
 const double BAUMGARDE_CONSTANT = 0.2;
 const double COEFFICIENT_OF_RESTITUTION = 0.3;
+
+// slicing implementation
 
 slice_t slice(engine::Scene *e)
 {
