@@ -1,5 +1,6 @@
 #include "shader.h"
 #include "lib/log.h"
+#include "core/exceptions.h"
 
 engine::ShaderLoader::ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath) {
 	this->vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -13,7 +14,7 @@ engine::ShaderLoader::~ShaderLoader() {
 	glDeleteShader(fragmentShaderID);
 }
 
-std::string engine::ShaderLoader::readShaderFile(std::string path) {
+std::string engine::ShaderLoader::readShaderFile(const std::string& path) {
 	std::string res;
 	std::ifstream fileStream(path, std::ios::in);
 	if (fileStream.is_open()) {
@@ -21,11 +22,9 @@ std::string engine::ShaderLoader::readShaderFile(std::string path) {
 		while (std::getline(fileStream, line))
 			res += line + "\n";
 		fileStream.close();
+		return res;
 	}
-	else {
-		throw ShaderException(path);
-	}
-	return res;
+	throw std::system_error(errno, std::system_category(), "Failed to open file at: " + path);	
 }
 
 GLuint engine::ShaderLoader::loadShaders() {
@@ -41,61 +40,47 @@ GLuint engine::ShaderLoader::loadShaders() {
 		BOOST_LOG_TRIVIAL(trace) << "Linking program";
 		return linkProgram();
 	}
-	catch (ShaderException e) {
-		std::cout << e.info << std::endl;
-		std::cin.ignore();
+	catch (std::exception e){
+		BOOST_LOG_TRIVIAL(trace) << e.what();
 		glDeleteShader(vertexShaderID);
 		glDeleteShader(fragmentShaderID);
+		std::cin.ignore();
 		exit(1);
 	}
 }
 
 void engine::ShaderLoader::compileShader(std::string shader, GLuint shaderID) {
-	try {
-		GLint result = GL_FALSE;
-		int infoLogLength;
-		char const* sourcePointer = shader.c_str();
-		glShaderSource(shaderID, 1, &sourcePointer, NULL);
-		glCompileShader(shaderID);
-		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
-		if (!result) {
-			glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-			std::vector<char> shaderErrorMessage(infoLogLength + 1);
-			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
-			throw ShaderException(std::string(shaderErrorMessage.begin(), shaderErrorMessage.end()));
-		}
-	}
-	catch (ShaderException e) {
-		throw e;
+	GLint result = GL_FALSE;
+	int infoLogLength;
+	char const* sourcePointer = shader.c_str();
+	glShaderSource(shaderID, 1, &sourcePointer, NULL);
+	glCompileShader(shaderID);
+	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+	if (!result) {
+		glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		std::vector<char> shaderErrorMessage(infoLogLength + 1);
+		glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
+		throw shader_compile_error(std::string(shaderErrorMessage.begin(), shaderErrorMessage.end()));
 	}
 }
 
 GLuint engine::ShaderLoader::linkProgram() {
-	try {
-		GLint result = GL_FALSE;
-		int infoLogLength;
-		GLuint programID = glCreateProgram();
-		glAttachShader(programID, vertexShaderID);
-		glAttachShader(programID, fragmentShaderID);
-		glLinkProgram(programID);
-		glGetProgramiv(programID, GL_LINK_STATUS, &result);
-		if (!result) {
-			glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-			std::vector<char> programErrorMessage(infoLogLength + 1);
-			glGetProgramInfoLog(programID, infoLogLength, NULL, &programErrorMessage[0]);
-			throw ShaderException(std::string(programErrorMessage.begin(), programErrorMessage.end()));
-		}
-		glDeleteShader(vertexShaderID);
-		glDeleteShader(fragmentShaderID);
-		return programID;
+	GLint result = GL_FALSE;
+	int infoLogLength;
+	GLuint programID = glCreateProgram();
+	glAttachShader(programID, vertexShaderID);
+	glAttachShader(programID, fragmentShaderID);
+	glLinkProgram(programID);
+	glGetProgramiv(programID, GL_LINK_STATUS, &result);
+	if (!result) {
+		glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		std::vector<char> programErrorMessage(infoLogLength + 1);
+		glGetProgramInfoLog(programID, infoLogLength, NULL, &programErrorMessage[0]);
+		throw shader_compile_error(std::string(programErrorMessage.begin(), programErrorMessage.end()));
 	}
-	catch (ShaderException e) {
-		throw e;
-	}
-}
-
-engine::ShaderException::ShaderException(std::string info) {
-	this->info = info;
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
+	return programID;
 }
 
 engine::Shader::Shader() {}
