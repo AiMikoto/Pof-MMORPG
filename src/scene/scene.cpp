@@ -3,6 +3,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
+#include "core/utils.h"
 
 engine::Scene::Scene() : ctree(root_aabb()) {
 }
@@ -21,7 +22,7 @@ void engine::Scene::update() {
 }
 
 ullong engine::Scene::addGameObject(GameObject* go) {
-	ullong id = ullong(gameObjects.size() + 1);
+	ullong id = getFirstAvailableMapIndex(gameObjects);
 	gameObjects[id] = go;
 	go->id = id;
 	collider* phys = go->getComponent<physical_collider>();

@@ -9,7 +9,7 @@ namespace engine {
 	public:
 		uint modelID;
 
-		MeshFilter();
+		MeshFilter(uint modelID = 0);
 		MeshFilter(const MeshFilter& meshFilter);
 		~MeshFilter();
 

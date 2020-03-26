@@ -5,10 +5,12 @@
 #include "lib/log.h"
 #include "core/exceptions.h"
 #include <typeinfo>
+#include "core/utils.h"
 
 engine::Model::Model(std::string path) {
 	this->path = path;
 	this->name = path.substr(path.find_last_of('/') + 1, path.size() - 1);
+	initialized = false;
 	BOOST_LOG_TRIVIAL(trace) << this->name;
 }
 
@@ -18,6 +20,83 @@ engine::Model::~Model() {
 	}
 	meshes.clear();
 	gpu->removeModel(modelID);
+	cleanup();
+}
+
+void engine::Model::glContextSetup() {
+	bindBuffers();
+	createOutline();
+}
+
+void engine::Model::bindBuffers() {
+	for (int i = 0; i < meshes.size(); i++) {
+		vertexArrayID.push_back(0);
+		vertexBufferID.push_back(0);
+		elementsBufferID.push_back(0);
+		outlineIndicesBufferID.push_back(0);
+		glGenVertexArrays(1, &vertexArrayID[i]);
+		glGenBuffers(1, &vertexBufferID[i]);
+		glGenBuffers(1, &elementsBufferID[i]);
+		glGenBuffers(1, &outlineIndicesBufferID[i]);
+
+		glBindVertexArray(vertexArrayID[i]);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID[i]);
+		glBufferData(GL_ARRAY_BUFFER, meshes[i]->vertices.size() * sizeof(Vertex), &meshes[i]->vertices[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBufferID[i]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshes[i]->indices.size() * sizeof(uint), &meshes[i]->indices[0], GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+
+		glBindVertexArray(0);
+	}
+}
+
+void engine::Model::createOutline() {}
+
+void engine::Model::draw(const glm::mat4& mvp, uint materialID) {
+	int pos = 0;
+	for (int i = 0; i < meshes.size(); i++) {
+		if (materialID == meshes[i]->materialID) {
+			pos = i;
+			break;
+		}
+	}
+	Mesh* mesh = meshes[pos];
+	Material* mat = gpu->materials[materialID];
+	Shader* shader = gpu->shaders[mat->shaderID];
+	shader->setMat4("mvp", mvp);
+	glBindVertexArray(vertexArrayID[pos]);
+	glDrawElements(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
+void engine::Model::deleteBuffers(int i) {
+	glDeleteVertexArrays(1, &vertexArrayID[i]);
+	glDeleteBuffers(1, &vertexBufferID[i]);
+	glDeleteBuffers(1, &elementsBufferID[i]);
+	glDeleteBuffers(1, &outlineIndicesBufferID[i]);
+}
+
+void engine::Model::cleanup() {
+	if (initialized) {
+		for (int i = 0; i < meshes.size(); i++) {
+			deleteBuffers(i);
+		}
+		vertexArrayID.clear();
+		vertexBufferID.clear();
+		elementsBufferID.clear();
+		outlineIndicesBufferID.clear();
+	}
 }
 
 engine::ModelLoader::ModelLoader() {}
@@ -38,7 +117,8 @@ void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection) {
 		throw assimp_error(importer.GetErrorString());
 	Model* model = new Model(path);
 	processNode(scene->mRootNode, scene, model);
-	uint modelID = uint(gpu->models.size());
+	uint modelID = getFirstAvailableMapIndex(gpu->models);
+	model->glContextSetup();
 	gpu->models[modelID] = model;
 	gpu->modelsPaths[path] = modelID;
 	model->modelID = modelID;
@@ -124,7 +204,7 @@ uint engine::ModelLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
 	for (int i = aiTextureType_DIFFUSE; i != aiTextureType_UNKNOWN; i++) {
 		loadMaterialTextures(aiMat, aiTextureType(i), mat);
 	}
-	uint materialID = uint(gpu->materials.size());
+	uint materialID = getFirstAvailableMapIndex(gpu->materials);
 	mat->shaderID = shaderTypes::modelShader;
 	gpu->materials[materialID] = mat;
 	return materialID;

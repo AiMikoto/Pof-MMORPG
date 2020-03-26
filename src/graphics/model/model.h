@@ -5,6 +5,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "graphics/model/material.h"
+#include "components/camera.h"
+#include "include/glad.h"
+#include "include/glfw3.h"
 
 namespace engine {
 	class Model {
@@ -16,6 +19,15 @@ namespace engine {
 
 		Model(std::string path);
 		~Model();
+		void draw(const glm::mat4& mvp, uint materialID);
+		void glContextSetup();
+	private:
+		bool initialized;
+		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
+		void bindBuffers();
+		void createOutline();
+		void deleteBuffers(int i);
+		void cleanup();
 	};
 
 	class ModelLoader {

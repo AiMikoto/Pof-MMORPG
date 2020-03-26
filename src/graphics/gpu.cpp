@@ -27,6 +27,10 @@ engine::GPU::~GPU() {
 	for (auto s : activeScenes) {
 		delete s;
 	}
+	for (auto m : models) {
+		delete m.second;
+	}
+	models.clear();
 	activeScenes.clear();
 	delete glContext;
 	delete editorCamera->gameObject;
@@ -40,7 +44,7 @@ void engine::GPU::initializeContext() {
 	BOOST_LOG_TRIVIAL(trace) << "Creating editor camera";
 	GameObject* editorCamera = new GameObject();
 	editorCamera->addComponent(new Camera());
-	editorCamera->transform.position = glm::dvec3(0, 0, 3);
+	editorCamera->transform.position = glm::dvec3(0, 5, 20);
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
 	meshLoader = new ModelLoader();

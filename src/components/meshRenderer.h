@@ -21,13 +21,8 @@ namespace engine {
 		virtual void setup();
 		void meshFilterRemoved();
 	private:
-		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
 		bool initialized = false;
-		void glContextSetup();
-		void bindBuffers();
-		void createOutline();
 		void cleanup();
-		void deleteBuffers(int i);
 		virtual void setType();
 	};
 }

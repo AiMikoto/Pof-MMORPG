@@ -4,6 +4,7 @@
 #include <fstream>
 #include <boost/property_tree/ptree.hpp>
 #include "glm/gtc/type_ptr.hpp"
+#include <map>
 
 namespace engine {
 	std::vector<std::string> charArrayToStringVector(const char* const input[], size_t arrayLength);
@@ -32,4 +33,11 @@ namespace engine {
 	boost::property_tree::ptree dvec3serializer(glm::dvec3);
 	boost::property_tree::ptree dvec4serializer(glm::dvec4);
 	double highestCommonDenominator(double a, double b, double eps = 0.0001);
+	//only works for maps that use numbers as a key
+	template <typename T, typename S> T getFirstAvailableMapIndex(std::map<T, S> toCheck) {
+		if (toCheck.size() == 0) {
+			return (T(-1) < T(0)) ? T(0) : T(1);
+		}
+		return T(toCheck.rbegin()->first + 1);
+	}
 }

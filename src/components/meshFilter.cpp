@@ -2,7 +2,8 @@
 #include "components/meshRenderer.h"
 #include "graphics/gpu.h"
 
-engine::MeshFilter::MeshFilter() {
+engine::MeshFilter::MeshFilter(uint modelID) {
+	this->modelID = modelID;
 	setType();
 }
 

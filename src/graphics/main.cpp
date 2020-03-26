@@ -20,25 +20,19 @@ int main() {
 	engine::Scene* scene = new engine::Scene();
 	engine::gpu->activeScenes.push_back(scene);
 
-	BOOST_LOG_TRIVIAL(trace) << "Loading model";
-	engine::GameObject* model = new engine::GameObject();
-	model->transform.position = glm::dvec3(5, 2, -20);
-	//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
-	model->transform.scale = glm::dvec3(2, 2, 2);
 	engine::gpu->meshLoader->loadModel("../src/graphics/assets/objects/kaguya.obj");
-	model->addComponent(new engine::MeshFilter());
-	engine::MeshFilter* meshFilter = model->getComponent<engine::MeshFilter>();
-	meshFilter->modelID = engine::gpu->models.begin()->first;
-	model->addComponent(new engine::MeshRenderer());
-	scene->addGameObject(model);
-
-	model->removeComponent<engine::MeshFilter>();
-	engine::gpu->meshLoader->loadModel("../src/graphics/assets/objects/kaguya.obj");
-	model->removeComponent<engine::MeshRenderer>();
-	model->addComponent(new engine::MeshRenderer);
-	model->addComponent(new engine::MeshFilter());
-	meshFilter = model->getComponent<engine::MeshFilter>();
-	meshFilter->modelID = engine::gpu->models.begin()->first;
+	uint modelID = engine::gpu->models.begin()->first;
+	for (int i = 0; i < 20; i++) {
+		for (int j = 0; j < 20; j++) {
+			engine::GameObject* model = new engine::GameObject();
+			model->transform.position = glm::dvec3(3 * i - 30, 0, 3 * j - 30);
+			//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
+			model->transform.scale = glm::dvec3(2, 2, 2);
+			model->addComponent(new engine::MeshFilter(modelID)); 
+			model->addComponent(new engine::MeshRenderer());
+			scene->addGameObject(model);
+		}
+	}
 
 	glfwSwapInterval(0);
 	bool deleted1 = false;
