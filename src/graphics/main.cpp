@@ -20,7 +20,7 @@ int main() {
 	engine::Scene* scene = new engine::Scene();
 	engine::gpu->activeScenes.push_back(scene);
 
-	BOOST_LOG_TRIVIAL(trace) << "Loading cube";
+	BOOST_LOG_TRIVIAL(trace) << "Loading model";
 	engine::GameObject* model = new engine::GameObject();
 	model->transform.position = glm::dvec3(5, 2, -20);
 	//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
@@ -32,10 +32,13 @@ int main() {
 	model->addComponent(new engine::MeshRenderer());
 	scene->addGameObject(model);
 
-	/*model->removeComponent<engine::MeshFilter>();
+	model->removeComponent<engine::MeshFilter>();
 	engine::gpu->meshLoader->loadModel("../src/graphics/assets/objects/kaguya.obj");
 	model->removeComponent<engine::MeshRenderer>();
-	model->addComponent(new engine::MeshRenderer);*/
+	model->addComponent(new engine::MeshRenderer);
+	model->addComponent(new engine::MeshFilter());
+	meshFilter = model->getComponent<engine::MeshFilter>();
+	meshFilter->modelID = engine::gpu->models.begin()->first;
 
 	glfwSwapInterval(0);
 	bool deleted1 = false;

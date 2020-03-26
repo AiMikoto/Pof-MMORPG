@@ -8,7 +8,7 @@
 
 engine::Model::Model(std::string path) {
 	this->path = path;
-	this->name = path.substr(path.find_last_of('/'), path.size() - 1);
+	this->name = path.substr(path.find_last_of('/') + 1, path.size() - 1);
 	BOOST_LOG_TRIVIAL(trace) << this->name;
 }
 
@@ -40,6 +40,7 @@ void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection) {
 	processNode(scene->mRootNode, scene, model);
 	uint modelID = uint(gpu->models.size());
 	gpu->models[modelID] = model;
+	gpu->modelsPaths[path] = modelID;
 	model->modelID = modelID;
 }
 
