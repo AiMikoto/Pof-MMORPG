@@ -2,6 +2,7 @@
 #include "instance/client.h"
 #include "lib/log.h"
 #include "include/common_macro.h"
+#include "instance/misc.h"
 
 user_card_library ucl;
 user_card_library uclp;
@@ -53,7 +54,12 @@ void slicer()
     boost::this_thread::sleep_for(boost::chrono::duration_cast<boost::chrono::microseconds>(duration));
     last = boost::chrono::system_clock::now();
     BOOST_LOG_TRIVIAL(trace) << "computing new scene";
-    tick(current);
+    slice_t next_slice = slice(current);
+    apply_slice(current, next_slice);
+    call c;
+    c.tree().put(OPCODE, OP_SLICE);
+    c.tree().put_child("data", next_slice.encode());
+    ucl.apply(boost::bind(ucl_broadcast, _1, c));
   }
 }
 

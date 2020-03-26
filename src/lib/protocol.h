@@ -27,6 +27,7 @@
 #define OP_INSTANCE_MANAGEMENT_REACTIVATE "ins_re"
 #define OP_RCON_SHUTDOWN "rcon_shutdown"
 #define OP_SHUTDOWN "shutdown"
+#define OP_SLICE "slice"
 
 class protocol
 {
