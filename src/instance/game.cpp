@@ -10,6 +10,8 @@ engine::Scene *current;
 
 bool loaded = false;
 
+boost::thread slicer_t;
+
 void ucl_destroy()
 {
 }
@@ -20,7 +22,7 @@ void unload()
   if(is_loaded())
   {
     loaded = false;
-    // TODO: wait for slicing thread to finish current slice
+    slicer_t.join();
     BOOST_LOG_TRIVIAL(trace) << "deleting scene";
     // TODO: save scene
     delete current;
@@ -33,7 +35,7 @@ void load()
   BOOST_LOG_TRIVIAL(trace) << "loading instanced";
   // TODO: load scene
   current = new engine::Scene();
-  // TODO: create slicing thread
+  slicer_t = boost::thread(slicer);
   loaded = true;
 }
 
@@ -45,11 +47,12 @@ bool is_loaded()
 void slicer()
 {
   boost::chrono::system_clock::time_point last = boost::chrono::system_clock::now();
-  forever
+  forever_until(!loaded)
   {
     boost::chrono::duration<double> duration = last - boost::chrono::system_clock::now() + boost::chrono::milliseconds(10);
     boost::this_thread::sleep_for(boost::chrono::duration_cast<boost::chrono::microseconds>(duration));
     last = boost::chrono::system_clock::now();
+    BOOST_LOG_TRIVIAL(trace) << "computing new scene";
     tick(current);
   }
 }
