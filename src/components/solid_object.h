@@ -11,7 +11,6 @@ public:
   ~solid_object();
   void setType();
   void initialise();
-  void tick(double delta);
   void add_force(glm::dvec3 force);
   glm::dvec3 velocity;
   glm::dvec3 force_acc;

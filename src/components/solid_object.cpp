@@ -18,13 +18,6 @@ void solid_object::setType()
   type = typeid(*this).name();
 }
 
-void solid_object::tick(double delta)
-{
-  velocity += im * force_acc * delta;
-  force_acc = {0, 0, 0};
-  this -> gameObject -> transform.position += velocity * delta;
-}
-
 void solid_object::add_force(glm::dvec3 force)
 {
   this -> force_acc += force;
