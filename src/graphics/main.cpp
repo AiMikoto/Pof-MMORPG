@@ -22,10 +22,10 @@ int main() {
 
 	engine::gpu->meshLoader->loadModel("../src/graphics/assets/objects/kaguya.obj");
 	uint modelID = engine::gpu->models.begin()->first;
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 20; j++) {
+	for (int i = 0; i < 30; i++) {
+		for (int j = 0; j < 30; j++) {
 			engine::GameObject* model = new engine::GameObject();
-			model->transform.position = glm::dvec3(3 * i - 30, 0, 3 * j - 30);
+			model->transform.position = glm::dvec3(3 * i - 45, 0, 3 * j - 45);
 			//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
 			model->transform.scale = glm::dvec3(2, 2, 2);
 			model->addComponent(new engine::MeshFilter(modelID)); 

@@ -3,8 +3,6 @@
 #include "core/exceptions.h"
 
 engine::ShaderLoader::ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath) {
-	this->vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-	this->fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 	this->vertexShaderPath = vertexShaderPath;
 	this->fragmentShaderPath = fragmentShaderPath;
 }
@@ -32,6 +30,8 @@ GLuint engine::ShaderLoader::loadShaders() {
 		std::string vertexShaderCode, fragmentShaderCode;
 		vertexShaderCode = readShaderFile(this->vertexShaderPath);
 		fragmentShaderCode = readShaderFile(this->fragmentShaderPath);
+		vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+		fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
 		BOOST_LOG_TRIVIAL(trace) << "Compiling vertex shader: " << vertexShaderPath;
 		compileShader(vertexShaderCode, vertexShaderID);
@@ -40,7 +40,12 @@ GLuint engine::ShaderLoader::loadShaders() {
 		BOOST_LOG_TRIVIAL(trace) << "Linking program";
 		return linkProgram();
 	}
-	catch (std::exception e){
+	catch (std::system_error e) {
+		BOOST_LOG_TRIVIAL(trace) << e.what() << ", " << e.code();
+		std::cin.ignore();
+		exit(1);
+	}
+	catch (shader_compile_error e){
 		BOOST_LOG_TRIVIAL(trace) << e.what();
 		glDeleteShader(vertexShaderID);
 		glDeleteShader(fragmentShaderID);

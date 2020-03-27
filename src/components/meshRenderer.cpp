@@ -25,11 +25,8 @@ engine::MeshRenderer* engine::MeshRenderer::instantiate() {
 	return this;
 }
 
-
-
 void engine::MeshRenderer::draw(Camera* camera, GLFWwindow* window, uint materialID) {
 	glm::mat4 mvp = camera->projection(window) * camera->view() * gameObject->transform.model();
-	gpu->models[modelID]->draw(mvp, materialID);
 }
 
 void engine::MeshRenderer::setup() {
@@ -53,6 +50,11 @@ void engine::MeshRenderer::setType() {
 
 void engine::MeshRenderer::meshFilterRemoved() {
 	cleanup();
+	initialized = false;
+}
+
+void engine::MeshRenderer::modelRemoved() {
+	materialIDs.clear();
 	initialized = false;
 }
 

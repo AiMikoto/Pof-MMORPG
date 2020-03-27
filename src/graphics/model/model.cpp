@@ -34,10 +34,12 @@ void engine::Model::bindBuffers() {
 		vertexBufferID.push_back(0);
 		elementsBufferID.push_back(0);
 		outlineIndicesBufferID.push_back(0);
+		instanceBufferID.push_back(0);
 		glGenVertexArrays(1, &vertexArrayID[i]);
 		glGenBuffers(1, &vertexBufferID[i]);
 		glGenBuffers(1, &elementsBufferID[i]);
 		glGenBuffers(1, &outlineIndicesBufferID[i]);
+		glGenBuffers(1, &instanceBufferID[i]);
 
 		glBindVertexArray(vertexArrayID[i]);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID[i]);
@@ -63,20 +65,22 @@ void engine::Model::bindBuffers() {
 
 void engine::Model::createOutline() {}
 
-void engine::Model::draw(const glm::mat4& mvp, uint materialID) {
-	int pos = 0;
-	for (int i = 0; i < meshes.size(); i++) {
-		if (materialID == meshes[i]->materialID) {
-			pos = i;
-			break;
-		}
-	}
+void engine::Model::draw(const std::vector<glm::mat4>& modelMatrices, uint pos) {
 	Mesh* mesh = meshes[pos];
-	Material* mat = gpu->materials[materialID];
+	Material* mat = gpu->materials[mesh->materialID];
 	Shader* shader = gpu->shaders[mat->shaderID];
-	shader->setMat4("mvp", mvp);
+	for (int i = 0; i < int(modelMatrices.size()); i++) {
+		shader->setMat4("models[" + std::to_string(i) + "]", modelMatrices[i]);
+	}
 	glBindVertexArray(vertexArrayID[pos]);
-	glDrawElements(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceBufferID[pos]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * modelMatrices.size(), &modelMatrices[0], GL_DYNAMIC_DRAW);
+	for (uint i = 0; i < 4; i++) {
+		glEnableVertexAttribArray(5 + i);
+		glVertexAttribPointer(5 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (const GLvoid*)(sizeof(GLfloat) * i * 4));
+		glVertexAttribDivisor(5 + i, 1);
+	}
+	glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)modelMatrices.size());
 	glBindVertexArray(0);
 }
 
@@ -85,6 +89,7 @@ void engine::Model::deleteBuffers(int i) {
 	glDeleteBuffers(1, &vertexBufferID[i]);
 	glDeleteBuffers(1, &elementsBufferID[i]);
 	glDeleteBuffers(1, &outlineIndicesBufferID[i]);
+	glDeleteBuffers(1, &instanceBufferID[i]);
 }
 
 void engine::Model::cleanup() {

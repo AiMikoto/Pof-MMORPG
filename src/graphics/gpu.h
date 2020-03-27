@@ -35,9 +35,7 @@ namespace engine {
 		void removeRenderer(MeshRenderer* renderer);
 		void removeModel(uint modelID);
 	private:
-		std::map<uint, uint> renderLayersMap;
 		std::map<uint, std::vector<MeshRenderer*>> renderLayers;
-		void determineRenderLayers(MeshRenderer* renderer);
 		void drawScene();
 		void drawUI();
 	};

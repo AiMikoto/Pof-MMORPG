@@ -23,7 +23,6 @@ engine::GPU::~GPU() {
 	shaders.clear();
 	cameras.clear();
 	renderLayers.clear();
-	renderLayersMap.clear();
 	for (auto s : activeScenes) {
 		delete s;
 	}
@@ -60,10 +59,20 @@ void engine::GPU::drawScene() {
 	glDepthFunc(GL_LESS);
 	editorCamera->setViewport(glContext->window);
 	glContext->setBackgroundColor(colors::bgColor);
-	for (auto mat : materials) {
-		mat.second->contextSetup();
-		for (auto r : renderLayers[renderLayersMap[mat.first]]) {
-			r->draw(editorCamera, glContext->window, mat.first);
+	glm::mat4 vp = editorCamera->projection(glContext->window) * editorCamera->view();
+	for (auto m : models) {
+		for (uint i = 0; i < (uint)m.second->meshes.size(); i++) {
+			materials[m.second->meshes[i]->materialID]->contextSetup();
+			shaders[materials[m.second->meshes[i]->materialID]->shaderID]->setMat4("vp", vp);
+			int j = 0;
+			while (j < renderLayers[m.first].size()) {
+				std::vector<glm::mat4> objectsToRender;
+				for (uint k = uint(objectsToRender.size()); k < 10000 && j < renderLayers[m.first].size(); k = uint(objectsToRender.size())) {
+					objectsToRender.push_back(renderLayers[m.first][j]->gameObject->transform.model());
+					j++;
+				}
+				m.second->draw(objectsToRender, i);
+			}
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
@@ -84,32 +93,21 @@ void engine::GPU::update() {
 }
 
 void engine::GPU::addRenderer(MeshRenderer* renderer) {
-	determineRenderLayers(renderer);
+	renderLayers[renderer->modelID].push_back(renderer);
 }
 
 void engine::GPU::removeRenderer(MeshRenderer* renderer) {
-	for (auto i : renderer->materialIDs) {
-		renderLayers[renderLayersMap[i]].erase(std::remove(renderLayers[renderLayersMap[i]].begin(),
-			renderLayers[renderLayersMap[i]].end(),
-			renderer),
-			renderLayers[renderLayersMap[i]].end());
-	}	
-}
-
-void engine::GPU::determineRenderLayers(MeshRenderer* renderer) {
-	for (auto i : renderer->materialIDs) {
-		renderLayers[renderLayersMap[i]].push_back(renderer);
-	}
+	renderLayers[renderer->modelID].erase(std::remove(renderLayers[renderer->modelID].begin(),
+		renderLayers[renderer->modelID].end(),
+		renderer),
+		renderLayers[renderer->modelID].end());
 }
 
 void engine::GPU::removeModel(uint modelID) {
-	for (auto layer : renderLayers) {
-		for (auto renderer : layer.second) {
-			if (renderer->modelID == modelID) {
-				layer.second.erase(std::remove(layer.second.begin(), layer.second.end(), renderer),
-					layer.second.end());
-				renderer->meshFilterRemoved();
-			}
+	if (renderLayers.count(modelID) == 1) {
+		for (auto renderer : renderLayers[modelID]) {
+			renderer->modelRemoved();
 		}
+		renderLayers.erase(modelID);
 	}
 }

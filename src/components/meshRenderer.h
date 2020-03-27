@@ -20,6 +20,7 @@ namespace engine {
 		void draw(Camera* camera, GLFWwindow* window, uint materialID);
 		virtual void setup();
 		void meshFilterRemoved();
+		void modelRemoved();
 	private:
 		bool initialized = false;
 		void cleanup();

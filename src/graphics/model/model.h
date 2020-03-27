@@ -19,11 +19,11 @@ namespace engine {
 
 		Model(std::string path);
 		~Model();
-		void draw(const glm::mat4& mvp, uint materialID);
+		void draw(const std::vector<glm::mat4>& mvps, uint pos);
 		void glContextSetup();
 	private:
 		bool initialized;
-		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
+		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID, instanceBufferID;
 		void bindBuffers();
 		void createOutline();
 		void deleteBuffers(int i);
