@@ -25,9 +25,9 @@ int main() {
 	for (int i = 0; i < 30; i++) {
 		for (int j = 0; j < 30; j++) {
 			engine::GameObject* model = new engine::GameObject();
-			model->transform.position = glm::dvec3(3 * i - 45, 0, 3 * j - 45);
+			model->transform.position = glm::dvec3(1.2 * i - 30, 0, 1.2 * j - 30);
 			//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
-			model->transform.scale = glm::dvec3(2, 2, 2);
+			model->transform.scale = glm::dvec3(1, 1, 1);
 			model->addComponent(new engine::MeshFilter(modelID)); 
 			model->addComponent(new engine::MeshRenderer());
 			scene->addGameObject(model);
