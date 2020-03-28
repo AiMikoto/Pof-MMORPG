@@ -10,6 +10,8 @@ extern user_card_library ucl;
 
 extern engine::Scene *current;
 
+extern std::mutex scene_lock;
+
 extern chat_log cl;
 
 extern std::mutex init_l;

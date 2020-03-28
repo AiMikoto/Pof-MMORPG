@@ -3,6 +3,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
+#include "phys/aabb.h"
 
 engine::Scene::Scene() : ctree(root_aabb()) {
 }

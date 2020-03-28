@@ -4,6 +4,7 @@
 
 user_card_library ucl;
 engine::Scene *current;
+std::mutex scene_lock;
 chat_log cl;
 
 void move(std::string host, int port)
@@ -25,7 +26,9 @@ void move(std::string host, int port)
 
 void add_slice(slice_t next_slice)
 {
+  scene_lock.lock();
   apply_slice(current, next_slice);
+  scene_lock.unlock();
 }
 
 void send_message(chat_target target, std::string payload)

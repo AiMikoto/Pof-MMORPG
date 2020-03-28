@@ -60,6 +60,8 @@ add_library(components STATIC ${COMPONENTS_SOURCES})
 link_libraries(glfw glm assimp OpenGL::GL ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol user_card crypto database chat uuid dl core scene control components rcon)
 add_library(phys STATIC ${PHYS_SOURCES})
 link_libraries(glfw glm assimp OpenGL::GL ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} phys log call protocol user_card crypto database chat uuid dl core scene control components rcon)
+add_library(graphics STATIC ${GRAPHICS_SOURCES})
+link_libraries(glfw glm assimp OpenGL::GL ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} log call protocol user_card crypto database chat uuid dl core phys control components rcon graphics scene)
 
 # idk how to set this for windows
 set(OPENSSL openssl)
@@ -78,16 +80,17 @@ add_custom_command(OUTPUT keys/public_key.pem
 	COMMAND ${OPENSSL} rsa -pubout -in keys/private_key.pem -out keys/public_key.pem
 )
 
+add_executable(client ${CLIENT_SOURCES})
 add_executable(server ${SERVER_SOURCES})
 add_executable(chat_server ${CHAT_SERVER_SOURCES})
 add_executable(instance ${INSTANCE_SOURCES})
 add_executable(gfx ${GRAPHICS_SOURCES})
-add_executable(client ${CLIENT_SOURCES})
 add_executable(world_test ${WORLD_STRUCTURE_SOURCES} src/test/world_structure_test.cpp)
 add_executable(call_test src/test/call_test.cpp)
 add_executable(crypto_test src/test/crypto_test.cpp)
 add_executable(trie_test src/test/trie_test.cpp)
 add_executable(phys_test src/test/phys_test.cpp)
+
 add_dependencies(chat_server rsa_key)
 add_dependencies(server rsa_key)
 add_dependencies(instance rsa_key)
