@@ -75,14 +75,14 @@ user_card database::auth(std::string username, std::string password, int *status
 
 void database::map_add(map_t map, engine::Scene *s)
 {
-  std::string query = "INSERT INTO mapinfo(map, map_name) VALUES(\'" + t_encode(s -> serialize()) + "\', \'" + map + "\')";
+  std::string query = "INSERT INTO mapinfo(data, name) VALUES(\'" + t_encode(s -> serialize()) + "\', \'" + map + "\')";
   pqxx::work W{*conn};
   W.exec(query);
 }
 
 void database::map_save(map_t map, engine::Scene *s)
 {
-  std::string query = "UPDATE mapinfo SET map = \'" + t_encode(s -> serialize()) + "\' WHERE map_name = \'" + map + "\'";
+  std::string query = "UPDATE mapinfo SET data = \'" + t_encode(s -> serialize()) + "\' WHERE name = \'" + map + "\'";
   pqxx::work W{*conn};
   W.exec0(query);
   W.commit();
@@ -91,7 +91,7 @@ void database::map_save(map_t map, engine::Scene *s)
 engine::Scene *database::load_map(map_t map, int *status)
 {
   engine::Scene *s;
-  std::string query = "SELECT map FROM mapinfo WHERE map_name=\'" + map + "\'";
+  std::string query = "SELECT data FROM mapinfo WHERE name=\'" + map + "\'";
   pqxx::work W{*conn};
   pqxx::result R{W.exec(query)};
   *status = R.size();
