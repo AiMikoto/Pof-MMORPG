@@ -1,6 +1,22 @@
 #include "lib/database.h"
 #include "lib/crypto.h"
 #include <pqxx/pqxx>
+#include <boost/property_tree/json_parser.hpp>
+
+std::string t_encode(boost::property_tree::ptree tree)
+{
+  std::stringstream ss;
+  boost::property_tree::json_parser::write_json(ss, tree);
+  return ss.str();
+}
+
+boost::property_tree::ptree t_decode(std::string json)
+{
+  boost::property_tree::ptree tree;
+  std::stringstream ss(json);
+  boost::property_tree::json_parser::read_json(ss, tree);
+  return tree;
+}
 
 void sanitize(std::string& sequence)
 {
@@ -55,4 +71,34 @@ user_card database::auth(std::string username, std::string password, int *status
     uc.load(data);
   }
   return uc;
+}
+
+void database::map_add(map_t map, engine::Scene *s)
+{
+  std::string query = "INSERT INTO mapinfo(map, map_name) VALUES(\'" + t_encode(s -> serialize()) + "\', \'" + map + "\')";
+  pqxx::work W{*conn};
+  W.exec(query);
+}
+
+void database::map_save(map_t map, engine::Scene *s)
+{
+  std::string query = "UPDATE mapinfo SET map = \'" + t_encode(s -> serialize()) + "\' WHERE map_name = \'" + map + "\'";
+  pqxx::work W{*conn};
+  W.exec0(query);
+  W.commit();
+}
+
+engine::Scene *database::load_map(map_t map, int *status)
+{
+  engine::Scene *s;
+  std::string query = "SELECT map FROM mapinfo WHERE map_name=\'" + map + "\'";
+  pqxx::work W{*conn};
+  pqxx::result R{W.exec(query)};
+  *status = R.size();
+  if(*status)
+  {
+    std::string data = std::string(R[0][0].c_str());
+    s = new engine::Scene(t_decode(data));
+  }
+  return s;
 }
