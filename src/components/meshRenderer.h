@@ -10,7 +10,7 @@ namespace engine {
 	class MeshRenderer : public Component {
 	public:
 		std::vector<uint> materialIDs;
-		std::pair<uint, uint> renderLayer;
+		std::vector<std::pair<uint, uint>> renderLayers;
 
 		MeshRenderer();
 		~MeshRenderer();

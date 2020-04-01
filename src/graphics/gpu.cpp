@@ -4,8 +4,6 @@
 #include "core/time_values.h"
 #include <boost/property_tree/json_parser.hpp>
 
-engine::GPU* engine::gpu;
-
 engine::GPU::GPU() {}
 
 engine::GPU::~GPU() {
@@ -23,6 +21,11 @@ engine::GPU::~GPU() {
 	}
 	shaders.clear();
 	cameras.clear();
+	for (auto modelLayerMap : renderLayers) {
+		for (auto matLayerMap : modelLayerMap.second) {
+			delete matLayerMap.second;
+		}
+	}
 	renderLayers.clear();
 	for (auto s : activeScenes) {
 		delete s;
@@ -61,19 +64,10 @@ void engine::GPU::drawScene() {
 	editorCamera->setViewport(glContext->window);
 	glContext->setBackgroundColor(colors::bgColor);
 	glm::mat4 vp = editorCamera->projection(glContext->window) * editorCamera->view();
-	for (auto m : models) {
-		for (uint i = 0; i < (uint)m.second->meshes.size(); i++) {
-			materials[m.second->meshes[i]->materialID]->contextSetup();
-			shaders[materials[m.second->meshes[i]->materialID]->shaderID]->setMat4("vp", vp);
-			int j = 0;
-			while (j < renderLayers[m.first].size()) {
-				std::vector<glm::mat4> objectsToRender;
-				for (uint k = uint(objectsToRender.size()); k < 10000 && j < renderLayers[m.first].size(); k = uint(objectsToRender.size())) {
-					objectsToRender.push_back(renderLayers[m.first][j]->gameObject->transform.model());
-					j++;
-				}
-				m.second->draw(objectsToRender, i);
-			}
+	for (auto modelLayerMap : renderLayers) {
+		for (auto matLayerMap : modelLayerMap.second) {
+			RenderLayer* renderLayer = matLayerMap.second;
+			renderLayer->draw(vp);
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
@@ -96,55 +90,42 @@ void engine::GPU::update() {
 void engine::GPU::addRenderer(MeshRenderer* renderer) {
 	MeshFilter* meshFilter = renderer->gameObject->getComponent<MeshFilter>();
 	if (meshFilter != NULL) {
-		renderLayers[meshFilter->modelID].push_back(renderer);
-		renderer->renderLayer = std::pair<uint, uint>(meshFilter->modelID, 0);
+		for (uint i = 0; i < uint(renderer->materialIDs.size()); i++) {
+			uint modelID = meshFilter->modelID;
+			uint materialID = renderer->materialIDs[i];
+			if (renderLayers[modelID].count(materialID) == 1) {
+				RenderLayer* renderLayer = renderLayers[modelID][materialID];
+				renderLayer->renderers.push_back(renderer);
+			}
+			else {
+				RenderLayer* renderLayer = new RenderLayer(modelID, materialID, i);
+				renderLayer->renderers.push_back(renderer);
+				renderLayers[modelID][materialID] = renderLayer;
+			}
+			renderer->renderLayers.push_back(std::pair(modelID, materialID));
+		}
 	}
 }
 
 void engine::GPU::removeRenderer(MeshRenderer* renderer) {
-	uint id = renderer->renderLayer.first;
-	renderLayers[id].erase(std::remove(renderLayers[id].begin(), renderLayers[id].end(), renderer), renderLayers[id].end());
+	for (uint i = 0; i < uint(renderer->renderLayers.size()); i++) {
+		std::pair<uint, uint> layerID = renderer->renderLayers[i];
+		if (renderLayers.count(layerID.first) == 1) {
+			if (renderLayers[layerID.first].count(layerID.second) == 1) { {
+					RenderLayer* renderLayer = renderLayers[layerID.first][layerID.second];
+					renderLayer->renderers.erase(std::remove(renderLayer->renderers.begin(),
+						renderLayer->renderers.end(), renderer), renderLayer->renderers.end());
+				}
+			}
+		}		
+	}
 }
 
 void engine::GPU::removeModel(uint id) {
 	if (renderLayers.count(id) == 1) {
-		for (auto renderer : renderLayers[id]) {
-			renderer->modelRemoved();
+		for (auto layer : renderLayers[id]) {
+			delete layer.second;
 		}
 		renderLayers.erase(id);
 	}
-}
-
-boost::property_tree::ptree engine::GPU::serialize() {
-	boost::property_tree::ptree node, texNode, matNode, modelsNode, scenesNode;
-	node.add_child("Textures", texNode);
-	node.add_child("Materials", matNode);
-	node.add_child("Models", modelsNode);
-	node.add_child("Scenes", scenesNode);
-	for (auto t : textures) {
-		texNode.add_child("Texture", t.second->serialize());
-	}
-	for (auto m : materials) {
-		matNode.add_child("Material", m.second->serialize());
-	}
-	for (auto m : models) {
-		modelsNode.add_child("Model", m.second->serialize());
-	}
-	for (auto s : activeScenes) {
-		scenesNode.add_child("Scene", s->serialize());
-	}
-}
-
-engine::GPU* engine::GPU::deserialize(boost::property_tree::ptree node) {
-
-
-}
-
-void engine::GPU::saveToJSON(std::string path) {
-	boost::property_tree::ptree root = serialize();
-	boost::property_tree::write_json(path, root);
-}
-
-void engine::GPU::loadFromJSON(std::string path) {
-
 }

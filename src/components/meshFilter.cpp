@@ -11,6 +11,10 @@ engine::MeshFilter::MeshFilter(const MeshFilter& meshFilter) {
 	this->initialized = false;
 }
 
+engine::MeshFilter::MeshFilter(boost::property_tree::ptree) {
+	
+}
+
 engine::MeshFilter::~MeshFilter() {
 	if (initialized) {
 		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
@@ -36,12 +40,7 @@ void engine::MeshFilter::setup() {
 
 boost::property_tree::ptree engine::MeshFilter::serialize() {
 	boost::property_tree::ptree node;
-	node.add_child("Model", gpu->models[modelID]->serialize());
 	return node;
-}
-
-engine::MeshFilter* engine::MeshFilter::deserialize(boost::property_tree::ptree node) {
-	return this;
 }
 
 bool engine::MeshFilter::hasModel() {

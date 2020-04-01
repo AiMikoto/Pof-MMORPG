@@ -17,20 +17,10 @@ namespace engine {
 		std::string path;
 		std::string name;
 		uint id;
+		bool loaded;
 
 		Model(std::string path);
 		~Model();
-		void draw(const std::vector<glm::mat4>& mvps, uint pos);
-		void glContextSetup();
-		boost::property_tree::ptree serialize();
-		static Model* deserialize(boost::property_tree::ptree node);
-	private:
-		bool initialized;
-		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID, instanceBufferID;
-		void bindBuffers();
-		void createOutline();
-		void deleteBuffers(int i);
-		void cleanup();
 	};
 
 	class ModelLoader {

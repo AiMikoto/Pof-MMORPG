@@ -10,6 +10,7 @@
 #include "components/meshFilter.h"
 #include "graphics/model/model.h"
 #include <boost/property_tree/ptree.hpp>
+#include "graphics/renderLayer.h"
 
 namespace engine {
 	class GPU {
@@ -40,10 +41,10 @@ namespace engine {
 		void saveToJSON(std::string path);
 		void loadFromJSON(std::string path);
 	private:
-		std::map<uint, std::vector<MeshRenderer*>> renderLayers;
+		std::map<uint, std::map<uint, RenderLayer*>> renderLayers;
 		void drawScene();
 		void drawUI();
 	};
 
-	extern GPU* gpu;
+	inline GPU* gpu = NULL;
 }

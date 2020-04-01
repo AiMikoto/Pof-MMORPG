@@ -10,7 +10,6 @@
 engine::Model::Model(std::string path) {
 	this->path = path;
 	this->name = path.substr(path.find_last_of('/') + 1, path.size() - 1);
-	initialized = false;
 	BOOST_LOG_TRIVIAL(trace) << this->name;
 }
 
@@ -20,100 +19,6 @@ engine::Model::~Model() {
 	}
 	meshes.clear();
 	gpu->removeModel(id);
-	cleanup();
-}
-
-void engine::Model::glContextSetup() {
-	bindBuffers();
-	createOutline();
-}
-
-void engine::Model::bindBuffers() {
-	for (int i = 0; i < meshes.size(); i++) {
-		vertexArrayID.push_back(0);
-		vertexBufferID.push_back(0);
-		elementsBufferID.push_back(0);
-		outlineIndicesBufferID.push_back(0);
-		instanceBufferID.push_back(0);
-		glGenVertexArrays(1, &vertexArrayID[i]);
-		glGenBuffers(1, &vertexBufferID[i]);
-		glGenBuffers(1, &elementsBufferID[i]);
-		glGenBuffers(1, &outlineIndicesBufferID[i]);
-		glGenBuffers(1, &instanceBufferID[i]);
-
-		glBindVertexArray(vertexArrayID[i]);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID[i]);
-		glBufferData(GL_ARRAY_BUFFER, meshes[i]->vertices.size() * sizeof(Vertex), &meshes[i]->vertices[0], GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBufferID[i]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshes[i]->indices.size() * sizeof(uint), &meshes[i]->indices[0], GL_STATIC_DRAW);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoordinates));
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
-
-		glBindVertexArray(0);
-	}
-}
-
-void engine::Model::createOutline() {}
-
-void engine::Model::draw(const std::vector<glm::mat4>& modelMatrices, uint pos) {
-	Mesh* mesh = meshes[pos];
-	Material* mat = gpu->materials[mesh->materialID];
-	Shader* shader = gpu->shaders[mat->shaderID];
-	for (int i = 0; i < int(modelMatrices.size()); i++) {
-		shader->setMat4("models[" + std::to_string(i) + "]", modelMatrices[i]);
-	}
-	glBindVertexArray(vertexArrayID[pos]);
-	glBindBuffer(GL_ARRAY_BUFFER, instanceBufferID[pos]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * modelMatrices.size(), &modelMatrices[0], GL_DYNAMIC_DRAW);
-	for (uint i = 0; i < 4; i++) {
-		glEnableVertexAttribArray(5 + i);
-		glVertexAttribPointer(5 + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (const GLvoid*)(sizeof(GLfloat) * i * 4));
-		glVertexAttribDivisor(5 + i, 1);
-	}
-	glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)mesh->indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)modelMatrices.size());
-	glBindVertexArray(0);
-}
-
-void engine::Model::deleteBuffers(int i) {
-	glDeleteVertexArrays(1, &vertexArrayID[i]);
-	glDeleteBuffers(1, &vertexBufferID[i]);
-	glDeleteBuffers(1, &elementsBufferID[i]);
-	glDeleteBuffers(1, &outlineIndicesBufferID[i]);
-	glDeleteBuffers(1, &instanceBufferID[i]);
-}
-
-void engine::Model::cleanup() {
-	if (initialized) {
-		for (int i = 0; i < meshes.size(); i++) {
-			deleteBuffers(i);
-		}
-		vertexArrayID.clear();
-		vertexBufferID.clear();
-		elementsBufferID.clear();
-		outlineIndicesBufferID.clear();
-	}
-}
-
-boost::property_tree::ptree engine::Model::serialize() {
-	boost::property_tree::ptree node;
-	node.add("path", path);
-	node.add("id", id);
-	node.add("name", name);
-	return node;
-}
-
-engine::Model* engine::Model::deserialize(boost::property_tree::ptree node) {
-
 }
 
 engine::ModelLoader::ModelLoader() {}
@@ -135,7 +40,6 @@ void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection, uint
 	Model* model = new Model(path);
 	processNode(scene->mRootNode, scene, model);
 	uint id = (modelID != 0) ? modelID : getFirstAvailableMapIndex(gpu->models);
-	model->glContextSetup();
 	gpu->models[id] = model;
 	gpu->modelsPaths[path] = id;
 	model->id = id;
