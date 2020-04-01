@@ -10,7 +10,7 @@ namespace engine {
 	class MeshRenderer : public Component {
 	public:
 		std::vector<uint> materialIDs;
-		uint modelID;
+		std::pair<uint, uint> renderLayer;
 
 		MeshRenderer();
 		~MeshRenderer();
@@ -18,12 +18,12 @@ namespace engine {
 		MeshRenderer* deserialize(boost::property_tree::ptree node);
 		MeshRenderer* instantiate();
 		void draw(Camera* camera, GLFWwindow* window, uint materialID);
-		virtual void setup();
+		void setup();
 		void meshFilterRemoved();
 		void modelRemoved();
 	private:
 		bool initialized = false;
 		void cleanup();
-		virtual void setType();
+		void setType();
 	};
 }

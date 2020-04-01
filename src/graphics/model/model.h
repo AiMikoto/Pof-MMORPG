@@ -8,6 +8,7 @@
 #include "components/camera.h"
 #include "include/glad.h"
 #include "include/glfw3.h"
+#include <boost/property_tree/ptree.hpp>
 
 namespace engine {
 	class Model {
@@ -15,12 +16,14 @@ namespace engine {
 		std::vector<Mesh*> meshes;
 		std::string path;
 		std::string name;
-		uint modelID;
+		uint id;
 
 		Model(std::string path);
 		~Model();
 		void draw(const std::vector<glm::mat4>& mvps, uint pos);
 		void glContextSetup();
+		boost::property_tree::ptree serialize();
+		static Model* deserialize(boost::property_tree::ptree node);
 	private:
 		bool initialized;
 		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID, instanceBufferID;
@@ -34,7 +37,7 @@ namespace engine {
 	public:
 		ModelLoader();
 		~ModelLoader();
-		void loadModel(std::string path, bool gammaCorrection = false);
+		void loadModel(std::string path, bool gammaCorrection = false, uint id = 0);
 	private:
 		std::string directory;		
 		void processNode(aiNode* node, const aiScene* scene, Model* model);

@@ -34,7 +34,6 @@ void engine::MeshRenderer::setup() {
 		MeshFilter* meshFilter = gameObject->getComponent<MeshFilter>();
 		if (meshFilter != NULL) {
 			Model* model = gpu->models[meshFilter->modelID];
-			this->modelID = meshFilter->modelID;
 			for (auto mesh : model->meshes) {
 				materialIDs.push_back(mesh->materialID);
 			}

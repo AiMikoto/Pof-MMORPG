@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "lib/log.h"
 #include "core/time_values.h"
+#include <boost/property_tree/json_parser.hpp>
 
 engine::GPU* engine::gpu;
 
@@ -93,21 +94,57 @@ void engine::GPU::update() {
 }
 
 void engine::GPU::addRenderer(MeshRenderer* renderer) {
-	renderLayers[renderer->modelID].push_back(renderer);
+	MeshFilter* meshFilter = renderer->gameObject->getComponent<MeshFilter>();
+	if (meshFilter != NULL) {
+		renderLayers[meshFilter->modelID].push_back(renderer);
+		renderer->renderLayer = std::pair<uint, uint>(meshFilter->modelID, 0);
+	}
 }
 
 void engine::GPU::removeRenderer(MeshRenderer* renderer) {
-	renderLayers[renderer->modelID].erase(std::remove(renderLayers[renderer->modelID].begin(),
-		renderLayers[renderer->modelID].end(),
-		renderer),
-		renderLayers[renderer->modelID].end());
+	uint id = renderer->renderLayer.first;
+	renderLayers[id].erase(std::remove(renderLayers[id].begin(), renderLayers[id].end(), renderer), renderLayers[id].end());
 }
 
-void engine::GPU::removeModel(uint modelID) {
-	if (renderLayers.count(modelID) == 1) {
-		for (auto renderer : renderLayers[modelID]) {
+void engine::GPU::removeModel(uint id) {
+	if (renderLayers.count(id) == 1) {
+		for (auto renderer : renderLayers[id]) {
 			renderer->modelRemoved();
 		}
-		renderLayers.erase(modelID);
+		renderLayers.erase(id);
 	}
+}
+
+boost::property_tree::ptree engine::GPU::serialize() {
+	boost::property_tree::ptree node, texNode, matNode, modelsNode, scenesNode;
+	node.add_child("Textures", texNode);
+	node.add_child("Materials", matNode);
+	node.add_child("Models", modelsNode);
+	node.add_child("Scenes", scenesNode);
+	for (auto t : textures) {
+		texNode.add_child("Texture", t.second->serialize());
+	}
+	for (auto m : materials) {
+		matNode.add_child("Material", m.second->serialize());
+	}
+	for (auto m : models) {
+		modelsNode.add_child("Model", m.second->serialize());
+	}
+	for (auto s : activeScenes) {
+		scenesNode.add_child("Scene", s->serialize());
+	}
+}
+
+engine::GPU* engine::GPU::deserialize(boost::property_tree::ptree node) {
+
+
+}
+
+void engine::GPU::saveToJSON(std::string path) {
+	boost::property_tree::ptree root = serialize();
+	boost::property_tree::write_json(path, root);
+}
+
+void engine::GPU::loadFromJSON(std::string path) {
+
 }

@@ -9,6 +9,7 @@
 #include "graphics/model/mesh.h"
 #include "components/meshFilter.h"
 #include "graphics/model/model.h"
+#include <boost/property_tree/ptree.hpp>
 
 namespace engine {
 	class GPU {
@@ -33,7 +34,11 @@ namespace engine {
 		void update();
 		void addRenderer(MeshRenderer* renderer);
 		void removeRenderer(MeshRenderer* renderer);
-		void removeModel(uint modelID);
+		void removeModel(uint id);
+		boost::property_tree::ptree serialize();
+		static GPU* deserialize(boost::property_tree::ptree node);
+		void saveToJSON(std::string path);
+		void loadFromJSON(std::string path);
 	private:
 		std::map<uint, std::vector<MeshRenderer*>> renderLayers;
 		void drawScene();

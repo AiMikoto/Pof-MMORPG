@@ -19,7 +19,7 @@ engine::Model::~Model() {
 		delete mesh;
 	}
 	meshes.clear();
-	gpu->removeModel(modelID);
+	gpu->removeModel(id);
 	cleanup();
 }
 
@@ -104,11 +104,23 @@ void engine::Model::cleanup() {
 	}
 }
 
+boost::property_tree::ptree engine::Model::serialize() {
+	boost::property_tree::ptree node;
+	node.add("path", path);
+	node.add("id", id);
+	node.add("name", name);
+	return node;
+}
+
+engine::Model* engine::Model::deserialize(boost::property_tree::ptree node) {
+
+}
+
 engine::ModelLoader::ModelLoader() {}
 
 engine::ModelLoader::~ModelLoader() {}
 
-void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection) {
+void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection, uint modelID) {
 	if (gpu->modelsPaths.count(path)) {
 		BOOST_LOG_TRIVIAL(trace) << "Model already loaded: " << path;
 		return;
@@ -122,11 +134,11 @@ void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection) {
 		throw assimp_error(importer.GetErrorString());
 	Model* model = new Model(path);
 	processNode(scene->mRootNode, scene, model);
-	uint modelID = getFirstAvailableMapIndex(gpu->models);
+	uint id = (modelID != 0) ? modelID : getFirstAvailableMapIndex(gpu->models);
 	model->glContextSetup();
-	gpu->models[modelID] = model;
-	gpu->modelsPaths[path] = modelID;
-	model->modelID = modelID;
+	gpu->models[id] = model;
+	gpu->modelsPaths[path] = id;
+	model->id = id;
 }
 
 void engine::ModelLoader::processNode(aiNode* node, const aiScene* scene, Model* model) {

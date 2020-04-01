@@ -16,11 +16,8 @@ namespace engine {
 		~Scene();
 		ullong addGameObject(GameObject* go);
 		void update();
-		void sceneToJSON(std::string path);
-		void sceneFromJSON(std::string data);
-		octree ctree;
-	private:
 		boost::property_tree::ptree serialize();
 		void deserialize(boost::property_tree::ptree node);
+		octree ctree;		
 	};
 }

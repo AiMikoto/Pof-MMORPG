@@ -2,8 +2,7 @@
 #include "components/meshRenderer.h"
 #include "graphics/gpu.h"
 
-engine::MeshFilter::MeshFilter(uint modelID) {
-	this->modelID = modelID;
+engine::MeshFilter::MeshFilter() {
 	setType();
 }
 
@@ -37,7 +36,7 @@ void engine::MeshFilter::setup() {
 
 boost::property_tree::ptree engine::MeshFilter::serialize() {
 	boost::property_tree::ptree node;
-	//node.add_child("model", gpu->models[modelID].serialize());
+	node.add_child("Model", gpu->models[modelID]->serialize());
 	return node;
 }
 

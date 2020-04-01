@@ -4,6 +4,7 @@
 #include "components/component.h"
 #include "phys/aabb.h"
 #include "scene/objects.h"
+#include <boost/property_tree/ptree.hpp>
 
 enum collider_t
 {
@@ -21,6 +22,8 @@ public:
   virtual void setType() = 0;
   collider_t c_type;
   glm::dvec3 size;
+  virtual boost::property_tree::ptree serialize() = 0;
+  virtual void setup() = 0;
 };
 
 // exclusively for box

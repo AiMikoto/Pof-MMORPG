@@ -61,6 +61,15 @@ void engine::Texture::load() {
 	gpu->textures[this->id] = this;
 }
 
+boost::property_tree::ptree engine::Texture::serialize() {
+	boost::property_tree::ptree node;
+	node.add("type", type);
+	node.add("id", id);
+	node.add("path", path);
+}
+
+engine::Texture* engine::Texture::deserialize(boost::property_tree::ptree node) {}
+
 engine::Material::Material() {}
 
 engine::Material::~Material() {}
@@ -95,6 +104,9 @@ void engine::Material::contextSetup() {
 	}
 }
 
-boost::property_tree::ptree engine::Material::serialize() {}
+boost::property_tree::ptree engine::Material::serialize() {
+	boost::property_tree::ptree node;
 
-void engine::Material::deserialize(boost::property_tree::ptree node) {}
+}
+
+engine::Material* engine::Material::deserialize(boost::property_tree::ptree node) {}

@@ -8,15 +8,17 @@ namespace engine {
 	class MeshFilter : public Component {
 	public:
 		uint modelID;
+		std::string path;
 
-		MeshFilter(uint modelID = 0);
+		MeshFilter();
 		MeshFilter(const MeshFilter& meshFilter);
 		~MeshFilter();
 
-		void setType();
 		void setup();
 		boost::property_tree::ptree serialize();
 		MeshFilter* deserialize(boost::property_tree::ptree node);
 		bool hasModel();
+	protected:
+		void setType();
 	};
 }

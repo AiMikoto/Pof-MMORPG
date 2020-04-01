@@ -33,4 +33,8 @@ namespace engine {
 	};
 
 	const uint maxRenderedInstances = 512;
+
+	enum componentTypes {
+		camera, light, meshFilter, meshRenderer, physCollider, solidObject
+	};
 }

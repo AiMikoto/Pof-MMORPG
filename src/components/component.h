@@ -12,13 +12,12 @@ namespace engine {
 
 		Component();
 		Component(bool allowMultiple);
+		Component(const Component& component);
 		virtual ~Component();
-		virtual boost::property_tree::ptree serialize();
-		virtual Component* deserialize(boost::property_tree::ptree node);
-		virtual Component* instantiate();
-		virtual void setup();
+		virtual boost::property_tree::ptree serialize() = 0;
+		virtual void setup() = 0;
 	protected:
 		bool initialized;
-		virtual void setType();
+		virtual void setType() = 0;
 	};
 }

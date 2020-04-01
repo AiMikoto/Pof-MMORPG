@@ -13,7 +13,7 @@ namespace engine {
 		Texture(std::string path, uint type);
 		~Texture();
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
+		static Texture* deserialize(boost::property_tree::ptree node);
 	private:
 		void load();
 	};
@@ -34,7 +34,7 @@ namespace engine {
 		Material(uint shaderID);
 
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
+		static Material* deserialize(boost::property_tree::ptree node);
 		void contextSetup();
 	};
 }

@@ -1,6 +1,12 @@
 #include "scene/objects.h"
 #include "core/constants.h"
 #include "components/component.h"
+#include "components/camera.h"
+#include "components/light.h"
+#include "components/meshFilter.h"
+#include "components/meshRenderer.h"
+#include "components/phys_collider.h"
+#include "components/solid_object.h"
 
 engine::GameObject::GameObject() {
 }
@@ -14,6 +20,28 @@ engine::GameObject::~GameObject() {
 		delete c;
 	}
 	children.clear();
+}
+
+engine::GameObject::GameObject(const GameObject& gameObject) {
+	this->parent = NULL;
+	this->transform = gameObject.transform;
+	for (auto c : gameObject.components) {
+		if (c->type == typeid(Camera).name())
+			this->addComponent(new Camera(*static_cast<Camera*>(c)));
+		//if (c->type == typeid(Light).name())
+			//this->addComponent(new Light(*static_cast<Light*>(c)));
+		if (c->type == typeid(MeshFilter).name())
+			this->addComponent(new MeshFilter(*static_cast<MeshFilter*>(c)));
+		if (c->type == typeid(MeshRenderer).name())
+			this->addComponent(new MeshRenderer(*static_cast<MeshRenderer*>(c)));
+	}
+	for (auto c : gameObject.children) {
+		this->addChild(new GameObject(*c));
+	}
+}
+
+engine::GameObject::GameObject(boost::property_tree::ptree node) {
+
 }
 
 engine::GameObject::GameObject(GameObject* parent) {
@@ -52,17 +80,6 @@ engine::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> chil
 void engine::GameObject::update() {
 	for (auto c : children)
 		c->update();
-}
-
-engine::GameObject* engine::GameObject::instantiate() {
-	GameObject* gameObject = new GameObject(this->parent);
-	gameObject->transform = this->transform;
-	for (auto c : components) {
-		gameObject->addComponent(c->instantiate());
-	}
-	for (auto c : children) {
-		gameObject->addChild(c->instantiate());
-	}
 }
 
 void engine::GameObject::addChild(GameObject* child) {
@@ -118,8 +135,4 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	}	
 	node.add_child("transform", transform.serialize());
 	return node;
-}
-
-engine::GameObject* engine::GameObject::deserialize(boost::property_tree::ptree node) {
-	
 }

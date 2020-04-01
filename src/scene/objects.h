@@ -23,6 +23,8 @@ namespace engine {
 
 		GameObject();
 		~GameObject();
+		GameObject(const GameObject& gameObject);
+		GameObject(boost::property_tree::ptree node);
 		GameObject(GameObject* parent);
 		GameObject(std::vector<GameObject*> children);
 		GameObject(std::vector<Component*> components);
@@ -30,16 +32,12 @@ namespace engine {
 		GameObject(GameObject* parent, std::vector<Component*> components);
 		GameObject(std::vector<GameObject*> children, std::vector<Component*> components);
 		GameObject(GameObject* parent, std::vector<GameObject*> children, std::vector<Component*> components);
-
-		//returns a pointer to a new game object that has all its values copied from the current one
-		GameObject* instantiate();
 		virtual void update();
 		void addChild(GameObject* child);
 		void addChildren(std::vector<GameObject*> children);
 		void addComponent(Component* component);
 		void addComponents(std::vector<Component*> components);
 		boost::property_tree::ptree serialize();
-		GameObject* deserialize(boost::property_tree::ptree node);
 		template<typename T> bool hasComponent() {
 			for (auto c : components) {
 				if (typeid(T).name() == c->type)

@@ -18,8 +18,8 @@ namespace engine {
 		float startX, startY, endX, endY; // percentages relative to the window's widht/height
 		CameraViewport();
 		CameraViewport(float startX, float startY, float endX, float endY);
+		CameraViewport(boost::property_tree::ptree node);
 		boost::property_tree::ptree serialize();
-		CameraViewport deserialize(boost::property_tree::ptree node);
 	};
 
 	class Camera : public Component {
@@ -36,6 +36,8 @@ namespace engine {
 		Camera();
 		Camera(CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
 		Camera(Transform transform, CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
+		Camera(const Camera& camera);
+		Camera(boost::property_tree::ptree node);
 		~Camera();
 		void moveCamera(int direction);
 		void rotateCamera(GLFWwindow* window);
@@ -43,11 +45,9 @@ namespace engine {
 		glm::mat4 projection(GLFWwindow* window);
 		glm::mat4 view();
 		void setViewport(GLFWwindow* window);
-		virtual Camera* instantiate();
 		boost::property_tree::ptree serialize();
-		Camera* deserialize(boost::property_tree::ptree node);
-		virtual void update();
-		virtual void setup();
+		void update();
+		void setup();
 	protected:
 		virtual void setType();
 		glm::dvec3 forward();
