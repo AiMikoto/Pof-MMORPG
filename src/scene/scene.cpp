@@ -7,6 +7,12 @@
 engine::Scene::Scene() : ctree(root_aabb()) {
 }
 
+engine::Scene::Scene(boost::property_tree::ptree node) : ctree(root_aabb()) {
+	for (auto v : node.get_child("Game Object")) {
+		addGameObject(new GameObject(v.second));
+	}
+}
+
 engine::Scene::~Scene() {
 	for (auto g : gameObjects) {
 		delete g.second;
@@ -32,16 +38,14 @@ ullong engine::Scene::addGameObject(GameObject* go) {
 	return id;
 }
 
+ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {
+	return addGameObject(new GameObject(node.get_child("Game Object")));
+}
+
 boost::property_tree::ptree engine::Scene::serialize() {
 	boost::property_tree::ptree node, scene;
 	for (auto g : gameObjects) {
 		scene.add_child("Game Object", g.second->serialize());
 	}
 	return node;
-}
-
-void engine::Scene::deserialize(boost::property_tree::ptree node) {
-	for (auto v : node.get_child("Game Object")) {
-		addGameObject(new GameObject(v.second));
-	}
 }

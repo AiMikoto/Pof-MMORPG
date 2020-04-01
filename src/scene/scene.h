@@ -13,11 +13,12 @@ namespace engine {
 		std::map<ullong, GameObject*> gameObjects;
 
 		Scene();
+		Scene(boost::property_tree::ptree node);
 		~Scene();
 		ullong addGameObject(GameObject* go);
+		ullong addGameObject(boost::property_tree::ptree node);
 		void update();
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
 		octree ctree;		
 	};
 }

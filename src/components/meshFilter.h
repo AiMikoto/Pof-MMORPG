@@ -18,7 +18,10 @@ namespace engine {
 		void setup();
 		boost::property_tree::ptree serialize();
 		bool hasModel();
+		double modelSize();
+		void computeModelSize();
 	protected:
+		double size;
 		void setType();
 	};
 }

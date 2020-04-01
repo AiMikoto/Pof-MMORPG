@@ -26,8 +26,6 @@ void engine::Mesh::computeScale(){
 		max.x = glm::max(max.x, double(v.position.x));
 		max.y = glm::max(max.y, double(v.position.y));
 		max.z = glm::max(max.z, double(v.position.z));
-		if (v.position.x < min.x)
-			min.x = v.position.x;
 	}
 	meshScale = max - min;
 	BOOST_LOG_TRIVIAL(trace) << meshScale.x << ", " << meshScale.y << ", " << meshScale.z;
