@@ -10,9 +10,6 @@ void gfx_init()
 {
   BOOST_LOG_TRIVIAL(trace) << "Initializing GPU context";
   engine::gpu = new engine::GPU();
-  engine::gpu -> initializeContext();
-  BOOST_LOG_TRIVIAL(trace) << "GPU context initialized";
-  glfwSwapInterval(0);
   BOOST_LOG_TRIVIAL(trace) << "pushing empty scene";
   gfx_push(new engine::Scene());
   BOOST_LOG_TRIVIAL(trace) << "starting render thread";
@@ -44,6 +41,9 @@ void gfx_destroy()
 
 void gfx_duty()
 {
+  engine::gpu -> initializeContext();
+  glfwSwapInterval(0);
+  BOOST_LOG_TRIVIAL(trace) << "GPU context initialized";
   init_l.lock();
   init_l.unlock();
   BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
