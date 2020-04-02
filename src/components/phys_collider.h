@@ -13,8 +13,7 @@ public:
   ~physical_collider();
   void setType();
   void initialise();
-  boost::property_tree::ptree serialize() = 0;
-  static physical_collider* deserialize(boost::property_tree::ptree node);
+  boost::property_tree::ptree serialize() { boost::property_tree::ptree node; return node; }
 };
 
 #endif // COMPONENTS_PHYSICAL_COLLIDER_H

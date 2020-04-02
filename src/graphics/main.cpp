@@ -42,7 +42,6 @@ int main() {
 		}
 	}*/
 	scene->readFromFile("../src/graphics/assets/scenes/test.json");
-	BOOST_LOG_TRIVIAL(trace) << scene->gameObjects.size();
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
 	glfwSwapInterval(0);
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";

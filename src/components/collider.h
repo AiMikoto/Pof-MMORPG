@@ -19,11 +19,11 @@ public:
   collider(glm::dvec3 size, collider_t c_type);
   ~collider();
   aabb to_aabb();
-  virtual void setType() = 0;
+  virtual void setType() { type = ""; };
   collider_t c_type;
   glm::dvec3 size;
   virtual boost::property_tree::ptree serialize() = 0;
-  virtual void setup() = 0;
+  void setup() {}
 };
 
 // exclusively for box
