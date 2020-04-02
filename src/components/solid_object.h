@@ -14,8 +14,8 @@ public:
   void initialise();
   void tick(double delta);
   void add_force(glm::dvec3 force);
-  boost::property_tree::ptree serialize() { boost::property_tree::ptree node; return node; }
-  void setup() {}
+  boost::property_tree::ptree serialize() = 0;
+  static solid_object* deserialize(boost::property_tree::ptree node);
   glm::dvec3 velocity;
   glm::dvec3 force_acc;
   double m;
