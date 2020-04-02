@@ -28,7 +28,8 @@ void database::uc_add(std::string username, std::string password, user_card uc)
   sanitize(username);
   std::string query = "INSERT INTO userinfo(usercard, username, passwordhash) VALUES(\'" + uc.save() + "\', \'" + username + "\', \'" + sha256(password) + "\')";
   pqxx::work W{*conn};
-  W.exec(query);
+  W.exec0(query);
+  W.commit();
 }
 
 void database::uc_save(std::string username, user_card uc)
@@ -61,7 +62,8 @@ void database::map_add(map_t map, engine::Scene *s)
 {
   std::string query = "INSERT INTO mapinfo(data, name) VALUES(\'" + s -> toJSON() + "\', \'" + map + "\')";
   pqxx::work W{*conn};
-  W.exec(query);
+  W.exec0(query);
+  W.commit();
 }
 
 void database::map_save(map_t map, engine::Scene *s)
