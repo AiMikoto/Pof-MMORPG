@@ -12,9 +12,8 @@ public:
   physical_collider(glm::dvec3 size, collider_t c_type);
   ~physical_collider();
   void setType();
-  void initialise();
-  boost::property_tree::ptree serialize() = 0;
-  static physical_collider* deserialize(boost::property_tree::ptree node);
+  boost::property_tree::ptree serialize();
+  void setup();
 };
 
 #endif // COMPONENTS_PHYSICAL_COLLIDER_H

@@ -13,3 +13,13 @@ void physical_collider::setType()
 {
   type = typeid(*this).name();
 }
+
+void physical_collider::setup()
+{
+}
+
+boost::property_tree::ptree physical_collider::serialize()
+{
+  boost::property_tree::ptree tree;
+  return tree;
+}

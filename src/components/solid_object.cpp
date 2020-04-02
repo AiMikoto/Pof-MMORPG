@@ -22,3 +22,13 @@ void solid_object::add_force(glm::dvec3 force)
 {
   this -> force_acc += force;
 }
+
+boost::property_tree::ptree solid_object::serialize()
+{
+  boost::property_tree::ptree tree;
+  return tree;
+}
+
+void solid_object::setup()
+{
+}

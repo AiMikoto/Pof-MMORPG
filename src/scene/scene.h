@@ -21,13 +21,12 @@ namespace engine {
 		void update();
 		void sceneToJSON(std::string path);
 		void sceneFromJSON(std::string data);
-		octree ctree;
 		boost::property_tree::ptree serialize();
-	private:
 		void deserialize(boost::property_tree::ptree node);
 		std::string toJSON();
 		void fromJSON(std::string data);
 		void writeToFile(std::string path);
 		void readFromFile(std::string path);
+	private:
 	};
 }
