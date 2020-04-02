@@ -2,10 +2,10 @@
 #include "graphics/model/mesh.h"
 #include "gpu.h"
 
-engine::RenderLayer::RenderLayer(uint modelID, uint materialID, uint meshID) {
-	this->modelID = modelID;
-	this->materialID = materialID;
-	this->meshID = meshID;
+engine::RenderLayer::RenderLayer(std::string modelPath, std::string materialPath, uint submeshPos) {
+	this->modelPath = modelPath;
+	this->materialPath = materialPath;
+	this->submeshPos = submeshPos;
 	setup();
 }
 
@@ -15,8 +15,8 @@ engine::RenderLayer::~RenderLayer() {
 }
 
 void engine::RenderLayer::draw(const glm::mat4& vp) {
-	Mesh* mesh = gpu->models[modelID]->meshes[meshID];
-	Material* mat = gpu->materials[mesh->materialID];
+	Mesh* mesh = gpu->models[modelPath]->meshes[submeshPos];
+	Material* mat = gpu->materials[mesh->materialPath];
 	Shader* shader = gpu->shaders[mat->shaderID];
 	mat->contextSetup();
 	shader->setMat4("vp", vp);
@@ -38,7 +38,7 @@ void engine::RenderLayer::setup() {
 }
 
 void engine::RenderLayer::bindBuffers() {
-	Mesh* mesh = gpu->models[modelID]->meshes[meshID];
+	Mesh* mesh = gpu->models[modelPath]->meshes[submeshPos];
 	glGenVertexArrays(1, &vertexArrayID);
 	glGenBuffers(1, &vertexBufferID);
 	glGenBuffers(1, &elementsBufferID);

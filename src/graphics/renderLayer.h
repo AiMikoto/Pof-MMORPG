@@ -10,10 +10,11 @@
 namespace engine {
 	class RenderLayer {
 	public:
-		uint materialID, modelID, meshID;
+		std::string materialPath, modelPath;
+		uint submeshPos;
 		std::vector<MeshRenderer*> renderers;
 
-		RenderLayer(uint materialID, uint modelID, uint meshID);
+		RenderLayer(std::string modelPath, std::string materialPath, uint meshID);
 		~RenderLayer();
 		void draw(const glm::mat4& vp);
 		void setup();

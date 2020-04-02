@@ -37,7 +37,7 @@ engine::GPU::~GPU() {
 	activeScenes.clear();
 	delete glContext;
 	delete editorCamera->gameObject;
-	delete meshLoader;
+	delete modelLoader;
 	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
 }
 
@@ -50,7 +50,7 @@ void engine::GPU::initializeContext() {
 	editorCamera->transform.position = glm::dvec3(0, 5, 20);
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
-	meshLoader = new ModelLoader();
+	modelLoader = new ModelLoader();
 }
 
 void engine::GPU::draw() {
@@ -90,26 +90,26 @@ void engine::GPU::update() {
 void engine::GPU::addRenderer(MeshRenderer* renderer) {
 	MeshFilter* meshFilter = renderer->gameObject->getComponent<MeshFilter>();
 	if (meshFilter != NULL) {
-		for (uint i = 0; i < uint(renderer->materialIDs.size()); i++) {
-			uint modelID = meshFilter->modelID;
-			uint materialID = renderer->materialIDs[i];
-			if (renderLayers[modelID].count(materialID) == 1) {
-				RenderLayer* renderLayer = renderLayers[modelID][materialID];
+		for (uint i = 0; i < uint(renderer->materialsPaths.size()); i++) {
+			std::string modelPath = meshFilter->modelPath;
+			std::string materialPath = renderer->materialsPaths[i];
+			if (renderLayers[modelPath].count(materialPath) == 1) {
+				RenderLayer* renderLayer = renderLayers[modelPath][materialPath];
 				renderLayer->renderers.push_back(renderer);
 			}
 			else {
-				RenderLayer* renderLayer = new RenderLayer(modelID, materialID, i);
+				RenderLayer* renderLayer = new RenderLayer(modelPath, materialPath, i);
 				renderLayer->renderers.push_back(renderer);
-				renderLayers[modelID][materialID] = renderLayer;
+				renderLayers[modelPath][materialPath] = renderLayer;
 			}
-			renderer->renderLayers.push_back(std::pair(modelID, materialID));
+			renderer->renderLayers.push_back(std::pair(modelPath, materialPath));
 		}
 	}
 }
 
 void engine::GPU::removeRenderer(MeshRenderer* renderer) {
 	for (uint i = 0; i < uint(renderer->renderLayers.size()); i++) {
-		std::pair<uint, uint> layerID = renderer->renderLayers[i];
+		std::pair<std::string, std::string> layerID = renderer->renderLayers[i];
 		if (renderLayers.count(layerID.first) == 1) {
 			if (renderLayers[layerID.first].count(layerID.second) == 1) { {
 					RenderLayer* renderLayer = renderLayers[layerID.first][layerID.second];
@@ -121,11 +121,11 @@ void engine::GPU::removeRenderer(MeshRenderer* renderer) {
 	}
 }
 
-void engine::GPU::removeModel(uint id) {
-	if (renderLayers.count(id) == 1) {
-		for (auto layer : renderLayers[id]) {
+void engine::GPU::removeModel(std::string path) {
+	if (renderLayers.count(path) == 1) {
+		for (auto layer : renderLayers[path]) {
 			delete layer.second;
 		}
-		renderLayers.erase(id);
+		renderLayers.erase(path);
 	}
 }

@@ -7,7 +7,6 @@
 namespace engine {
 	class MeshFilter : public Component {
 	public:
-		uint modelID, defaultModelID;
 		std::string modelPath, defaultModelPath;
 
 		MeshFilter();

@@ -31,7 +31,7 @@ namespace engine {
 		bool rotate;
 		double yaw, pitch;
 		CameraViewport viewport;
-		std::vector<size_t> objectsInView;
+		std::vector<ullong> objectsInView;
 
 		Camera();
 		Camera(CameraViewport viewport, bool isPerspective = true, bool isFixed = false);

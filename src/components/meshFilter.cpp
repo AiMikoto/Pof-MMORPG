@@ -7,8 +7,9 @@ engine::MeshFilter::MeshFilter() {
 }
 
 engine::MeshFilter::MeshFilter(const MeshFilter& meshFilter) {
-	this->modelID = meshFilter.modelID;
-	this->initialized = false;
+	this->modelPath = meshFilter.modelPath;
+	this->defaultModelPath = meshFilter.defaultModelPath;
+	setType();
 }
 
 engine::MeshFilter::MeshFilter(boost::property_tree::ptree) {
@@ -40,11 +41,14 @@ void engine::MeshFilter::setup() {
 
 boost::property_tree::ptree engine::MeshFilter::serialize() {
 	boost::property_tree::ptree node;
+	node.add("model", modelPath);
+	node.add("defaultModel", defaultModelPath);
+	node.add("modelSize", size);
 	return node;
 }
 
 bool engine::MeshFilter::hasModel() {
-	return gpu->models.count(modelID) == 1;
+	return gpu->models.count(modelPath) == 1;
 }
 
 double engine::MeshFilter::modelSize() {
@@ -52,7 +56,7 @@ double engine::MeshFilter::modelSize() {
 }
 
 void engine::MeshFilter::computeModelSize() {
-	std::vector<Mesh*> meshes = gpu->models[modelID]->meshes;
+	std::vector<Mesh*> meshes = gpu->models[modelPath]->meshes;
 	glm::vec3 center = { 0,0,0 };
 	size = glm::distance(center, meshes[0]->vertices[0].position);
 	

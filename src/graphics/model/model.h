@@ -16,7 +16,6 @@ namespace engine {
 		std::vector<Mesh*> meshes;
 		std::string path;
 		std::string name;
-		uint id;
 		bool loaded;
 
 		Model(std::string path);
@@ -27,14 +26,14 @@ namespace engine {
 	public:
 		ModelLoader();
 		~ModelLoader();
-		void loadModel(std::string path, bool gammaCorrection = false, uint id = 0);
+		void loadModel(std::string path, bool gammaCorrection = false);
 	private:
 		std::string directory;		
 		void processNode(aiNode* node, const aiScene* scene, Model* model);
 		Mesh* processMesh(aiMesh* mesh, const aiScene* scene);
 		std::vector<Vertex> loadMeshVertices(aiMesh* mesh, const aiScene* scene);
 		std::vector<uint> loadMeshIndices(aiMesh* mesh, const aiScene* scene);
-		uint loadMaterial(aiMesh* mesh, const aiScene* scene);
+		std::string loadMaterial(aiMesh* mesh, const aiScene* scene);
 		void loadMaterialTextures(aiMaterial* aiMat, aiTextureType type, Material* mat);
 	};
 }

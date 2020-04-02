@@ -9,21 +9,17 @@ namespace engine {
 	struct Vertex {
 		glm::vec3 position, normal, tangent, bitangent;
 		glm::vec2 textureCoordinates;
-		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
 	};	
 
 	struct Mesh {
 		std::vector<Vertex> vertices;
-		uint materialID;
+		std::string materialPath;
 		std::vector<uint> indices;
 		glm::dvec3 meshScale;
 		std::string name;
 
-		Mesh(std::vector<Vertex> vertices, uint materialID, std::vector<uint> indices);
+		Mesh(std::vector<Vertex> vertices, std::string materialPath, std::vector<uint> indices);
 		~Mesh();
-		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
 		void computeScale();	
 	};
 }

@@ -9,15 +9,15 @@
 namespace engine {
 	class MeshRenderer : public Component {
 	public:
-		std::vector<uint> materialIDs;
-		std::vector<std::pair<uint, uint>> renderLayers;
+		std::string defaultMaterialPath;
+		std::vector<std::string> materialsPaths;
+		std::vector<std::pair<std::string, std::string>> renderLayers;
 
 		MeshRenderer();
+		MeshRenderer(const MeshRenderer& renderer);
+		MeshRenderer(boost::property_tree::ptree node);
 		~MeshRenderer();
 		boost::property_tree::ptree serialize();
-		MeshRenderer* deserialize(boost::property_tree::ptree node);
-		MeshRenderer* instantiate();
-		void draw(Camera* camera, GLFWwindow* window, uint materialID);
 		void setup();
 		void meshFilterRemoved();
 		void modelRemoved();

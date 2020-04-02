@@ -5,9 +5,9 @@
 #include "core/utils.h"
 #include "core/constants.h"
 
-engine::Mesh::Mesh(std::vector<Vertex> vertices, uint materialID, std::vector<uint> indices) {
+engine::Mesh::Mesh(std::vector<Vertex> vertices, std::string materialPath, std::vector<uint> indices) {
 	this->vertices = vertices;
-	this->materialID = materialID;
+	this->materialPath = materialPath;
 	this->indices = indices;
 }
 
@@ -30,33 +30,3 @@ void engine::Mesh::computeScale(){
 	meshScale = max - min;
 	BOOST_LOG_TRIVIAL(trace) << meshScale.x << ", " << meshScale.y << ", " << meshScale.z;
 }
-
-boost::property_tree::ptree engine::Vertex::serialize() {
-	boost::property_tree::ptree node;
-	node.add_child("position", dvec3serializer(position));
-	node.add_child("normal", dvec3serializer(normal));
-	node.add_child("textureCoordinates", dvec2serializer(textureCoordinates));
-	node.add_child("tangent", dvec3serializer(tangent));
-	node.add_child("bitangent", dvec3serializer(bitangent));
-	return node;
-}
-
-void engine::Vertex::deserialize(boost::property_tree::ptree node) {
-
-}
-
-boost::property_tree::ptree engine::Mesh::serialize() {
-	boost::property_tree::ptree node, verticesNode;
-	for (int i = 0; i < vertices.size(); i++) {
-		verticesNode.add_child("v" + std::to_string(i), vertices[i].serialize());
-	}
-	node.add_child("vertices", verticesNode);
-	node.put("materialID", materialID);
-	node.put("indices", vectorToString(indices, ' '));
-	return node;
-}
-
-void engine::Mesh::deserialize(boost::property_tree::ptree node) {
-	boost::property_tree::ptree verticesNode;
-}
-

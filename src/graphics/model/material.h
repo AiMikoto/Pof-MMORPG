@@ -11,9 +11,9 @@ namespace engine {
 		Texture();
 		Texture(std::string path);
 		Texture(std::string path, uint type);
+		Texture(boost::property_tree::ptree node);
 		~Texture();
 		boost::property_tree::ptree serialize();
-		static Texture* deserialize(boost::property_tree::ptree node);
 	private:
 		void load();
 	};
@@ -24,7 +24,7 @@ namespace engine {
 		bool twoSided;
 		int blend, shading;
 		float opacity, shininess, shininessStrength;
-		std::vector<uint> texturesIDs;
+		std::vector<std::string> texturesPaths;
 		std::vector<int> texturesOP;
 		std::vector<float> texturesStrength;
 		std::string path;
@@ -32,9 +32,11 @@ namespace engine {
 		Material();
 		~Material();
 		Material(uint shaderID);
-
+		Material(boost::property_tree::ptree node);
 		boost::property_tree::ptree serialize();
-		static Material* deserialize(boost::property_tree::ptree node);
 		void contextSetup();
+		void writeToFile();
+	private:
+		void load();
 	};
 }

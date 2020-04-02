@@ -18,18 +18,16 @@ engine::Model::~Model() {
 		delete mesh;
 	}
 	meshes.clear();
-	gpu->removeModel(id);
+	gpu->removeModel(path);
 }
 
 engine::ModelLoader::ModelLoader() {}
 
 engine::ModelLoader::~ModelLoader() {}
 
-void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection, uint modelID) {
-	if (gpu->modelsPaths.count(path)) {
-		BOOST_LOG_TRIVIAL(trace) << "Model already loaded: " << path;
+void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection) {
+	if (gpu->models.count(path))
 		return;
-	}
 	BOOST_LOG_TRIVIAL(trace) << "Started loading model: " << path;
 	Assimp::Importer importer;
 	directory = path.substr(0, path.find_last_of('/'));
@@ -39,10 +37,7 @@ void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection, uint
 		throw assimp_error(importer.GetErrorString());
 	Model* model = new Model(path);
 	processNode(scene->mRootNode, scene, model);
-	uint id = (modelID != 0) ? modelID : getFirstAvailableMapIndex(gpu->models);
-	gpu->models[id] = model;
-	gpu->modelsPaths[path] = id;
-	model->id = id;
+	gpu->models[path] = model;
 }
 
 void engine::ModelLoader::processNode(aiNode* node, const aiScene* scene, Model* model) {
@@ -60,8 +55,8 @@ void engine::ModelLoader::processNode(aiNode* node, const aiScene* scene, Model*
 engine::Mesh* engine::ModelLoader::processMesh(aiMesh *mesh, const aiScene *scene) {
 	std::vector<Vertex> vertices = loadMeshVertices(mesh, scene);
 	std::vector<uint> indices = loadMeshIndices(mesh, scene);
-	uint materialID = loadMaterial(mesh, scene);
-	Mesh* processedMesh = new Mesh(vertices, materialID, indices);
+	std::string materialPath = loadMaterial(mesh, scene);
+	Mesh* processedMesh = new Mesh(vertices, materialPath, indices);
 	processedMesh->computeScale();
 	return processedMesh;
 }
@@ -97,7 +92,7 @@ std::vector<uint> engine::ModelLoader::loadMeshIndices(aiMesh *mesh, const aiSce
 	return indices;
 }
 
-uint engine::ModelLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
+std::string engine::ModelLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
 	aiMaterial* aiMat = scene->mMaterials[mesh->mMaterialIndex];
 	Material* mat = new Material();
 
@@ -125,10 +120,11 @@ uint engine::ModelLoader::loadMaterial(aiMesh* mesh, const aiScene* scene) {
 	for (int i = aiTextureType_DIFFUSE; i != aiTextureType_UNKNOWN; i++) {
 		loadMaterialTextures(aiMat, aiTextureType(i), mat);
 	}
-	uint materialID = getFirstAvailableMapIndex(gpu->materials);
+	//TODO: Write the material to a file that materialPath points at.
+	std::string materialPath = directory + "/materials/" + std::string(aiMat->GetName().C_Str()) + ".pofmat";
 	mat->shaderID = shaderTypes::modelShader;
-	gpu->materials[materialID] = mat;
-	return materialID;
+	gpu->materials[materialPath] = mat;
+	return materialPath;
 }
 
 void engine::ModelLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType type, Material* mat) {
@@ -142,7 +138,7 @@ void engine::ModelLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType 
 		bool skip = false;
 		for (auto texture : gpu->textures) {
 			if (texture.second->path == directory + "/" + std::string(path.C_Str())) {
-				mat->texturesIDs.push_back(texture.second->id);
+				mat->texturesPaths.push_back(texture.second->path);
 				mat->texturesOP.push_back(textureOP);
 				skip = true;
 				break;
@@ -150,7 +146,7 @@ void engine::ModelLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType 
 		}
 		if (!skip) {
 			Texture* texture = new Texture(directory + "/" + path.C_Str(), type); //textures are automatically placed in the map when instantiated
-			mat->texturesIDs.push_back(texture->id);
+			mat->texturesPaths.push_back(texture->path);
 		}
 	}
 }

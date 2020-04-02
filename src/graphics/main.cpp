@@ -20,21 +20,27 @@ int main() {
 	engine::Scene* scene = new engine::Scene();
 	engine::gpu->activeScenes.push_back(scene);
 
-	engine::gpu->meshLoader->loadModel("../src/graphics/assets/objects/kaguya.obj");
-	uint id = engine::gpu->models.begin()->first;
-	for (int i = 0; i < 30; i++) {
-		for (int j = 0; j < 30; j++) {
+	std::string modelPath = "../src/graphics/assets/objects/kaguya.obj";
+	std::string defaultModelPath = "../src/graphics/assets/objects/cube.obj";
+	engine::gpu->modelLoader->loadModel(modelPath);
+	engine::gpu->modelLoader->loadModel(defaultModelPath);
+	
+	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
+	for (int i = 0; i < 40; i++) {
+		for (int j = 0; j < 40; j++) {
 			engine::GameObject* model = new engine::GameObject();
-			model->transform.position = glm::dvec3(1.2 * i - 30, 0, 1.2 * j - 30);
+			model->transform.position = glm::dvec3(2 * i - 40, 0, 2 * j - 40);
 			//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
 			model->transform.scale = glm::dvec3(1, 1, 1);
 			model->addComponent(new engine::MeshFilter());
-			model->getComponent<engine::MeshFilter>()->modelID = id;
+			model->getComponent<engine::MeshFilter>()->modelPath = modelPath;
+			model->getComponent<engine::MeshFilter>()->defaultModelPath = defaultModelPath;
 			model->addComponent(new engine::MeshRenderer());
+			
 			scene->addGameObject(model);
 		}
 	}
-
+	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
 	glfwSwapInterval(0);
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!engine::gpu->glContext->quit) {

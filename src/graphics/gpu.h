@@ -15,18 +15,17 @@
 namespace engine {
 	class GPU {
 	public:
-		std::map<uint, Texture*> textures;
+		std::map<std::string, Texture*> textures;
 		std::map<uint, Shader*> shaders;
-		std::map<uint, Material*> materials;
-		std::map<std::string, uint> modelsPaths;
-		std::map<uint, Model*> models;
+		std::map<std::string, Material*> materials;
+		std::map<std::string, Model*> models;
 		std::vector<Camera*> cameras;
 		//optimizing objects that use the same material not to switch context on the gpu
 		
 		std::vector<Scene*> activeScenes;
 		GLContext* glContext;
 		Camera* editorCamera;
-		ModelLoader* meshLoader;
+		ModelLoader* modelLoader;
 
 		GPU();
 		~GPU();
@@ -35,13 +34,9 @@ namespace engine {
 		void update();
 		void addRenderer(MeshRenderer* renderer);
 		void removeRenderer(MeshRenderer* renderer);
-		void removeModel(uint id);
-		boost::property_tree::ptree serialize();
-		static GPU* deserialize(boost::property_tree::ptree node);
-		void saveToJSON(std::string path);
-		void loadFromJSON(std::string path);
+		void removeModel(std::string path);
 	private:
-		std::map<uint, std::map<uint, RenderLayer*>> renderLayers;
+		std::map<std::string, std::map<std::string, RenderLayer*>> renderLayers;
 		void drawScene();
 		void drawUI();
 	};

@@ -6,6 +6,7 @@
 #include "include/glad.h"
 #include "include/glfw3.h"
 #include <iostream>
+#include <fstream>
 
 engine::Texture::Texture() {}
 
@@ -20,8 +21,21 @@ engine::Texture::Texture(std::string path, uint type) {
 	load();
 }
 
+engine::Texture::Texture(boost::property_tree::ptree node) {
+	path = node.get<std::string>("path", "");
+	type = node.get<uint>("type", type);
+	load();
+}
+
 engine::Texture::~Texture() {
 	glDeleteTextures(1, &id);
+}
+
+boost::property_tree::ptree engine::Texture::serialize() {
+	boost::property_tree::ptree node;
+	node.add("path", path);
+	node.add("type", type);
+	return node;
 }
 
 void engine::Texture::load() {
@@ -58,17 +72,8 @@ void engine::Texture::load() {
 		BOOST_LOG_TRIVIAL(trace) << "Failed to load texture at: " << path;
 	}
 	stbi_image_free(data);
-	gpu->textures[this->id] = this;
+	gpu->textures[path] = this;
 }
-
-boost::property_tree::ptree engine::Texture::serialize() {
-	boost::property_tree::ptree node;
-	node.add("type", type);
-	node.add("id", id);
-	node.add("path", path);
-}
-
-engine::Texture* engine::Texture::deserialize(boost::property_tree::ptree node) {}
 
 engine::Material::Material() {}
 
@@ -76,6 +81,10 @@ engine::Material::~Material() {}
 
 engine::Material::Material(uint shaderID) {
 	this->shaderID = shaderID;
+}
+
+engine::Material::Material(boost::property_tree::ptree node) {
+
 }
 
 void engine::Material::contextSetup() {
@@ -89,24 +98,29 @@ void engine::Material::contextSetup() {
 	shader->setFloat("material.opacity", opacity);
 	shader->setInt("material.blend", blend);
 	shader->setInt("material.shading", shading);
-	shader->setInt("material.texturesCount", (int)texturesIDs.size());
+	shader->setInt("material.texturesCount", (int)texturesPaths.size());
 	shader->setInt("material.texturesStrengthCount", (int)texturesStrength.size());
 	shader->setInt("material.texturesOPCount", (int)texturesOP.size());
-	for (int i = 0; i < texturesIDs.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + texturesIDs[i]);
-		shader->setInt("material.textures[" + std::to_string(i) + "]", texturesIDs[i]);
-		shader->setInt("material.texturesType[" + std::to_string(i) + "]", gpu->textures[texturesIDs[i]]->type);
+	for (int i = 0; i < int(texturesPaths.size()); i++) {
+		glActiveTexture(GL_TEXTURE0 + gpu->textures[texturesPaths[i]]->id);
+		shader->setInt("material.textures[" + std::to_string(i) + "]", gpu->textures[texturesPaths[i]]->id);
+		shader->setInt("material.texturesType[" + std::to_string(i) + "]", gpu->textures[texturesPaths[i]]->type);
 		if(i < texturesStrength.size())
 			shader->setFloat("material.texturesStrength[" + std::to_string(i) + "]", texturesStrength[i]);
 		if(i < texturesOP.size())
 			shader->setInt("material.texturesOP[" + std::to_string(i) + "]", texturesOP[i]);
-		glBindTexture(GL_TEXTURE_2D, texturesIDs[i]);
+		glBindTexture(GL_TEXTURE_2D, gpu->textures[texturesPaths[i]]->id);
 	}
 }
 
 boost::property_tree::ptree engine::Material::serialize() {
-	boost::property_tree::ptree node;
+	boost::property_tree::ptree node, texNode;
+}
+
+void engine::Material::writeToFile() {
 
 }
 
-engine::Material* engine::Material::deserialize(boost::property_tree::ptree node) {}
+void engine::Material::load() {
+
+}
