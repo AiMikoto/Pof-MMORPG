@@ -21,10 +21,13 @@ void gfx_init()
 
 void gfx_push(engine::Scene *s)
 {
+  BOOST_LOG_TRIVIAL(trace) << "attempting to change scene";
   scene_lock.lock();
+  BOOST_LOG_TRIVIAL(trace) << "lock aqcuired";
   engine::gpu -> activeScenes.clear();
   if(current)
   {
+    BOOST_LOG_TRIVIAL(trace) << "deleting old scene";
     delete current;
   }
   engine::gpu -> activeScenes.push_back(s);
@@ -49,6 +52,7 @@ void gfx_duty()
     scene_lock.lock();
     engine::gpu -> update();
     scene_lock.unlock();
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
   }
   BOOST_LOG_TRIVIAL(trace) << "Terminating renderer";
   delete engine::gpu;

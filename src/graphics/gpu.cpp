@@ -71,6 +71,7 @@ void engine::GPU::drawScene() {
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
+
 }
 
 void engine::GPU::drawUI() {

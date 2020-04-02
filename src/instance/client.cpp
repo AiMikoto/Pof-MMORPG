@@ -82,6 +82,7 @@ void client::handle_auth(call c)
         call scene_transfer;
         scene_transfer.tree().put(OPCODE, OP_SCENE);
         scene_transfer.tree().put_child("data", current -> serialize());
+        safe_write(scene_transfer);
         // TODO: populate calls
         break;
       }
