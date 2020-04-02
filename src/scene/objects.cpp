@@ -51,6 +51,10 @@ engine::GameObject::GameObject(boost::property_tree::ptree node) {
 			addComponent(new MeshFilter(c.second));
 		if (c.first == "MeshRenderer")
 			addComponent(new MeshRenderer(c.second));
+		if (c.first == "physical_collider")
+			addComponent(new physical_collider(c.second));
+		if (c.first == "solid_object")
+			addComponent(new solid_object(c.second));
 	}
 	transform = Transform(node.get_child("Transform"));
 	for (auto c : node.get_child("Children")) {

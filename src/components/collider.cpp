@@ -7,6 +7,12 @@ collider::collider(glm::dvec3 size, collider_t c_type) : Component(true)
   this -> size = size;
 }
 
+collider::collider(boost::property_tree::ptree node) : Component(true)
+{
+  size = engine::vecDeserializer<glm::dvec3, double>(node.get_child("size"));
+  c_type = static_cast<collider_t>(node.get<int>("shape"));
+}
+
 collider::~collider()
 {
 }

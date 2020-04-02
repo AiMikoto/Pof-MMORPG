@@ -9,6 +9,7 @@ class solid_object : public engine::Component
 {
 public:
   solid_object();
+  solid_object(boost::property_tree::ptree node);
   ~solid_object();
   void setType();
   void add_force(glm::dvec3 force);

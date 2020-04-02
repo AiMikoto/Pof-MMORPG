@@ -8,7 +8,7 @@
 
 enum collider_t
 {
-  caps,
+  caps = 0,
   box,
   sphere
 };
@@ -17,6 +17,7 @@ class collider : public engine::Component
 {
 public:
   collider(glm::dvec3 size, collider_t c_type);
+  collider(boost::property_tree::ptree node);
   ~collider();
   aabb to_aabb();
   virtual void setType() = 0;

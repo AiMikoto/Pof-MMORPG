@@ -10,6 +10,7 @@ class physical_collider : public collider
 {
 public:
   physical_collider(glm::dvec3 size, collider_t c_type);
+  physical_collider(boost::property_tree::ptree node);
   ~physical_collider();
   void setType();
   boost::property_tree::ptree serialize();

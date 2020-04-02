@@ -1,5 +1,6 @@
 #include "scene/scene.h"
 #include "components/phys_collider.h"
+#include "components/solid_object.h"
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -9,7 +10,7 @@
 #define FAIL printf("FAILED\n");failures++;
 #define T_EQ(s1, s2) if(scene_eq(s1, s2)) {PASS;} else {FAIL;}
 
-bool col_eq(physical_collider *c1, physical_collider *c2)
+bool col_eq(collider *c1, collider *c2)
 {
   if(c1 == c2)
   { // same memory location
@@ -22,6 +23,19 @@ bool col_eq(physical_collider *c1, physical_collider *c2)
   return c1 -> c_type == c2 -> c_type && c1 -> size == c2 -> size;
 }
 
+bool so_eq(solid_object *c1, solid_object *c2)
+{
+  if(c1 == c2)
+  { // same memory location
+    return true;
+  }
+  if((c1 == NULL) || (c2 == NULL))
+  {
+    return false;
+  }
+  return c1 -> m == c2 -> m && c1 -> im == c2 -> im && c1 -> velocity == c2 -> velocity;
+}
+
 bool obj_eq(engine::GameObject *o1, engine::GameObject *o2)
 {
   bool assume = true;
@@ -32,6 +46,7 @@ bool obj_eq(engine::GameObject *o1, engine::GameObject *o2)
   assume = assume && o1 -> transform.scale    == o2 -> transform.scale;
   assume = assume && o1 -> id                 == o2 -> id;
   assume = assume && col_eq(o1 -> getComponent<physical_collider>(), o2 -> getComponent<physical_collider>());
+  assume = assume && so_eq (o1 -> getComponent<solid_object>(), o2 -> getComponent<solid_object>());
   return assume;
 }
 
@@ -98,12 +113,15 @@ void test_serialisation()
   T_EQ(s1, s2);
   delete s1;
   delete s2;
-  TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT")
+  TEST("TESTING SCENE EQUALITY OF ONE OBJECT WITH COMPONENTS")
   s1 = new engine::Scene();
   o = new engine::GameObject();
   o -> id = 7;
   o -> tag = "asd";
   c = new physical_collider({1, 1, 1}, caps);
+  o -> addComponent(c);
+  c = new solid_object();
+  ((solid_object *)c) -> velocity = {10, -3, 7.2};
   o -> addComponent(c);
   s1 -> addGameObject(o);
   s2 = new engine::Scene(s1 -> serialize());
