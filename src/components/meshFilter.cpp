@@ -9,11 +9,18 @@ engine::MeshFilter::MeshFilter() {
 engine::MeshFilter::MeshFilter(const MeshFilter& meshFilter) {
 	this->modelPath = meshFilter.modelPath;
 	this->defaultModelPath = meshFilter.defaultModelPath;
+	this->size = meshFilter.size;
 	setType();
 }
 
-engine::MeshFilter::MeshFilter(boost::property_tree::ptree) {
-	
+engine::MeshFilter::MeshFilter(boost::property_tree::ptree node) {
+	modelPath = node.get<std::string>("model");
+	defaultModelPath = node.get<std::string>("defaultModel");
+	size = node.get<double>("modelSize");
+	//for now load the model on scene initialization
+	if (gpu != NULL)
+		gpu->modelLoader->loadModel(modelPath);
+	setType();
 }
 
 engine::MeshFilter::~MeshFilter() {

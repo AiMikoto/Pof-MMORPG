@@ -69,7 +69,7 @@ void engine::Scene::readFromFile(std::string path) {
 }
 
 void engine::Scene::deserialize(boost::property_tree::ptree node) {
-	for (auto v : node.get_child("GameObject")) {
-		addGameObject(new GameObject(v.second));
+	for (auto go : node.get_child("Scene")) {
+		addGameObject(new GameObject(go.second));
 	}
 }

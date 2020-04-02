@@ -7,6 +7,7 @@
 #include "components/meshRenderer.h"
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
+#include "lib/log.h"
 
 engine::GameObject::GameObject() {
 }
@@ -41,7 +42,20 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 }
 
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
-
+	name = node.get<std::string>("name");
+	tag = node.get<std::string>("tag");
+	for (auto c : node.get_child("Components")) {
+		if (c.first == "Camera")
+			addComponent(new Camera(c.second));
+		if (c.first == "MeshFilter")
+			addComponent(new MeshFilter(c.second));
+		if (c.first == "MeshRenderer")
+			addComponent(new MeshRenderer(c.second));
+	}
+	transform = Transform(node.get_child("Transform"));
+	for (auto c : node.get_child("Children")) {
+		addChild(new GameObject(c.second));
+	}
 }
 
 engine::GameObject::GameObject(GameObject* parent) {
