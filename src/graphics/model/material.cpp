@@ -7,6 +7,7 @@
 #include "include/glfw3.h"
 #include <iostream>
 #include <fstream>
+#include "core/exceptions.h"
 
 engine::Texture::Texture() {}
 
@@ -79,8 +80,8 @@ engine::Material::Material() {}
 
 engine::Material::~Material() {}
 
-engine::Material::Material(uint shaderID) {
-	this->shaderID = shaderID;
+engine::Material::Material(uint shaderType) {
+	this->shaderType = shaderType;
 }
 
 engine::Material::Material(boost::property_tree::ptree node) {
@@ -88,7 +89,7 @@ engine::Material::Material(boost::property_tree::ptree node) {
 }
 
 void engine::Material::contextSetup() {
-	Shader* shader = gpu->shaders[shaderID];
+	Shader* shader = gpu->shaders[shaderType];
 	shader->use();
 	shader->setVec4("material.colorDiffuse", colorDiffuse);
 	shader->setVec4("material.colorSpecular", colorSpecular);
@@ -118,7 +119,11 @@ boost::property_tree::ptree engine::Material::serialize() {
 }
 
 void engine::Material::writeToFile() {
-
+	/*std::ofstream fileStream(path, std::ios::out);
+	if (fileStream.is_open()) {
+		fileStream.close();
+	}
+	else throw std::system_error(errno, std::system_category(), "Failed to create/write to file at: " + path);*/
 }
 
 void engine::Material::load() {

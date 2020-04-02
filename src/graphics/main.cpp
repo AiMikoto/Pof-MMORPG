@@ -26,15 +26,16 @@ int main() {
 	engine::gpu->modelLoader->loadModel(defaultModelPath);
 	
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
-	for (int i = 0; i < 40; i++) {
-		for (int j = 0; j < 40; j++) {
+	for (int i = 0; i < 30; i++) {
+		for (int j = 0; j < 30; j++) {
 			engine::GameObject* model = new engine::GameObject();
-			model->transform.position = glm::dvec3(2 * i - 40, 0, 2 * j - 40);
+			model->transform.position = glm::dvec3(2 * i - 30, 0, 2 * j - 30);
 			//cube->transform.rotateTo(glm::dvec3(30, 20, 150));
 			model->transform.scale = glm::dvec3(1, 1, 1);
 			model->addComponent(new engine::MeshFilter());
 			model->getComponent<engine::MeshFilter>()->modelPath = modelPath;
 			model->getComponent<engine::MeshFilter>()->defaultModelPath = defaultModelPath;
+			model->getComponent<engine::MeshFilter>()->computeModelSize();
 			model->addComponent(new engine::MeshRenderer());
 			
 			scene->addGameObject(model);
@@ -46,6 +47,7 @@ int main() {
 	while (!engine::gpu->glContext->quit) {
 		engine::gpu->update();
 	}
+	scene->writeToFile("../src/graphics/assets/scenes/test.json");
 	delete engine::gpu;
 	return 0;
 }

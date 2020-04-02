@@ -3,14 +3,10 @@
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
 #include "core/utils.h"
+#include <boost/property_tree/json_parser.hpp>
+#include <sstream>
 
 engine::Scene::Scene() : ctree(root_aabb()) {
-}
-
-engine::Scene::Scene(boost::property_tree::ptree node) : ctree(root_aabb()) {
-	for (auto v : node.get_child("Game Object")) {
-		addGameObject(new GameObject(v.second));
-	}
 }
 
 engine::Scene::~Scene() {
@@ -45,7 +41,35 @@ ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {
 boost::property_tree::ptree engine::Scene::serialize() {
 	boost::property_tree::ptree node, scene;
 	for (auto g : gameObjects) {
-		scene.add_child("Game Object", g.second->serialize());
+		scene.add_child("GameObject", g.second->serialize());
 	}
+	node.add_child("Scene", scene);
 	return node;
+}
+
+std::string engine::Scene::toJSON() {
+
+}
+
+void engine::Scene::fromJSON(std::string data) {
+	boost::property_tree::ptree root;
+	std::stringstream ss;
+	ss << data;
+	boost::property_tree::read_json(ss, root);
+}
+
+void engine::Scene::writeToFile(std::string path) {
+	boost::property_tree::write_json(path, serialize());
+}
+
+void engine::Scene::readFromFile(std::string path) {
+	boost::property_tree::ptree root;
+	boost::property_tree::read_json(path, root);
+	deserialize(root);
+}
+
+void engine::Scene::deserialize(boost::property_tree::ptree node) {
+	for (auto v : node.get_child("GameObject")) {
+		addGameObject(new GameObject(v.second));
+	}
 }

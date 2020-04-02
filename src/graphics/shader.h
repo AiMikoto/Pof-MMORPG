@@ -4,8 +4,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <map>
-#include <iostream>
-#include <fstream>
+
 
 namespace engine {
 	struct ShaderLoader {

@@ -19,7 +19,7 @@ namespace engine {
 	};
 
 	struct Material {
-		uint shaderID;
+		uint shaderType;
 		glm::vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
 		bool twoSided;
 		int blend, shading;
@@ -31,7 +31,7 @@ namespace engine {
 
 		Material();
 		~Material();
-		Material(uint shaderID);
+		Material(uint shaderType);
 		Material(boost::property_tree::ptree node);
 		boost::property_tree::ptree serialize();
 		void contextSetup();

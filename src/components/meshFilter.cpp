@@ -27,6 +27,7 @@ engine::MeshFilter::~MeshFilter() {
 
 void engine::MeshFilter::setType() {
 	type = typeid(*this).name();
+	name = "MeshFilter";
 }
 
 void engine::MeshFilter::setup() {

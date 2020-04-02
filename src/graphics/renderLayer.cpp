@@ -17,7 +17,7 @@ engine::RenderLayer::~RenderLayer() {
 void engine::RenderLayer::draw(const glm::mat4& vp) {
 	Mesh* mesh = gpu->models[modelPath]->meshes[submeshPos];
 	Material* mat = gpu->materials[mesh->materialPath];
-	Shader* shader = gpu->shaders[mat->shaderID];
+	Shader* shader = gpu->shaders[mat->shaderType];
 	mat->contextSetup();
 	shader->setMat4("vp", vp);
 	std::vector<glm::mat4> modelMatrices = getModelMatrices();

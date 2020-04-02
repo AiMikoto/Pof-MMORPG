@@ -11,14 +11,18 @@ namespace engine {
 	class Scene {
 	public:
 		std::map<ullong, GameObject*> gameObjects;
+		octree ctree;
 
 		Scene();
-		Scene(boost::property_tree::ptree node);
 		~Scene();
 		ullong addGameObject(GameObject* go);
 		ullong addGameObject(boost::property_tree::ptree node);
 		void update();
 		boost::property_tree::ptree serialize();
-		octree ctree;		
+		void deserialize(boost::property_tree::ptree node);
+		std::string toJSON();
+		void fromJSON(std::string data);
+		void writeToFile(std::string path);
+		void readFromFile(std::string path);
 	};
 }

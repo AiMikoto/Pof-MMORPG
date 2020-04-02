@@ -35,7 +35,7 @@ boost::property_tree::ptree engine::dvec3serializer(glm::dvec3 in) {
 	boost::property_tree::ptree node;
 	node.add("x", in.x);
 	node.add("y", in.y);
-	node.add("z", in.y);
+	node.add("z", in.z);
 	return node;
 }
 

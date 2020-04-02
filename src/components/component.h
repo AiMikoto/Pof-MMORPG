@@ -7,6 +7,7 @@ namespace engine {
 	class Component {
 	public:
 		std::string type = "change_me";
+		std::string name = "Component"; //change this for serialization purposes to actual class names, since typeid is compiler specific
 		bool allowMultiple = false; // specifies wheter a game object can have multiple components of the same type
 		GameObject* gameObject;
 
@@ -18,6 +19,6 @@ namespace engine {
 		virtual void setup() = 0;
 	protected:
 		bool initialized;
-		virtual void setType() = 0;
+		virtual void setType() = 0; //you can also set the name in here
 	};
 }

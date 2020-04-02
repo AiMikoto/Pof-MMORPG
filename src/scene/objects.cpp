@@ -123,16 +123,17 @@ void engine::GameObject::addComponents(std::vector<Component*> components) {
 }
 
 boost::property_tree::ptree engine::GameObject::serialize() {
-	boost::property_tree::ptree node;
+	boost::property_tree::ptree node, componentsNode, childrenNode;
 	node.put("name", name);
 	node.put("tag", tag);
-	node.put("id", id);
 	for (auto c : components) {
-		node.add_child("component", c->serialize());
+		componentsNode.add_child(c->name, c->serialize());
 	}
 	for (auto c : children) {
-		node.add_child("game object", c->serialize());
+		childrenNode.add_child("GameObject", c->serialize());
 	}	
-	node.add_child("transform", transform.serialize());
+	node.add_child("Transform", transform.serialize());
+	node.add_child("Components", componentsNode);
+	node.add_child("Children", childrenNode);
 	return node;
 }

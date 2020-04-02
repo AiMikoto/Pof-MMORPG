@@ -1,6 +1,8 @@
 #include "shader.h"
 #include "lib/log.h"
 #include "core/exceptions.h"
+#include <iostream>
+#include <fstream>
 
 engine::ShaderLoader::ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath) {
 	this->vertexShaderPath = vertexShaderPath;
@@ -41,12 +43,12 @@ GLuint engine::ShaderLoader::loadShaders() {
 		return linkProgram();
 	}
 	catch (std::system_error e) {
-		BOOST_LOG_TRIVIAL(trace) << e.what() << ", " << e.code();
+		BOOST_LOG_TRIVIAL(error) << e.what() << ", " << e.code();
 		std::cin.ignore();
 		exit(1);
 	}
 	catch (shader_compile_error e){
-		BOOST_LOG_TRIVIAL(trace) << e.what();
+		BOOST_LOG_TRIVIAL(error) << e.what();
 		glDeleteShader(vertexShaderID);
 		glDeleteShader(fragmentShaderID);
 		std::cin.ignore();

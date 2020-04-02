@@ -17,4 +17,5 @@ engine::Light::Light(glm::vec4 color, float attenuation, float ambientCoefficien
 
 void engine::Light::setType() {
 	type = typeid(*this).name();
+	name = "Light";
 }

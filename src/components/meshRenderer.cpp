@@ -28,6 +28,11 @@ engine::MeshRenderer::~MeshRenderer() {
 
 boost::property_tree::ptree engine::MeshRenderer::serialize() {
 	boost::property_tree::ptree node, matNode;
+	matNode.add("Default Material", defaultMaterialPath);
+	for (auto path : materialsPaths) {
+		matNode.add("Material", path);
+	}	
+	node.add_child("Materials", matNode);
 	return node;
 }
 
@@ -50,6 +55,7 @@ void engine::MeshRenderer::setup() {
 
 void engine::MeshRenderer::setType() {
 	type = typeid(*this).name();
+	name = "MeshRenderer";
 }
 
 void engine::MeshRenderer::meshFilterRemoved() {

@@ -223,4 +223,5 @@ void engine::Camera::update() {
 
 void engine::Camera::setType() {
 	type = typeid(*this).name();
+	name = "Camera";
 }

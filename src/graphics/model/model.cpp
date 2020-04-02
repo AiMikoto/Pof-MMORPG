@@ -121,10 +121,16 @@ std::string engine::ModelLoader::loadMaterial(aiMesh* mesh, const aiScene* scene
 		loadMaterialTextures(aiMat, aiTextureType(i), mat);
 	}
 	//TODO: Write the material to a file that materialPath points at.
-	std::string materialPath = directory + "/materials/" + std::string(aiMat->GetName().C_Str()) + ".pofmat";
-	mat->shaderID = shaderTypes::modelShader;
-	gpu->materials[materialPath] = mat;
-	return materialPath;
+	mat->path = directory + "/materials/" + std::string(aiMat->GetName().C_Str()) + ".pofmat";
+	mat->shaderType = shaderTypes::modelShader;
+	try {
+		mat->writeToFile();
+	}
+	catch (std::system_error e) {
+		BOOST_LOG_TRIVIAL(trace) << e.what() << ", " << e.code();
+	}
+	gpu->materials[mat->path] = mat;
+	return mat->path;
 }
 
 void engine::ModelLoader::loadMaterialTextures(aiMaterial* aiMat, aiTextureType type, Material* mat) {
