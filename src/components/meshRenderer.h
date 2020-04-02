@@ -9,26 +9,21 @@
 namespace engine {
 	class MeshRenderer : public Component {
 	public:
-		std::vector<uint> meshIDs;
-		std::vector<uint> materialIDs;
+		std::string defaultMaterialPath;
+		std::vector<std::string> materialsPaths;
+		std::vector<std::pair<std::string, std::string>> renderLayers;
 
 		MeshRenderer();
+		MeshRenderer(const MeshRenderer& renderer);
+		MeshRenderer(boost::property_tree::ptree node);
 		~MeshRenderer();
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
-		MeshRenderer* instantiate();
-		void draw(Camera* camera, GLFWwindow* window, uint materialID);
-		virtual void setup();
-		void meshFilterRemoved(uint meshID);
+		void setup();
+		void meshFilterRemoved();
+		void modelRemoved();
 	private:
-		std::vector<GLuint> vertexArrayID, vertexBufferID, elementsBufferID, outlineIndicesBufferID;
 		bool initialized = false;
-		void glContextSetup();
-		void bindBuffers();
-		void createOutline();
-		void removeMeshAt(int i);
-		void fillMeshIDs(GameObject* current);
-		void deleteBuffers(int i);
-		virtual void setType();
+		void cleanup();
+		void setType();
 	};
 }

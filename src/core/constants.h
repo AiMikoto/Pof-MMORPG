@@ -14,7 +14,7 @@ const double pi = boost::math::constants::pi<double>();
 namespace engine {
 	//Too bad we're not using c++ 20, or we could just use vectors and strings in constexpr,
 	//I need this ugly workaround, oh well...
-
+	
 	const uint requiredShadersPathLength = 2;
 	constexpr const char* const requiredShadersPath[] = 
 		{ "../src/graphics/assets/shaders/model.vs", "../src/graphics/assets/shaders/model.fs"};
@@ -32,5 +32,9 @@ namespace engine {
 		modelShader
 	};
 
-	
+	const uint maxRenderedInstances = 512;
+
+	enum componentTypes {
+		camera, light, meshFilter, meshRenderer, physCollider, solidObject
+	};
 }

@@ -5,14 +5,13 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 textureCoordinates;
 layout (location = 3) in vec3 tangent;
 layout (location = 4) in vec3 bitangent;
+layout (location = 5) in mat4 model;
 
-uniform mat4 mvp;
+uniform mat4 vp;
 
-out vec4 vertexColor;
 out vec2 uvs;
 
 void main() {
 	uvs = textureCoordinates;
-    gl_Position = mvp * vec4(position, 1.0);
-    vertexColor = vec4(0, 0.3, 0.8, 1.0); // make a light blue triangle peepoHappy	
+	gl_Position = vp * model * vec4(position, 1.0);
 }

@@ -23,6 +23,10 @@ engine::CameraViewport::CameraViewport(float startX, float startY, float endX, f
 	this->endY = endY;
 }
 
+engine::CameraViewport::CameraViewport(boost::property_tree::ptree node) {
+
+}
+
 engine::Camera::Camera() : Component(true) {
 	setType();
 }
@@ -44,12 +48,39 @@ engine::Camera::Camera(Transform transform, CameraViewport viewport, bool isPers
 	setType();
 }
 
+engine::Camera::Camera(const Camera& camera) {
+	this->gameObject = camera.gameObject;
+	this->viewport = camera.viewport;
+	this->isPerspective = camera.isPerspective;
+	this->isFixed = camera.isFixed;
+	this->moveSpeed = camera.moveSpeed;
+	this->rotationSpeed = camera.rotationSpeed;
+	this->nearClipDistance = camera.nearClipDistance;
+	this->farClipDistance = camera.farClipDistance;
+	this->fieldOfView = camera.fieldOfView;
+	this->yaw = yaw;
+	this->pitch = pitch;
+}
+
+engine::Camera::Camera(boost::property_tree::ptree node) {
+	viewport = CameraViewport(node.get_child("viewport"));
+	isFixed = node.get<bool>("isFixed");
+	isPerspective = node.get<bool>("isPerspective");
+	moveSpeed = node.get<double>("moveSpeed");
+	rotationSpeed = node.get<double>("rotationSpeed");
+	nearClipDistance = node.get<float>("nearClipDistance");
+	farClipDistance = node.get<float>("farClipDistance");
+	fieldOfView = node.get<float>("fieldOfView");
+	yaw = node.get<double>("yaw");
+	pitch = node.get<double>("pitch");
+}
+
 void engine::Camera::setup() {
 	moveSpeed = 5.0f;
 	rotationSpeed = 1;
 	fieldOfView = 45.0f;
 	nearClipDistance = 0.1f;
-	farClipDistance = 100.0f;
+	farClipDistance = 400.0f;
 	isPerspective = true;
 	isFixed = false;
 	pitch = 0;
@@ -59,7 +90,7 @@ void engine::Camera::setup() {
 	}
 	updateRotation();
 	gpu->cameras.push_back(this);
-	Component::setup();
+	initialized = true;
 }
 
 void engine::Camera::moveCamera(int direction) {
@@ -171,20 +202,6 @@ boost::property_tree::ptree engine::Camera::serialize() {
 	return node;
 }
 
-void engine::Camera::deserialize(boost::property_tree::ptree node) {
-	viewport = CameraViewport();
-	viewport.deserialize(node.get_child("viewport"));
-	isFixed = node.get<bool>("isFixed");
-	isPerspective = node.get<bool>("isPerspective");
-	moveSpeed = node.get<double>("moveSpeed");
-	rotationSpeed = node.get<double>("rotationSpeed");
-	nearClipDistance = node.get<float>("nearClipDistance");
-	farClipDistance = node.get<float>("farClipDistance");
-	fieldOfView = node.get<float>("fieldOfView");
-	yaw = node.get<double>("yaw");
-	pitch = node.get<double>("pitch");
-}
-
 boost::property_tree::ptree engine::CameraViewport::serialize() {
 	boost::property_tree::ptree node;
 	node.put("startX", startX);
@@ -192,28 +209,6 @@ boost::property_tree::ptree engine::CameraViewport::serialize() {
 	node.put("endX", endX);
 	node.put("endY", endY);
 	return node;
-}
-
-void engine::CameraViewport::deserialize(boost::property_tree::ptree node) {
-	startX = node.get<float>("startX");
-	startY = node.get<float>("startY");
-	endX = node.get<float>("endX");
-	endY = node.get<float>("endY");
-}
-
-engine::Camera* engine::Camera::instantiate() {
-	Camera* cam = new Camera();
-	cam->viewport = this->viewport;
-	cam->isFixed = this->isFixed;
-	cam->isPerspective = this->isPerspective;
-	cam->moveSpeed = this->moveSpeed;
-	cam->rotationSpeed = this->rotationSpeed;
-	cam->nearClipDistance = this->nearClipDistance;
-	cam->farClipDistance = this->farClipDistance;
-	cam->fieldOfView = this->fieldOfView;
-	cam->yaw = this->yaw;
-	cam->pitch = this->pitch;
-	return cam;
 }
 
 void engine::Camera::update() {
@@ -228,4 +223,5 @@ void engine::Camera::update() {
 
 void engine::Camera::setType() {
 	type = typeid(*this).name();
+	name = "Camera";
 }

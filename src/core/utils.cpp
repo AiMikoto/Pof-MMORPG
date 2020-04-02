@@ -24,30 +24,6 @@ std::vector<std::string> engine::split(const std::string &toSplit, char separato
 	return tokens;
 }
 
-boost::property_tree::ptree engine::dvec2serializer(glm::dvec2 in) {
-	boost::property_tree::ptree node;
-	node.add("x", in.x);
-	node.add("y", in.y);
-	return node;
-}
-
-boost::property_tree::ptree engine::dvec3serializer(glm::dvec3 in) {
-	boost::property_tree::ptree node;
-	node.add("x", in.x);
-	node.add("y", in.y);
-	node.add("z", in.y);
-	return node;
-}
-
-boost::property_tree::ptree engine::dvec4serializer(glm::dvec4 in) {
-	boost::property_tree::ptree node;
-	node.add("w", in.w);
-	node.add("x", in.x);
-	node.add("y", in.y);
-	node.add("z", in.z);
-	return node;
-}
-
 double engine::highestCommonDenominator(double a, double b, double eps) {
 	a = std::fabs(a);
 	b = std::fabs(b);

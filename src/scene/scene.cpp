@@ -1,9 +1,11 @@
 #include "scene/scene.h"
 #include "lib/log.h"
-#include <boost/property_tree/json_parser.hpp>
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
 #include "phys/aabb.h"
+#include "core/utils.h"
+#include <boost/property_tree/json_parser.hpp>
+#include <sstream>
 
 engine::Scene::Scene() : ctree(root_aabb()) {
 }
@@ -26,7 +28,7 @@ void engine::Scene::update() {
 }
 
 ullong engine::Scene::addGameObject(GameObject* go) {
-	ullong id = ullong(gameObjects.size() + 1);
+	ullong id = getFirstAvailableMapIndex(gameObjects);
 	gameObjects[id] = go;
 	go->id = id;
 	collider* phys = go->getComponent<physical_collider>();
@@ -37,21 +39,42 @@ ullong engine::Scene::addGameObject(GameObject* go) {
 	return id;
 }
 
-void engine::Scene::sceneToJSON(std::string path) {
-	boost::property_tree::ptree root = serialize();
-	boost::property_tree::write_json(path, root);
+ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {
+	return addGameObject(new GameObject(node.get_child("Game Object")));
 }
 
-void engine::Scene::sceneFromJSON(std::string data) {}
-
 boost::property_tree::ptree engine::Scene::serialize() {
-	boost::property_tree::ptree root, cNode, tNode, mNode, goNode;
+	boost::property_tree::ptree node, scene;
 	for (auto g : gameObjects) {
-		root.add_child("Game Object", g.second->serialize());
+		scene.add_child("GameObject", g.second->serialize());
 	}
-	return root;
+	node.add_child("Scene", scene);
+	return node;
+}
+
+std::string engine::Scene::toJSON() {
+
+}
+
+void engine::Scene::fromJSON(std::string data) {
+	boost::property_tree::ptree root;
+	std::stringstream ss;
+	ss << data;
+	boost::property_tree::read_json(ss, root);
+}
+
+void engine::Scene::writeToFile(std::string path) {
+	boost::property_tree::write_json(path, serialize());
+}
+
+void engine::Scene::readFromFile(std::string path) {
+	boost::property_tree::ptree root;
+	boost::property_tree::read_json(path, root);
+	deserialize(root);
 }
 
 void engine::Scene::deserialize(boost::property_tree::ptree node) {
-
+	for (auto go : node.get_child("Scene")) {
+		addGameObject(new GameObject(go.second));
+	}
 }

@@ -4,8 +4,7 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <map>
-#include <iostream>
-#include <fstream>
+
 
 namespace engine {
 	struct ShaderLoader {
@@ -14,16 +13,10 @@ namespace engine {
 
 		ShaderLoader(std::string vertexShaderPath, std::string fragmentShaderPath);
 		~ShaderLoader();
-		std::string readShaderFile(std::string path);
+		std::string readShaderFile(const std::string& path);
 		GLuint loadShaders();
 		void compileShader(std::string shader, GLuint shaderID);
 		GLuint linkProgram();
-	};
-
-	struct ShaderException : std::exception {
-		std::string info;
-
-		ShaderException(std::string info);
 	};
 
 	class Shader {

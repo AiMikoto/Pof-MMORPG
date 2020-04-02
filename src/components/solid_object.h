@@ -3,6 +3,7 @@
 
 #include "components/component.h"
 #include "scene/objects.h"
+#include <boost/property_tree/ptree.hpp>
 
 class solid_object : public engine::Component
 {
@@ -12,6 +13,8 @@ public:
   void setType();
   void initialise();
   void add_force(glm::dvec3 force);
+  boost::property_tree::ptree serialize() = 0;
+  static solid_object* deserialize(boost::property_tree::ptree node);
   glm::dvec3 velocity;
   glm::dvec3 force_acc;
   double m;

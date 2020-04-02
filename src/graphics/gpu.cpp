@@ -2,8 +2,7 @@
 #include <algorithm>
 #include "lib/log.h"
 #include "core/time_values.h"
-
-engine::GPU* engine::gpu;
+#include <boost/property_tree/json_parser.hpp>
 
 engine::GPU::GPU() {}
 
@@ -21,28 +20,37 @@ engine::GPU::~GPU() {
 		delete s.second;
 	}
 	shaders.clear();
-	meshes.clear();
 	cameras.clear();
+	for (auto modelLayerMap : renderLayers) {
+		for (auto matLayerMap : modelLayerMap.second) {
+			delete matLayerMap.second;
+		}
+	}
 	renderLayers.clear();
-	renderLayersMap.clear();
 	for (auto s : activeScenes) {
 		delete s;
 	}
+	for (auto m : models) {
+		delete m.second;
+	}
+	models.clear();
 	activeScenes.clear();
 	delete glContext;
 	delete editorCamera->gameObject;
+	delete modelLoader;
 	BOOST_LOG_TRIVIAL(trace) << "cleanup successful";
 }
 
 void engine::GPU::initializeContext() {
 	BOOST_LOG_TRIVIAL(trace) << "Creating openGL context";
-	this->glContext = new GLContext(1280, 720, "Pof Engine");
+	glContext = new GLContext(1280, 720, "Pof Engine");
 	BOOST_LOG_TRIVIAL(trace) << "Creating editor camera";
 	GameObject* editorCamera = new GameObject();
 	editorCamera->addComponent(new Camera());
-	editorCamera->transform.position = glm::dvec3(0, 0, 3);
+	editorCamera->transform.position = glm::dvec3(0, 5, 20);
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
+	modelLoader = new ModelLoader();
 }
 
 void engine::GPU::draw() {
@@ -55,10 +63,11 @@ void engine::GPU::drawScene() {
 	glDepthFunc(GL_LESS);
 	editorCamera->setViewport(glContext->window);
 	glContext->setBackgroundColor(colors::bgColor);
-	for (auto mat : materials) {
-		mat.second->contextSetup();
-		for (auto r : renderLayers[renderLayersMap[mat.first]]) {
-			r->draw(editorCamera, glContext->window, mat.first);
+	glm::mat4 vp = editorCamera->projection(glContext->window) * editorCamera->view();
+	for (auto modelLayerMap : renderLayers) {
+		for (auto matLayerMap : modelLayerMap.second) {
+			RenderLayer* renderLayer = matLayerMap.second;
+			renderLayer->draw(vp);
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
@@ -79,20 +88,44 @@ void engine::GPU::update() {
 }
 
 void engine::GPU::addRenderer(MeshRenderer* renderer) {
-	determineRenderLayers(renderer);
+	MeshFilter* meshFilter = renderer->gameObject->getComponent<MeshFilter>();
+	if (meshFilter != NULL) {
+		for (uint i = 0; i < uint(renderer->materialsPaths.size()); i++) {
+			std::string modelPath = meshFilter->modelPath;
+			std::string materialPath = renderer->materialsPaths[i];
+			if (renderLayers[modelPath].count(materialPath) == 1) {
+				RenderLayer* renderLayer = renderLayers[modelPath][materialPath];
+				renderLayer->renderers.push_back(renderer);
+			}
+			else {
+				RenderLayer* renderLayer = new RenderLayer(modelPath, materialPath, i);
+				renderLayer->renderers.push_back(renderer);
+				renderLayers[modelPath][materialPath] = renderLayer;
+			}
+			renderer->renderLayers.push_back(std::pair(modelPath, materialPath));
+		}
+	}
 }
 
 void engine::GPU::removeRenderer(MeshRenderer* renderer) {
-	for (auto i : renderer->materialIDs) {
-		renderLayers[renderLayersMap[i]].erase(std::remove(renderLayers[renderLayersMap[i]].begin(),
-			renderLayers[renderLayersMap[i]].end(),
-			renderer),
-			renderLayers[renderLayersMap[i]].end());
-	}	
+	for (uint i = 0; i < uint(renderer->renderLayers.size()); i++) {
+		std::pair<std::string, std::string> layerID = renderer->renderLayers[i];
+		if (renderLayers.count(layerID.first) == 1) {
+			if (renderLayers[layerID.first].count(layerID.second) == 1) { {
+					RenderLayer* renderLayer = renderLayers[layerID.first][layerID.second];
+					renderLayer->renderers.erase(std::remove(renderLayer->renderers.begin(),
+						renderLayer->renderers.end(), renderer), renderLayer->renderers.end());
+				}
+			}
+		}		
+	}
 }
 
-void engine::GPU::determineRenderLayers(MeshRenderer* renderer) {
-	for (auto i : renderer->materialIDs) {
-		renderLayers[renderLayersMap[i]].push_back(renderer);
+void engine::GPU::removeModel(std::string path) {
+	if (renderLayers.count(path) == 1) {
+		for (auto layer : renderLayers[path]) {
+			delete layer.second;
+		}
+		renderLayers.erase(path);
 	}
 }
