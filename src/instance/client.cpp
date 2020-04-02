@@ -72,12 +72,15 @@ void client::handle_auth(call c)
         BOOST_LOG_TRIVIAL(trace) << "user login successful - " << username;
         uclp.remove(username);
         uc.aux = (void *) this;
-        ucl.add(uc);
+        ucl.add(uc); // at this point client will start receiving slices
         // TODO: subscribe user to irc
         answer.tree().put("status", true);
         ept.remove(OP_AUTH_TOKEN);
         ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&client::handle_map_change_request, this, _1));
         ept.add(OP_IRC, boost::bind(&client::handle_irc_request, this, _1));
+        call scene_transfer;
+        scene_transfer.tree().put(OPCODE, OP_SCENE);
+        scene_transfer.tree().put_child("data", current -> serialize());
         // TODO: populate calls
         break;
       }

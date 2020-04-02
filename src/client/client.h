@@ -26,6 +26,7 @@ private:
   void move_cb(call c);
   void irc_cb(call c);
   void slice_cb(call c);
+  void scene_cb(call c);
 };
 
 instance *instance_builder(std::string host, int port);

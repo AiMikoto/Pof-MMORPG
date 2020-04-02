@@ -5,6 +5,7 @@
 #include "lib/chat.h"
 #include <mutex>
 #include "phys/slicing.h"
+#include "scene/scene.h"
 
 extern user_card_library ucl;
 
@@ -21,6 +22,8 @@ extern std::string username;
 void move(std::string host, int port);
 
 void add_slice(slice_t next_slice);
+
+void set_scene(engine::Scene *s);
 
 void send_message(chat_target target, std::string payload);
 
