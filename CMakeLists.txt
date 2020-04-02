@@ -98,6 +98,7 @@ add_executable(call_test src/test/call_test.cpp)
 add_executable(crypto_test src/test/crypto_test.cpp)
 add_executable(trie_test src/test/trie_test.cpp)
 add_executable(phys_test src/test/phys_test.cpp)
+add_executable(scene_test src/test/scene_test.cpp)
 
 add_dependencies(chat_server rsa_key)
 add_dependencies(server rsa_key)

@@ -53,7 +53,9 @@ boost::property_tree::ptree engine::Scene::serialize() {
 }
 
 std::string engine::Scene::toJSON() {
-
+	std::stringstream ss;
+	boost::property_tree::write_json(ss, serialize());
+	return ss.str();
 }
 
 void engine::Scene::fromJSON(std::string data) {
@@ -61,6 +63,7 @@ void engine::Scene::fromJSON(std::string data) {
 	std::stringstream ss;
 	ss << data;
 	boost::property_tree::read_json(ss, root);
+	deserialize(root);
 }
 
 void engine::Scene::writeToFile(std::string path) {
