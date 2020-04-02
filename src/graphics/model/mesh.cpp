@@ -28,5 +28,4 @@ void engine::Mesh::computeScale(){
 		max.z = glm::max(max.z, double(v.position.z));
 	}
 	meshScale = max - min;
-	BOOST_LOG_TRIVIAL(trace) << meshScale.x << ", " << meshScale.y << ", " << meshScale.z;
 }

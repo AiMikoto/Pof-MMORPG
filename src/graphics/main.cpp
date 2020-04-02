@@ -20,13 +20,13 @@ int main() {
 	engine::Scene* scene = new engine::Scene();
 	engine::gpu->activeScenes.push_back(scene);
 
-	//std::string modelPath = "../src/graphics/assets/objects/kaguya.obj";
+	std::string modelPath = "../src/graphics/assets/objects/kaguya.obj";
 	std::string defaultModelPath = "../src/graphics/assets/objects/cube.obj";
-	//engine::gpu->modelLoader->loadModel(modelPath);
+	engine::gpu->modelLoader->loadModel(modelPath);
 	engine::gpu->modelLoader->loadModel(defaultModelPath);
 	
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
-	/*for (int i = 0; i < 30; i++) {
+	for (int i = 0; i < 30; i++) {
 		for (int j = 0; j < 30; j++) {
 			engine::GameObject* model = new engine::GameObject();
 			model->transform.position = glm::dvec3(2 * i - 30, 0, 2 * j - 30);
@@ -40,8 +40,8 @@ int main() {
 			
 			scene->addGameObject(model);
 		}
-	}*/
-	scene->readFromFile("../src/graphics/assets/scenes/test.json");
+	}
+	//scene->readFromFile("../src/graphics/assets/scenes/test.json");
 	BOOST_LOG_TRIVIAL(trace) << scene->gameObjects.size();
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
 	glfwSwapInterval(0);
@@ -49,7 +49,7 @@ int main() {
 	while (!engine::gpu->glContext->quit) {
 		engine::gpu->update();
 	}
-	//scene->writeToFile("../src/graphics/assets/scenes/test.json");
+	scene->writeToFile("../src/graphics/assets/scenes/test.json");
 	delete engine::gpu;
 	//delete scene;
 	return 0;

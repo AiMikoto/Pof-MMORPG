@@ -23,7 +23,7 @@ void engine::Scene::update() {
 }
 
 ullong engine::Scene::addGameObject(GameObject* go) {
-	ullong id = getFirstAvailableMapIndex(gameObjects);
+	ullong id = (go->id == 0) ? getFirstAvailableMapIndex(gameObjects) : go->id;
 	gameObjects[id] = go;
 	go->id = id;
 	collider* phys = go->getComponent<physical_collider>();
@@ -48,7 +48,9 @@ boost::property_tree::ptree engine::Scene::serialize() {
 }
 
 std::string engine::Scene::toJSON() {
-
+	std::stringstream ss;
+	boost::property_tree::write_json(ss, serialize());
+	return ss.str();
 }
 
 void engine::Scene::fromJSON(std::string data) {
