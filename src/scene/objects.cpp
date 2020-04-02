@@ -116,20 +116,6 @@ void engine::GameObject::addChildren(std::vector<GameObject*> children) {
 	}
 }
 
-void engine::GameObject::addComponent(Component* component) {
-	bool found = false;
-	for (auto i : this->components) {
-		if (i == component) {
-			found = true;
-			break;
-		}
-	}
-	if (!found) {
-		this->components.push_back(component);
-		component->gameObject = this;
-	}
-}
-
 void engine::GameObject::addComponents(std::vector<Component*> components) {
 	for (auto i : components) {
 		this->addComponent(i);

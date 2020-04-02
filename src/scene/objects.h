@@ -35,7 +35,6 @@ namespace engine {
 		virtual void update();
 		void addChild(GameObject* child);
 		void addChildren(std::vector<GameObject*> children);
-		void addComponent(Component* component);
 		void addComponents(std::vector<Component*> components);
 		boost::property_tree::ptree serialize();
 		template<typename T> bool hasComponent() {
@@ -65,7 +64,7 @@ namespace engine {
 			return NULL;
 		}
 		template<typename T> T* getComponentInChildren() {
-			for(auto child : children) {
+			for (auto child : children) {
 				for (auto c : child->components) {
 					if (typeid(T).name() == c->type) {
 						return static_cast<T*>(c);
@@ -89,7 +88,7 @@ namespace engine {
 				delete component;
 				return false;
 			}
-			this->components.push_back(component);		
+			this->components.push_back(component);
 			component->gameObject = this;
 			component->setup();
 			return true;
