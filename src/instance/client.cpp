@@ -13,6 +13,7 @@
 #include "instance/chat_client.h"
 #include "instance/shutdown.h"
 #include "instance/token.h"
+#include "include/maps.h"
 
 client *master = NULL;
 
@@ -190,7 +191,7 @@ void client::handle_cmd(call c)
     {
       unload();
     }
-    load();
+    load(c.tree().get<map_t>("map"));
     return;
   }
   if(command == "rcon")

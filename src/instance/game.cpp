@@ -30,7 +30,7 @@ void unload()
   }
 }
 
-void load()
+void load(map_t map)
 {
   unload();
   BOOST_LOG_TRIVIAL(trace) << "loading instanced";

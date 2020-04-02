@@ -4,6 +4,7 @@
 #include "common/user_card.h"
 #include "scene/scene.h"
 #include "phys/slicing.h"
+#include "include/maps.h"
 
 extern user_card_library ucl;
 extern user_card_library uclp;
@@ -14,7 +15,7 @@ extern engine::Scene *current;
 
 void unload();
 
-void load();
+void load(map_t map);
 
 bool is_loaded();
 
