@@ -1,4 +1,5 @@
 #include "scene/scene.h"
+#include "components/phys_collider.h"
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -7,6 +8,19 @@
 #define PASS printf("PASSED\n");
 #define FAIL printf("FAILED\n");failures++;
 #define T_EQ(s1, s2) if(scene_eq(s1, s2)) {PASS;} else {FAIL;}
+
+bool col_eq(physical_collider *c1, physical_collider *c2)
+{
+  if(c1 == c2)
+  { // same memory location
+    return true;
+  }
+  if((c1 == NULL) || (c2 == NULL))
+  {
+    return false;
+  }
+  return c1 -> c_type == c2 -> c_type && c1 -> size == c2 -> size;
+}
 
 bool obj_eq(engine::GameObject *o1, engine::GameObject *o2)
 {
@@ -17,6 +31,7 @@ bool obj_eq(engine::GameObject *o1, engine::GameObject *o2)
   assume = assume && o1 -> transform.rotation == o2 -> transform.rotation;
   assume = assume && o1 -> transform.scale    == o2 -> transform.scale;
   assume = assume && o1 -> id                 == o2 -> id;
+  assume = assume && col_eq(o1 -> getComponent<physical_collider>(), o2 -> getComponent<physical_collider>());
   return assume;
 }
 
@@ -36,6 +51,7 @@ void test_serialisation()
 {
   engine::Scene *s1, *s2;
   engine::GameObject *o;
+  engine::Component *c;
   TEST("TESTING SCENE EQUALITY OF EMPTY SCENE")
   s1 = new engine::Scene();
   s2 = new engine::Scene(s1 -> serialize());
@@ -79,6 +95,18 @@ void test_serialisation()
   s2 = new engine::Scene();
   s1 -> writeToFile("test.json");
   s2 -> readFromFile("test.json");
+  T_EQ(s1, s2);
+  delete s1;
+  delete s2;
+  TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT")
+  s1 = new engine::Scene();
+  o = new engine::GameObject();
+  o -> id = 7;
+  o -> tag = "asd";
+  c = new physical_collider({1, 1, 1}, caps);
+  o -> addComponent(c);
+  s1 -> addGameObject(o);
+  s2 = new engine::Scene(s1 -> serialize());
   T_EQ(s1, s2);
   delete s1;
   delete s2;
