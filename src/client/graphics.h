@@ -1,7 +1,11 @@
 #ifndef CLIENT_GRAPHICS_H
 #define CLIENT_GRAPHICS_H
 
+#include "scene/scene.h"
+
 void gfx_init();
+
+void gfx_push(engine::Scene *s);
 
 void gfx_destroy();
 

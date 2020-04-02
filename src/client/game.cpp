@@ -1,9 +1,10 @@
 #include "client/game.h"
 #include "client/client.h"
+#include "client/graphics.h"
 #include "lib/log.h"
 
 user_card_library ucl;
-engine::Scene *current;
+engine::Scene *current = NULL;
 std::mutex scene_lock;
 chat_log cl;
 
@@ -20,8 +21,13 @@ void move(std::string host, int port)
   BOOST_LOG_TRIVIAL(trace) << "attempting to log-in";
   std::string tok = ucl.get(username).tree().get<std::string>("user.token");
   current_instance -> authenticate_token(username, tok);
-  // TODO: take down loading screen
   BOOST_LOG_TRIVIAL(trace) << "finished instance movement";
+}
+
+void set_scene(engine::Scene *s)
+{
+  gfx_push(s);
+  // TODO: take down loading screen
 }
 
 void add_slice(slice_t next_slice)

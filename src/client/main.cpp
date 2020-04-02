@@ -6,6 +6,7 @@
 #include "client/game.h"
 #include "include/maps.h"
 #include "include/regions.h"
+#include "client/graphics.h"
 #include <boost/thread/barrier.hpp>
 
 #define LOGIN_SV_HOST "localhost"
@@ -54,6 +55,8 @@ int main(int argc, char **argv)
   init_crypto(pub);
   BOOST_LOG_TRIVIAL(trace) << "client initialising";
   init_l.lock();
+  BOOST_LOG_TRIVIAL(trace) << "initialising graphics";
+  gfx_init();
   // artificially create a new game
   BOOST_LOG_TRIVIAL(trace) << "attempting to connect to login server";
   current_instance = instance_builder(host, port);
@@ -77,5 +80,6 @@ int main(int argc, char **argv)
   boost::barrier b(2);
   BOOST_LOG_TRIVIAL(error) << "client finished successfully";
   b.wait();
+  gfx_destroy();
   return 0;
 }

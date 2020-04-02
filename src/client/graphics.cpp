@@ -11,10 +11,25 @@ void gfx_init()
   BOOST_LOG_TRIVIAL(trace) << "Initializing GPU context";
   engine::gpu = new engine::GPU();
   engine::gpu -> initializeContext();
-  engine::gpu -> activeScenes.push_back(current);
   BOOST_LOG_TRIVIAL(trace) << "GPU context initialized";
   glfwSwapInterval(0);
+  BOOST_LOG_TRIVIAL(trace) << "pushing empty scene";
+  gfx_push(new engine::Scene());
+  BOOST_LOG_TRIVIAL(trace) << "starting render thread";
   t_render = new boost::thread(gfx_duty);
+}
+
+void gfx_push(engine::Scene *s)
+{
+  scene_lock.lock();
+  engine::gpu -> activeScenes.clear();
+  if(current)
+  {
+    delete current;
+  }
+  engine::gpu -> activeScenes.push_back(s);
+  current = s;
+  scene_lock.unlock();
 }
 
 void gfx_destroy()
