@@ -3,6 +3,7 @@
 #include "lib/log.h"
 #include "include/common_macro.h"
 #include "instance/misc.h"
+#include "instance/ioc.h"
 
 user_card_library ucl;
 user_card_library uclp;
@@ -25,6 +26,7 @@ void unload()
     loaded = false;
     slicer_t.join();
     BOOST_LOG_TRIVIAL(trace) << "deleting scene";
+    int status;
     // TODO: save scene
     delete current;
   }
@@ -33,9 +35,9 @@ void unload()
 void load(map_t map)
 {
   unload();
-  BOOST_LOG_TRIVIAL(trace) << "loading instanced";
-  // TODO: load scene
-  current = new engine::Scene();
+  BOOST_LOG_TRIVIAL(trace) << "loading instance";
+  int status;
+  current = db -> load_map(map, &status);
   slicer_t = boost::thread(slicer);
   loaded = true;
 }

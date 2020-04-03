@@ -38,7 +38,7 @@ void engine::MeshFilter::setType() {
 }
 
 void engine::MeshFilter::setup() {
-	if (hasModel() && !initialized) {
+	if (gpu != NULL && hasModel() && !initialized) {
 		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
 		if (meshRenderer != NULL) {
 			meshRenderer->setup();

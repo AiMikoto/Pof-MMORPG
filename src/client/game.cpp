@@ -24,9 +24,9 @@ void move(std::string host, int port)
   BOOST_LOG_TRIVIAL(trace) << "finished instance movement";
 }
 
-void set_scene(engine::Scene *s)
+void set_scene(boost::property_tree::ptree node)
 {
-  gfx_push(s);
+  gfx_buffer(node);
   // TODO: take down loading screen
 }
 

@@ -171,5 +171,5 @@ void instance::slice_cb(call c)
 void instance::scene_cb(call c)
 {
   BOOST_LOG_TRIVIAL(info) << "received scene";
-  set_scene(new engine::Scene(c.tree().get_child("data")));
+  set_scene(c.tree().get_child("data"));
 }

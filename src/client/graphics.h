@@ -5,7 +5,9 @@
 
 void gfx_init();
 
-void gfx_push(engine::Scene *s);
+void gfx_buffer(boost::property_tree::ptree);
+
+void gfx_push();
 
 void gfx_destroy();
 
