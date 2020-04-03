@@ -111,14 +111,12 @@ slice_t slice(engine::Scene *e)
             continue;
           }
           BOOST_LOG_TRIVIAL(trace) << "handling collision";
-          double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-(gop -> velocity + ret.vel_delta[it.first]), axis);
-          glm::dvec3 j = axis;
-          glm::dmat3 im = {{gop -> im, 0, 0}, {0, gop -> im, 0}, {0, 0, gop -> im}};
-          glm::dvec3 v = (gop -> velocity + ret.vel_delta[it.first]);
-          double em = glm::dot(j, im * j);
-          double lam = (-glm::dot(j, v) + bias) / em;
-          glm::dvec3 dv = (im * j) * lam;
-          ret.vel_delta[it.first] += dv;
+          // stop the object
+          ret.vel_delta[it.first] -= glm::dot(gop -> velocity + ret.vel_delta[it.first], axis) * axis;
+          // push the object back
+          go -> transform.position -= ret.pos_delta[it.first];
+          ret.pos_delta[it.first] -= (axis * offset);
+          go -> transform.position += ret.pos_delta[it.first];
         }
         else
         {
