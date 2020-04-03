@@ -22,7 +22,7 @@ aabb collider::to_aabb()
   aabb ret;
   glm::dvec3 position = this -> gameObject -> transform.position;
   glm::dvec3 scale = this -> gameObject -> transform.scale;
-  glm::dvec3 size = this ->size;
+  glm::dvec3 size = this -> size;
   if(this -> c_type == sphere)
   {
     // Assumptions

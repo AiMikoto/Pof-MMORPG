@@ -8,8 +8,8 @@
 
 enum collider_t
 {
-  caps = 0,
-  box,
+  box = 0,
+  caps,
   sphere
 };
 
