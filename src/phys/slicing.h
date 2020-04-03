@@ -5,6 +5,14 @@
 #include <map>
 #include <boost/property_tree/ptree.hpp>
 
+enum collision_handling_model_t
+{
+  CH_SI,
+  CH_SM
+};
+
+extern collision_handling_model_t collision_handling_model;
+
 class slice_t
 {
 public:

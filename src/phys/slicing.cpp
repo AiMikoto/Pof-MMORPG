@@ -7,6 +7,8 @@
 
 // a few helper functions
 
+collision_handling_model_t collision_handling_model = CH_SM;
+
 glm::dvec3 decode_dvec3(boost::property_tree::ptree tree)
 {
   return {tree.get<double>("x"), tree.get<double>("y"), tree.get<double>("z")};
@@ -111,12 +113,36 @@ slice_t slice(engine::Scene *e)
             continue;
           }
           BOOST_LOG_TRIVIAL(trace) << "handling collision";
-          // stop the object
-          ret.vel_delta[it.first] -= glm::dot(gop -> velocity + ret.vel_delta[it.first], axis) * axis;
-          // push the object back
-          go -> transform.position -= ret.pos_delta[it.first];
-          ret.pos_delta[it.first] -= (axis * offset);
-          go -> transform.position += ret.pos_delta[it.first];
+          switch (collision_handling_model)
+          {
+            case CH_SI:
+            {
+              double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-(gop -> velocity + ret.vel_delta[it.first]), axis);
+              glm::dvec3 j = axis;
+              glm::dmat3 im = {{gop -> im, 0, 0}, {0, gop -> im, 0}, {0, 0, gop -> im}};
+              glm::dvec3 v = (gop -> velocity + ret.vel_delta[it.first]);
+              double em = glm::dot(j, im * j);
+              double lam = (-glm::dot(j, v) + bias) / em;
+              glm::dvec3 dv = (im * j) * lam;
+              ret.vel_delta[it.first] += dv;
+              break;
+            }
+            case CH_SM:
+            {
+              // stop the object
+              ret.vel_delta[it.first] -= glm::dot(gop -> velocity + ret.vel_delta[it.first], axis) * axis;
+              // push the object back
+              go -> transform.position -= ret.pos_delta[it.first];
+              ret.pos_delta[it.first] -= (axis * offset);
+              go -> transform.position += ret.pos_delta[it.first];
+              break;
+            }
+            default:
+            {
+              // literally nothing, it will clip through
+              break;
+            }
+          }
         }
         else
         {
