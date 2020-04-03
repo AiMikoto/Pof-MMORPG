@@ -27,6 +27,8 @@ boost::property_tree::ptree encode_dvec3(glm::dvec3 vector)
 
 slice_t::slice_t()
 {
+  this -> origin_generation = 0;
+  this -> target_generation = 0;
 }
 
 slice_t::slice_t(boost::property_tree::ptree tree)
@@ -41,6 +43,35 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   {
     this -> vel_delta[std::stoi(it.first)] = decode_dvec3(it.second);
   }
+  this -> origin_generation = tree.get<long long>("og");
+  this -> target_generation = tree.get<long long>("tg");
+}
+
+void slice_t::add(slice_t other)
+{
+  for(auto it : other.pos_delta)
+  {
+    try
+    {
+      this -> pos_delta[it.first] += it.second;
+    }
+    catch(std::exception &e)
+    { // then it doesn't exist as a record
+      this -> pos_delta[it.first] = it.second;
+    }
+  }
+  for(auto it : other.vel_delta)
+  {
+    try
+    {
+      this -> vel_delta[it.first] += it.second;
+    }
+    catch(std::exception &e)
+    { // then it doesn't exist as a record
+      this -> vel_delta[it.first] = it.second;
+    }
+  }
+  this -> target_generation = other.target_generation;
 }
 
 boost::property_tree::ptree slice_t::encode()
@@ -56,6 +87,8 @@ boost::property_tree::ptree slice_t::encode()
   }
   ret.put_child("pos", pos_node);
   ret.put_child("vel", vel_node);
+  ret.put("og", this -> origin_generation);
+  ret.put("tg", this -> target_generation);
   return ret;
 }
 
@@ -72,6 +105,8 @@ const double COEFFICIENT_OF_RESTITUTION = 0.3;
 slice_t slice(engine::Scene *e)
 {
   slice_t ret;
+  ret.origin_generation = e -> generation;
+  ret.target_generation = ret.origin_generation + 1;
   double dt = 1 / SPS;
   for(auto it : e -> gameObjects)
   {
@@ -158,6 +193,7 @@ slice_t slice(engine::Scene *e)
 
 engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
 {
+  e -> generation = slice.target_generation;
   for(auto it : slice.pos_delta)
   {
     engine::GameObject *go = e -> gameObjects[it.first];

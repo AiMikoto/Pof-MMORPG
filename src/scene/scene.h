@@ -12,6 +12,7 @@ namespace engine {
 	public:
 		std::map<ullong, GameObject*> gameObjects;
 		octree ctree;
+		long long generation;
 
 		Scene();
 		Scene(boost::property_tree::ptree node);

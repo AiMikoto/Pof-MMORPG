@@ -8,6 +8,7 @@
 #include <sstream>
 
 engine::Scene::Scene() : ctree(root_aabb()) {
+	generation = 0;
 }
 
 engine::Scene::Scene(boost::property_tree::ptree node) : ctree(root_aabb()) {
@@ -49,6 +50,7 @@ boost::property_tree::ptree engine::Scene::serialize() {
 		scene.add_child("GameObject", g.second->serialize());
 	}
 	node.add_child("Scene", scene);
+	node.put("generation", generation);
 	return node;
 }
 
@@ -77,6 +79,11 @@ void engine::Scene::readFromFile(std::string path) {
 }
 
 void engine::Scene::deserialize(boost::property_tree::ptree node) {
+	try {
+		generation = node.get<long long>("generation");
+	} catch(std::exception &e) {
+		generation = 0;
+	}
 	for (auto go : node.get_child("Scene")) {
 		addGameObject(new GameObject(go.second));
 	}
