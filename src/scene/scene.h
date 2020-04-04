@@ -13,6 +13,8 @@ namespace engine {
 		std::map<ullong, GameObject*> gameObjects;
 		octree ctree;
 		long long generation;
+		// tag is unique and not saved
+		std::string tag;
 
 		Scene();
 		Scene(boost::property_tree::ptree node);

@@ -24,6 +24,7 @@ public:
   boost::property_tree::ptree encode();
   long long origin_generation;
   long long target_generation;
+  std::string tag;
 };
 
 extern const double sps;

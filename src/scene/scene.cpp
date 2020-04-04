@@ -51,6 +51,7 @@ boost::property_tree::ptree engine::Scene::serialize() {
 	}
 	node.add_child("Scene", scene);
 	node.put("generation", generation);
+	node.put("tag", tag);
 	return node;
 }
 
@@ -83,6 +84,11 @@ void engine::Scene::deserialize(boost::property_tree::ptree node) {
 		generation = node.get<long long>("generation");
 	} catch(std::exception &e) {
 		generation = 0;
+	}
+	try {
+		tag = node.get<std::string>("tag");
+	} catch(std::exception &e) {
+		tag = "";
 	}
 	for (auto go : node.get_child("Scene")) {
 		addGameObject(new GameObject(go.second));

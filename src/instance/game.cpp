@@ -4,6 +4,7 @@
 #include "include/common_macro.h"
 #include "instance/misc.h"
 #include "instance/ioc.h"
+#include "lib/uuid.h"
 
 user_card_library ucl;
 user_card_library uclp;
@@ -38,6 +39,7 @@ void load(map_t map)
   BOOST_LOG_TRIVIAL(trace) << "loading instance";
   int status;
   current = db -> load_map(map, &status);
+  current -> tag = get_uuid();
   slicer_t = boost::thread(slicer);
   loaded = true;
 }

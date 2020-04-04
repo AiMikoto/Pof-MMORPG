@@ -29,6 +29,7 @@ slice_t::slice_t()
 {
   this -> origin_generation = 0;
   this -> target_generation = 0;
+  this -> tag = "";
 }
 
 slice_t::slice_t(boost::property_tree::ptree tree)
@@ -45,6 +46,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   }
   this -> origin_generation = tree.get<long long>("og");
   this -> target_generation = tree.get<long long>("tg");
+  this -> tag = tree.get<std::string>("tag");
 }
 
 void slice_t::add(slice_t other)
@@ -89,6 +91,7 @@ boost::property_tree::ptree slice_t::encode()
   ret.put_child("vel", vel_node);
   ret.put("og", this -> origin_generation);
   ret.put("tg", this -> target_generation);
+  ret.put("tag", this -> tag);
   return ret;
 }
 
@@ -107,6 +110,7 @@ slice_t slice(engine::Scene *e)
   slice_t ret;
   ret.origin_generation = e -> generation;
   ret.target_generation = ret.origin_generation + 1;
+  ret.tag = e -> tag;
   double dt = 1 / SPS;
   for(auto it : e -> gameObjects)
   {

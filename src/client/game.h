@@ -23,6 +23,8 @@ void move(std::string host, int port);
 
 void add_slice(slice_t next_slice);
 
+void wipe(std::string tag);
+
 void set_scene(boost::property_tree::ptree node);
 
 void send_message(chat_target target, std::string payload);
