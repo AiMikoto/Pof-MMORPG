@@ -8,7 +8,7 @@ engine::Scene *current = NULL;
 std::mutex scene_lock;
 chat_log cl;
 
-slice_t acc_slice = slice_t();
+std::map<long long, slice_t> slices;
 
 void move(std::string host, int port)
 {
@@ -34,12 +34,11 @@ void set_scene(boost::property_tree::ptree node)
 
 void add_slice(slice_t next_slice)
 {
-  acc_slice.add(next_slice);
   scene_lock.lock();
-  if(current)
+  slices[next_slice.origin_generation] = next_slice;
+  while((current) && (slices.find(current -> generation) != slices.end()))
   {
-    apply_slice(current, acc_slice);
-    acc_slice = slice_t();
+    apply_slice(current, slices[current -> generation]);
   }
   scene_lock.unlock();
 }
