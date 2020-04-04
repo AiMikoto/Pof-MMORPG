@@ -4,6 +4,7 @@
 #include "lib/log.h"
 #include <boost/thread.hpp>
 #include <boost/thread/barrier.hpp>
+#include "client/shutdown.h"
 
 boost::thread *t_render;
 
@@ -57,9 +58,12 @@ void gfx_push()
   bar.wait();
 }
 
+boost::barrier gpu_destroyer_bar(2);
+
 void gfx_destroy()
 {
   engine::gpu -> glContext -> quit = true;
+  gpu_destroyer_bar.wait();
   t_render -> join();
   delete t_render;
 }
@@ -83,5 +87,8 @@ void gfx_duty()
     scene_lock.unlock();
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
   }
+  shutdown();
   BOOST_LOG_TRIVIAL(trace) << "Terminating renderer";
+  gpu_destroyer_bar.wait();
+  delete engine::gpu;
 }
