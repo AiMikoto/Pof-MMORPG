@@ -34,6 +34,7 @@ void gfx_buffer(boost::property_tree::ptree node)
 
 void gfx_push()
 {
+  std::string old_tag = "";
   BOOST_LOG_TRIVIAL(trace) << "attempting to change scene";
   scene_lock.lock();
   BOOST_LOG_TRIVIAL(trace) << "lock aqcuired";
@@ -41,12 +42,18 @@ void gfx_push()
   if(current)
   {
     BOOST_LOG_TRIVIAL(trace) << "deleting old scene";
+    old_tag = current -> tag;
     delete current;
   }
   current = new engine::Scene(push_buffer);
   engine::gpu -> activeScenes.push_back(current);
   buffer_full = false;
   scene_lock.unlock();
+  apply_slice_buffer();
+  if(old_tag != "")
+  {
+    wipe(old_tag);
+  }
   bar.wait();
 }
 

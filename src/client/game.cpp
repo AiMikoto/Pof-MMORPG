@@ -40,8 +40,13 @@ void set_scene(boost::property_tree::ptree node)
 void add_slice(slice_t next_slice)
 {
   BOOST_LOG_TRIVIAL(trace) << "received slice " << next_slice.tag << ":" << next_slice.target_generation;
-  scene_lock.lock();
   slices[next_slice.tag][next_slice.origin_generation] = next_slice;
+  apply_slice_buffer();
+}
+
+void apply_slice_buffer()
+{
+  scene_lock.lock();
   while((current) && (slices.find(current -> tag) != slices.end()) && (slices[current -> tag].find(current -> generation) != slices[current -> tag].end()))
   {
     BOOST_LOG_TRIVIAL(trace) << "applying slice " << slices[current -> tag][current -> generation].tag << ":" << slices[current -> tag][current -> generation].target_generation;
