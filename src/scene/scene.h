@@ -6,6 +6,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include "phys/octree.h"
 #include "core/constants.h"
+#include "include/maps.h"
 
 namespace engine {
 	class Scene {
@@ -15,6 +16,7 @@ namespace engine {
 		long long generation;
 		// tag is unique and not saved
 		std::string tag;
+		map_t map;
 
 		Scene();
 		Scene(boost::property_tree::ptree node);

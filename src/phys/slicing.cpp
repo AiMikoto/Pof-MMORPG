@@ -243,3 +243,13 @@ void slicer_move(unsigned long long id, glm::dvec3 pos)
   slicer_injection_shift[id] = pos;
   slicer_lock.unlock();
 }
+
+void slicer_acquire()
+{
+  slicer_lock.lock();
+}
+
+void slicer_release()
+{
+  slicer_lock.unlock();
+}

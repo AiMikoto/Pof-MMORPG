@@ -210,6 +210,7 @@ void client::handle_cmd(call c)
     ept.add(OP_EDIT_SLICER_STATUS, boost::bind(&client::set_slicer, this, _1));
     ept.add(OP_EDIT_SPS, boost::bind(&client::set_sps, this, _1));
     ept.add(OP_EDIT_MOVE_OBJECT, boost::bind(&client::obj_move, this, _1));
+    ept.add(OP_EDIT_SAVE, boost::bind(&client::map_save, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -267,6 +268,21 @@ void client::set_sps(call c)
 void client::obj_move(call c)
 {
   slicer_move(c.tree().get<unsigned long long>("id"), engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("pos")));
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::map_save(call c)
+{
+  try
+  {
+    map_t map = c.tree().get<map_t>("name");
+    save(map);
+  }
+  catch(std::exception &e)
+  {
+    save();
+  }
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }

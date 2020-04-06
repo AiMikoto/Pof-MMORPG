@@ -46,4 +46,8 @@ void slicer_set_sps(double val);
 
 void slicer_move(unsigned long long id, glm::dvec3 pos);
 
+void slicer_acquire();
+
+void slicer_release();
+
 #endif // PHYS_SLICING_H

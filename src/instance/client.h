@@ -22,6 +22,7 @@ private:
   void set_slicer(call c);
   void set_sps(call c);
   void obj_move(call c);
+  void map_save(call c);
 };
 
 extern client *master;

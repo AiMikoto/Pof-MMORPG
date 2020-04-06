@@ -7,6 +7,11 @@
 
 manipulator *man;
 
+bool try_exit(std::string line)
+{
+  return line == "exit" || line == "quit";
+}
+
 bool try_ss(std::string line)
 {
   if(line == "set slicer on")
@@ -45,6 +50,16 @@ bool try_move(std::string line)
   return false;
 }
 
+bool try_save(std::string line)
+{
+  if(line == "save")
+  {
+    man -> save();
+    return true;
+  }
+  return false;
+}
+
 int main()
 {
   log_init("manipulator");
@@ -55,7 +70,11 @@ int main()
   {
     std::string line;
     getline(std::cin, line);
-    try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
+    if(try_exit(line))
+    {
+      break;
+    }
+    try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
   }
   return 0;
   destroy_crypto();

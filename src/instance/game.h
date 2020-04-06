@@ -15,6 +15,10 @@ extern engine::Scene *current;
 
 void unload();
 
+void save();
+
+void save(map_t map);
+
 void load(map_t map);
 
 bool is_loaded();

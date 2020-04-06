@@ -45,7 +45,11 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 }
 
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
-	id = node.get<int>("id");
+	try{
+		id = node.get<int>("id");
+	} catch (std::exception &e) {
+		id = 0;
+	}
 	name = node.get<std::string>("name");
 	tag = node.get<std::string>("tag");
 	for (auto c : node.get_child("Components")) {

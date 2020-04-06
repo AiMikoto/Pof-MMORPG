@@ -28,9 +28,25 @@ void unload()
     slicer_t.join();
     BOOST_LOG_TRIVIAL(trace) << "deleting scene";
     int status;
-    // TODO: save scene
+    // TODO: check if maps needs to be saved
+    if(false)
+    {
+      save(current -> map);
+    }
     delete current;
   }
+}
+
+void save()
+{
+  save(current -> map);
+}
+
+void save(map_t map)
+{
+  slicer_acquire();
+  db -> save_map(map, current);
+  slicer_release();
 }
 
 void load(map_t map)

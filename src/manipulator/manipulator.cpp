@@ -25,7 +25,6 @@ void set_slicer_cb(boost::barrier *bar, call c)
 void manipulator::set_slicer(bool value)
 {
   boost::barrier bar(2);
-  bool status;
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(set_slicer_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_SLICER_STATUS);
@@ -42,7 +41,6 @@ void set_sps_cb(boost::barrier *bar, call c)
 void manipulator::set_sps(double value)
 {
   boost::barrier bar(2);
-  bool status;
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(set_sps_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_SPS);
@@ -59,12 +57,37 @@ void obj_move_cb(boost::barrier *bar, call c)
 void manipulator::obj_move(unsigned long long id, glm::dvec3 pos)
 {
   boost::barrier bar(2);
-  bool status;
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_move_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_MOVE_OBJECT);
   c.tree().put("id", id);
   c.tree().put_child("pos", engine::vecSerializer(pos));
+  proto -> safe_write(c);
+  bar.wait();
+}
+
+void save_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::save()
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(save_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_SAVE);
+  proto -> safe_write(c);
+  bar.wait();
+}
+
+void manipulator::save(map_t map)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(save_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_SAVE);
+  c.tree().put("map", map);
   proto -> safe_write(c);
   bar.wait();
 }
