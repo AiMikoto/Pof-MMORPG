@@ -39,6 +39,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
 {
   boost::property_tree::ptree pos_node = tree.get_child("pos");
   boost::property_tree::ptree vel_node = tree.get_child("vel");
+  boost::property_tree::ptree shift_node = tree.get_child("shift");
   for(auto it : pos_node)
   {
     this -> pos_delta[std::stoi(it.first)] = decode_dvec3(it.second);
@@ -47,41 +48,18 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   {
     this -> vel_delta[std::stoi(it.first)] = decode_dvec3(it.second);
   }
+  for(auto it : shift_node)
+  {
+    this -> shift[std::stoi(it.first)] = decode_dvec3(it.second);
+  }
   this -> origin_generation = tree.get<long long>("og");
   this -> target_generation = tree.get<long long>("tg");
   this -> tag = tree.get<std::string>("tag");
 }
 
-void slice_t::add(slice_t other)
-{
-  for(auto it : other.pos_delta)
-  {
-    try
-    {
-      this -> pos_delta[it.first] += it.second;
-    }
-    catch(std::exception &e)
-    { // then it doesn't exist as a record
-      this -> pos_delta[it.first] = it.second;
-    }
-  }
-  for(auto it : other.vel_delta)
-  {
-    try
-    {
-      this -> vel_delta[it.first] += it.second;
-    }
-    catch(std::exception &e)
-    { // then it doesn't exist as a record
-      this -> vel_delta[it.first] = it.second;
-    }
-  }
-  this -> target_generation = other.target_generation;
-}
-
 boost::property_tree::ptree slice_t::encode()
 {
-  boost::property_tree::ptree ret, pos_node, vel_node;
+  boost::property_tree::ptree ret, pos_node, vel_node, shift_node;
   for(auto it : this -> pos_delta)
   {
     pos_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
@@ -90,15 +68,23 @@ boost::property_tree::ptree slice_t::encode()
   {
     vel_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
   }
+  for(auto it : this -> shift)
+  {
+    shift_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+  }
   ret.put_child("pos", pos_node);
   ret.put_child("vel", vel_node);
+  ret.put_child("shift", shift_node);
   ret.put("og", this -> origin_generation);
   ret.put("tg", this -> target_generation);
   ret.put("tag", this -> tag);
   return ret;
 }
 
+// slicing interference
+
 glm::dvec3 gravity_vector = {0, -2, 0};
+std::map <unsigned long long, glm::dvec3> slicer_injection_shift;
 
 // slicing constants
 
@@ -202,6 +188,8 @@ slice_t slice(engine::Scene *e)
       go -> transform.position -= ret.pos_delta[it.first];
     }
   }
+  ret.shift = slicer_injection_shift;
+  slicer_injection_shift.clear();
   slicer_lock.unlock();
   return ret;
 }
@@ -220,6 +208,11 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
     solid_object *gop = go -> getComponent<solid_object>();
     gop -> velocity += it.second;
   }
+  for(auto it : slice.shift)
+  {
+    engine::GameObject *go = e -> gameObjects[it.first];
+    go -> transform.position = it.second;
+  }
   return e;
 }
 
@@ -234,5 +227,19 @@ void slicer_set_status(bool status)
 {
   slicer_lock.lock();
   slicer_active = status;
+  slicer_lock.unlock();
+}
+
+void slicer_set_sps(double val)
+{
+  slicer_lock.lock();
+  SPS = val;
+  slicer_lock.unlock();
+}
+
+void slicer_move(unsigned long long id, glm::dvec3 pos)
+{
+  slicer_lock.lock();
+  slicer_injection_shift[id] = pos;
   slicer_lock.unlock();
 }

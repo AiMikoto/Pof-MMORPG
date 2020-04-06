@@ -54,7 +54,7 @@ void slicer()
   boost::chrono::system_clock::time_point last = boost::chrono::system_clock::now();
   forever_until(!loaded)
   {
-    boost::chrono::duration<double> duration = last - boost::chrono::system_clock::now() + boost::chrono::milliseconds(10);
+    boost::chrono::duration<double> duration = last - boost::chrono::system_clock::now() + boost::chrono::milliseconds(1000 / (int)SPS);
     boost::this_thread::sleep_for(boost::chrono::duration_cast<boost::chrono::microseconds>(duration));
     last = boost::chrono::system_clock::now();
     BOOST_LOG_TRIVIAL(trace) << "computing new scene";
