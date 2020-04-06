@@ -30,6 +30,9 @@
 #define OP_SLICE "slice"
 #define OP_SCENE "scene"
 
+#define OP_EDIT_CB "e_cb"
+#define OP_EDIT_SLICER_STATUS "e_ss"
+
 class protocol
 {
 public:
