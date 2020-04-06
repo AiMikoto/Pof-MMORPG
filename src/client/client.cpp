@@ -8,23 +8,9 @@
 #include "common/user_card.h"
 #include "client/game.h"
 #include "lib/uuid.h"
+#include "client/crypto.h"
 
 boost::asio::io_context client_ioc;
-
-rsa_crypto *g_rsa;
-aes_crypto *g_aes;
-
-void init_crypto(std::string pub)
-{
-  std::string uuid1 = get_uuid();
-  std::string uuid2 = get_uuid();
-  std::string uuid3 = uuid1 + uuid2;
-  std::string uuid4 = get_uuid();
-  g_aes = new aes_crypto(uuid3.substr(0, 32), uuid4.substr(0, 16));
-  BIO *keybio = BIO_new(BIO_s_file());
-  BIO_read_filename(keybio, pub.c_str());
-  g_rsa = new rsa_crypto(keybio, NULL);
-}
 
 instance *instance_builder(std::string host, int port)
 {

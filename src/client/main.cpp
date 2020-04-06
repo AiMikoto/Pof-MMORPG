@@ -9,6 +9,7 @@
 #include "client/graphics.h"
 #include <boost/thread/barrier.hpp>
 #include "client/shutdown.h"
+#include "client/crypto.h"
 
 #ifdef __linux__
 #include <csignal>
@@ -93,5 +94,7 @@ int main(int argc, char **argv)
   delete current_instance;
   BOOST_LOG_TRIVIAL(error) << "destroying gfx";
   gfx_destroy();
+  BOOST_LOG_TRIVIAL(error) << "deleting keys";
+  destroy_crypto();
   return 0;
 }
