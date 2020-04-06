@@ -29,15 +29,18 @@ void engine::Scene::update() {
 }
 
 ullong engine::Scene::addGameObject(GameObject* go) {
-	ullong id = getFirstAvailableMapIndex(gameObjects);
-	gameObjects[id] = go;
-	go->id = id;
+	if(go->id == 0)
+	{
+		ullong id = getFirstAvailableMapIndex(gameObjects);
+		go->id = id;
+	}
+	gameObjects[go->id] = go;
 	collider* phys = go->getComponent<physical_collider>();
 	if (phys && !go->hasComponent<solid_object>()) {
 		aabb caabb = phys->to_aabb();
-		ctree.insert(int(id), caabb);
+		ctree.insert(int(go->id), caabb);
 	}
-	return id;
+	return go->id;
 }
 
 ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {

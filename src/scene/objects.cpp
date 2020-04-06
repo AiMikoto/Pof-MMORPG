@@ -39,9 +39,13 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 	for (auto c : gameObject.children) {
 		this->addChild(new GameObject(*c));
 	}
+	id = gameObject.id;
+	name = gameObject.name;
+	tag = gameObject.tag;
 }
 
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
+	id = node.get<int>("id");
 	name = node.get<std::string>("name");
 	tag = node.get<std::string>("tag");
 	for (auto c : node.get_child("Components")) {
@@ -144,6 +148,7 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	boost::property_tree::ptree node, componentsNode, childrenNode;
 	node.put("name", name);
 	node.put("tag", tag);
+	node.put("id", id);
 	for (auto c : components) {
 		componentsNode.add_child(c->name, c->serialize());
 	}
