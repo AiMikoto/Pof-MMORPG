@@ -4,6 +4,9 @@
 #include "components/solid_object.h"
 #include "components/phys_collider.h"
 #include <set>
+#include <mutex>
+
+std::mutex slicer_lock;
 
 // a few helper functions
 
@@ -99,9 +102,10 @@ glm::dvec3 gravity_vector = {0, -2, 0};
 
 // slicing constants
 
-const double SPS = 100; // Slices per second
-const double BAUMGARDE_CONSTANT = 0.2;
-const double COEFFICIENT_OF_RESTITUTION = 0.3;
+bool slicer_active = true;
+double SPS = 100; // Slices per second
+double BAUMGARDE_CONSTANT = 0.2;
+double COEFFICIENT_OF_RESTITUTION = 0.3;
 
 // slicing implementation
 
@@ -112,6 +116,12 @@ slice_t slice(engine::Scene *e)
   ret.target_generation = ret.origin_generation + 1;
   ret.tag = e -> tag;
   double dt = 1 / SPS;
+  slicer_lock.lock();
+  if(!slicer_active)
+  {
+    slicer_lock.unlock();
+    return ret;
+  }
   for(auto it : e -> gameObjects)
   {
     engine::GameObject *go = it.second;
@@ -192,6 +202,7 @@ slice_t slice(engine::Scene *e)
       go -> transform.position -= ret.pos_delta[it.first];
     }
   }
+  slicer_lock.unlock();
   return ret;
 }
 
@@ -215,4 +226,13 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
 engine::Scene *tick(engine::Scene *e)
 {
   return apply_slice(e, slice(e));
+}
+
+// editor functions
+
+void slicer_set_status(bool status)
+{
+  slicer_lock.lock();
+  slicer_active = status;
+  slicer_lock.unlock();
 }

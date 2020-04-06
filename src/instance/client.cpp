@@ -204,6 +204,11 @@ void client::handle_cmd(call c)
     replace_crypto(aes);
     return;
   }
+  if(command == "edit")
+  {
+    ept.add(OP_EDIT_SLICER_STATUS, boost::bind(&client::set_slicer, this, _1));
+    return;
+  }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
 }
 
@@ -238,4 +243,11 @@ void client::handle_shutdown(call c)
   validate_authority(c.tree().get<std::string>("authority.token"));
   BOOST_LOG_TRIVIAL(trace) << "remote shutdown initiated";
   shutdown();
+}
+
+void client::set_slicer(call c)
+{
+  slicer_set_status(c.tree().get<bool>("status"));
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
 }

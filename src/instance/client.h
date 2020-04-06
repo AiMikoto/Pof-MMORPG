@@ -18,6 +18,8 @@ private:
   void handle_cmd(call c);
   void handle_irc_request(call c);
   void handle_shutdown(call c);
+  // editor calls
+  void set_slicer(call c);
 };
 
 extern client *master;

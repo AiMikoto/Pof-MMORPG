@@ -27,14 +27,19 @@ public:
   std::string tag;
 };
 
-extern const double sps;
-extern const double BAUMGARDE_CONSTANT;
-extern const double COEFFICIENT_OF_RESTITUTION;
+extern bool slicer_active;
+extern double sps;
+extern double BAUMGARDE_CONSTANT;
+extern double COEFFICIENT_OF_RESTITUTION;
 
 slice_t slice(engine::Scene *e);
 
 engine::Scene *apply_slice(engine::Scene *e, slice_t slice);
 
 engine::Scene *tick(engine::Scene *e);
+
+// editor functions
+
+void slicer_set_status(bool status);
 
 #endif // PHYS_SLICING_H

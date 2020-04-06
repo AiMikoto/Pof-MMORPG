@@ -9,6 +9,7 @@ public:
   rcon(std::string hostname, int port, std::string tok, rsa_crypto *rsa, aes_crypto *aes);
   ~rcon();
   protocol *proto;
+  std::string tok;
 };
 
 #endif // LIB_RCON_H
