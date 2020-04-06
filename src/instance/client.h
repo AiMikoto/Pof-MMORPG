@@ -23,6 +23,7 @@ private:
   void set_sps(call c);
   void obj_move(call c);
   void map_save(call c);
+  void add_obj(call c);
 };
 
 extern client *master;

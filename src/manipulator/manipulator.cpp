@@ -13,8 +13,22 @@ manipulator::manipulator(std::string hostname, int port, std::string tok):rcon(h
   proto -> safe_write(init);
 }
 
+void spawn_cb(boost::barrier *bar, unsigned long long *ret, call c)
+{
+  *ret = c.tree().get<unsigned long long>("id");
+  bar -> wait();
+}
+
 unsigned long long manipulator::spawn()
 {
+  boost::barrier bar(2);
+  call c;
+  unsigned long long ret;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(spawn_cb, &bar, &ret, _1));
+  c.tree().put(OPCODE, OP_EDIT_ADD_OBJ);
+  proto -> safe_write(c);
+  bar.wait();
+  return ret;
 }
 
 void set_slicer_cb(boost::barrier *bar, call c)

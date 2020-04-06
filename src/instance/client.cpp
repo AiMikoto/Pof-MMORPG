@@ -211,6 +211,7 @@ void client::handle_cmd(call c)
     ept.add(OP_EDIT_SPS, boost::bind(&client::set_sps, this, _1));
     ept.add(OP_EDIT_MOVE_OBJECT, boost::bind(&client::obj_move, this, _1));
     ept.add(OP_EDIT_SAVE, boost::bind(&client::map_save, this, _1));
+    ept.add(OP_EDIT_ADD_OBJ, boost::bind(&client::add_obj, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -253,21 +254,31 @@ void client::handle_shutdown(call c)
 
 void client::set_slicer(call c)
 {
-  slicer_set_status(c.tree().get<bool>("status"));
+  bool status = c.tree().get<bool>("status");
+  slicer_acquire();
+  slicer_set_status(status);
+  slicer_release();
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }
 
 void client::set_sps(call c)
 {
-  slicer_set_sps(c.tree().get<double>("sps"));
+  double sps = c.tree().get<double>("sps");
+  slicer_acquire();
+  slicer_set_sps(sps);
+  slicer_release();
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }
 
 void client::obj_move(call c)
 {
-  slicer_move(c.tree().get<unsigned long long>("id"), engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("pos")));
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  glm::dvec3 pos = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("pos"));
+  slicer_acquire();
+  slicer_move(id, pos);
+  slicer_release();
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }
@@ -284,5 +295,12 @@ void client::map_save(call c)
     save();
   }
   c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::add_obj(call c)
+{
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  c.tree().put("id", game_inject_object());
   safe_write(c);
 }

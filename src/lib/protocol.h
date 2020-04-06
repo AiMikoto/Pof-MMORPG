@@ -36,6 +36,8 @@
 #define OP_EDIT_MOVE_OBJECT "e_mov"
 #define OP_EDIT_ROTATE_OBJECT "e_rot"
 #define OP_EDIT_SAVE "e_sav"
+#define OP_EDIT_ADD_OBJ "e_obj"
+#define OP_EDIT_ADD_COMP "e_com"
 
 class protocol
 {

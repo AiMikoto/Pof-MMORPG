@@ -60,6 +60,16 @@ bool try_save(std::string line)
   return false;
 }
 
+bool try_spawn(std::string line)
+{
+  if(line == "spawn")
+  {
+    printf("spawned [%llu]\n", man -> spawn());
+    return true;
+  }
+  return false;
+}
+
 int main()
 {
   log_init("manipulator");
@@ -74,7 +84,7 @@ int main()
     {
       break;
     }
-    try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
+    try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
   }
   return 0;
   destroy_crypto();

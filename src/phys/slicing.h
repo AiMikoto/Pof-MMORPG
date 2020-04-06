@@ -46,6 +46,8 @@ void slicer_set_sps(double val);
 
 void slicer_move(unsigned long long id, glm::dvec3 pos);
 
+void slicer_inject_object(engine::GameObject *go);
+
 void slicer_acquire();
 
 void slicer_release();

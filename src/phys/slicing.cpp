@@ -225,24 +225,25 @@ engine::Scene *tick(engine::Scene *e)
 
 void slicer_set_status(bool status)
 {
-  slicer_lock.lock();
   slicer_active = status;
-  slicer_lock.unlock();
 }
 
 void slicer_set_sps(double val)
 {
-  slicer_lock.lock();
   SPS = val;
-  slicer_lock.unlock();
 }
 
 void slicer_move(unsigned long long id, glm::dvec3 pos)
 {
-  slicer_lock.lock();
   slicer_injection_shift[id] = pos;
-  slicer_lock.unlock();
 }
+
+void slicer_inject_object(engine::GameObject *go)
+{
+  // TODO: this
+}
+
+// lock functions - use these to control the slicing process, the functions above are only thread safe in the context of slicer_lock manipulation
 
 void slicer_acquire()
 {

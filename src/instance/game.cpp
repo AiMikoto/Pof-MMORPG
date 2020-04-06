@@ -65,6 +65,16 @@ bool is_loaded()
   return loaded;
 }
 
+unsigned long long game_inject_object()
+{
+  engine::GameObject *go = new engine::GameObject();
+  slicer_acquire();
+  unsigned long long pos = current -> addGameObject(go);
+  slicer_inject_object(go);
+  slicer_release();
+  return pos;
+}
+
 void slicer()
 {
   boost::chrono::system_clock::time_point last = boost::chrono::system_clock::now();

@@ -23,6 +23,8 @@ void load(map_t map);
 
 bool is_loaded();
 
+unsigned long long game_inject_object();
+
 void slicer();
 
 #endif // INSTANCE_GAME_H
