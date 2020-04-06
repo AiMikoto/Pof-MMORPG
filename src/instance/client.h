@@ -20,6 +20,8 @@ private:
   void handle_shutdown(call c);
   // editor calls
   void set_slicer(call c);
+  void set_sps(call c);
+  void obj_move(call c);
 };
 
 extern client *master;

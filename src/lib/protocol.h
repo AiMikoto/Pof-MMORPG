@@ -32,6 +32,9 @@
 
 #define OP_EDIT_CB "e_cb"
 #define OP_EDIT_SLICER_STATUS "e_ss"
+#define OP_EDIT_SPS "e_sps"
+#define OP_EDIT_MOVE_OBJECT "e_mov"
+#define OP_EDIT_ROTATE_OBJECT "e_rot"
 
 class protocol
 {

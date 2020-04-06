@@ -206,7 +206,10 @@ void client::handle_cmd(call c)
   }
   if(command == "edit")
   {
+    BOOST_LOG_TRIVIAL(warning) << "enabling editor";
     ept.add(OP_EDIT_SLICER_STATUS, boost::bind(&client::set_slicer, this, _1));
+    ept.add(OP_EDIT_SPS, boost::bind(&client::set_sps, this, _1));
+    ept.add(OP_EDIT_MOVE_OBJECT, boost::bind(&client::obj_move, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -245,9 +248,25 @@ void client::handle_shutdown(call c)
   shutdown();
 }
 
+// editor functions
+
 void client::set_slicer(call c)
 {
   slicer_set_status(c.tree().get<bool>("status"));
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::set_sps(call c)
+{
+  slicer_set_sps(c.tree().get<double>("sps"));
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::obj_move(call c)
+{
+  slicer_move(c.tree().get<unsigned long long>("id"), engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("pos")));
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }

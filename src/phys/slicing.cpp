@@ -103,6 +103,8 @@ slice_t slice(engine::Scene *e)
   ret.tag = e -> tag;
   double dt = 1 / SPS;
   slicer_lock.lock();
+  ret.shift = slicer_injection_shift;
+  slicer_injection_shift.clear();
   if(!slicer_active)
   {
     slicer_lock.unlock();
@@ -188,8 +190,6 @@ slice_t slice(engine::Scene *e)
       go -> transform.position -= ret.pos_delta[it.first];
     }
   }
-  ret.shift = slicer_injection_shift;
-  slicer_injection_shift.clear();
   slicer_lock.unlock();
   return ret;
 }

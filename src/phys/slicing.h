@@ -42,7 +42,7 @@ engine::Scene *tick(engine::Scene *e);
 
 void slicer_set_status(bool status);
 
-void slicer_set_sps(double val)
+void slicer_set_sps(double val);
 
 void slicer_move(unsigned long long id, glm::dvec3 pos);
 

@@ -25,6 +25,23 @@ int main()
       man.set_slicer(true);
       continue;
     }
+    {
+      double sps;
+      if(sscanf(line.c_str(), "set sps %lf", &sps) == 1)
+      {
+        man.set_sps(sps);
+        continue;
+      }
+    }
+    {
+      unsigned long long id;
+      glm::dvec3 pos;
+      if(sscanf(line.c_str(), "move %llu {%lf, %lf, %lf}", &id, &pos.x, &pos.y, &pos.z) == 4)
+      {
+        man.obj_move(id, pos);
+        continue;
+      }
+    }
     printf("unknown command\n");
   }
   return 0;
