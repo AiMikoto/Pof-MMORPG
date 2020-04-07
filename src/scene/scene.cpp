@@ -56,6 +56,7 @@ void engine::Scene::deleteGameObject(ullong id) {
 		delete it -> second;
 	}
 	gameObjects.erase(id);
+	ctree.erase(id);
 }
 
 boost::property_tree::ptree engine::Scene::serialize() {

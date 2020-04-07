@@ -69,6 +69,22 @@ void octree::insert(unsigned long long id, aabb box)
   }
 }
 
+void octree::erase(unsigned long long id)
+{
+  if(boxes_i.find(id) == boxes_i.end())
+  {
+    return;
+  }
+  weight--;
+  boxes.erase(id);
+  boxes_i.erase(id);
+  for(int i = 0; i < 8; i++)
+  {
+    lazy_boxes[i].erase(id);
+  }
+  lazy_deletions.push_back(id);
+}
+
 std::set<unsigned long long> octree::get_collisions(aabb box)
 {
   std::set<unsigned long long> ret;
@@ -120,6 +136,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -143,6 +163,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -166,6 +190,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -189,6 +217,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -212,6 +244,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -235,6 +271,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -258,6 +298,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -281,6 +325,10 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
         children[index] -> insert(it.first, it.second);
       }
       lazy_boxes[index].clear();
+      for(auto it:lazy_deletions)
+      {
+        children[index] -> erase(it);
+      }
       std::set<int> difference;
       std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
       if(difference.size() != 0)
@@ -288,5 +336,6 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
 	children[index] -> get_collisions_h(box, ret);
       }
     }
+    lazy_deletions.clear();
   }
 }
