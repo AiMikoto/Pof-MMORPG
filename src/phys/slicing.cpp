@@ -41,6 +41,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   boost::property_tree::ptree vel_node = tree.get_child("vel");
   boost::property_tree::ptree shift_node = tree.get_child("shift");
   boost::property_tree::ptree object_node = tree.get_child("obj");
+  boost::property_tree::ptree component_node = tree.get_child("comp");
   boost::property_tree::ptree eject_node = tree.get_child("eje");
   for(auto it : pos_node)
   {
@@ -57,6 +58,10 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   for(auto it : object_node)
   {
     this -> objects[std::stoi(it.first)] = it.second;
+  }
+  for(auto it : component_node)
+  {
+    this -> components[std::stoi(it.first)] = it.second;
   }
   for(auto it : eject_node)
   {
