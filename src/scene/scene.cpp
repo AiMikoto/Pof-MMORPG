@@ -34,6 +34,11 @@ ullong engine::Scene::addGameObject(GameObject* go) {
 		ullong id = getFirstAvailableMapIndex(gameObjects);
 		go->id = id;
 	}
+	auto it = gameObjects.find(go->id);
+	if(it != gameObjects.end())
+	{ // new object takes priority
+		delete it -> second;
+	}
 	gameObjects[go->id] = go;
 	collider* phys = go->getComponent<physical_collider>();
 	if (phys && !go->hasComponent<solid_object>()) {

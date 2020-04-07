@@ -21,6 +21,7 @@ public:
   std::map<unsigned long long, glm::dvec3> pos_delta;
   std::map<unsigned long long, glm::dvec3> vel_delta;
   std::map<unsigned long long, glm::dvec3> shift;
+  std::map<unsigned long long, boost::property_tree::ptree> objects;
   boost::property_tree::ptree encode();
   long long origin_generation;
   long long target_generation;

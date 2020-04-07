@@ -67,9 +67,11 @@ bool is_loaded()
 
 unsigned long long game_inject_object()
 {
+  engine::GameObject *aux = new engine::GameObject();
   engine::GameObject *go = new engine::GameObject();
   slicer_acquire();
-  unsigned long long pos = current -> addGameObject(go);
+  unsigned long long pos = current -> addGameObject(aux);
+  go -> id = pos;
   slicer_inject_object(go);
   slicer_release();
   return pos;

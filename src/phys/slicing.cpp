@@ -40,6 +40,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   boost::property_tree::ptree pos_node = tree.get_child("pos");
   boost::property_tree::ptree vel_node = tree.get_child("vel");
   boost::property_tree::ptree shift_node = tree.get_child("shift");
+  boost::property_tree::ptree object_node = tree.get_child("obj");
   for(auto it : pos_node)
   {
     this -> pos_delta[std::stoi(it.first)] = decode_dvec3(it.second);
@@ -52,6 +53,10 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   {
     this -> shift[std::stoi(it.first)] = decode_dvec3(it.second);
   }
+  for(auto it : shift_node)
+  {
+    this -> objects[std::stoi(it.first)] = it.second;
+  }
   this -> origin_generation = tree.get<long long>("og");
   this -> target_generation = tree.get<long long>("tg");
   this -> tag = tree.get<std::string>("tag");
@@ -59,7 +64,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
 
 boost::property_tree::ptree slice_t::encode()
 {
-  boost::property_tree::ptree ret, pos_node, vel_node, shift_node;
+  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, object_node;
   for(auto it : this -> pos_delta)
   {
     pos_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
@@ -72,9 +77,14 @@ boost::property_tree::ptree slice_t::encode()
   {
     shift_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
   }
+  for(auto it : this -> objects)
+  {
+    object_node.put_child(std::to_string(it.first), it.second);
+  }
   ret.put_child("pos", pos_node);
   ret.put_child("vel", vel_node);
   ret.put_child("shift", shift_node);
+  ret.put_child("obj", object_node);
   ret.put("og", this -> origin_generation);
   ret.put("tg", this -> target_generation);
   ret.put("tag", this -> tag);
@@ -85,6 +95,9 @@ boost::property_tree::ptree slice_t::encode()
 
 glm::dvec3 gravity_vector = {0, -2, 0};
 std::map <unsigned long long, glm::dvec3> slicer_injection_shift;
+// note on injection_objects - allocated memory is created by the caller of
+// inject_object, but memory is deleted by slicer.
+std::map <unsigned long long, engine::GameObject *> slicer_injection_objects;
 
 // slicing constants
 
@@ -105,6 +118,12 @@ slice_t slice(engine::Scene *e)
   slicer_lock.lock();
   ret.shift = slicer_injection_shift;
   slicer_injection_shift.clear();
+  for(auto it : slicer_injection_objects)
+  {
+    ret.objects[it.first] = it.second -> serialize();
+    delete it.second;
+  }
+  slicer_injection_objects.clear();
   if(!slicer_active)
   {
     slicer_lock.unlock();
@@ -197,6 +216,11 @@ slice_t slice(engine::Scene *e)
 engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
 {
   e -> generation = slice.target_generation;
+  for(auto it : slice.objects)
+  {
+    engine::GameObject *go = new engine::GameObject(it.second);
+    e -> addGameObject(go);
+  }
   for(auto it : slice.pos_delta)
   {
     engine::GameObject *go = e -> gameObjects[it.first];
@@ -240,7 +264,7 @@ void slicer_move(unsigned long long id, glm::dvec3 pos)
 
 void slicer_inject_object(engine::GameObject *go)
 {
-  // TODO: this
+  slicer_injection_objects[go -> id] = go;
 }
 
 // lock functions - use these to control the slicing process, the functions above are only thread safe in the context of slicer_lock manipulation
