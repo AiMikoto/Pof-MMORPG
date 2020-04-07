@@ -41,7 +41,7 @@ ullong engine::Scene::addGameObject(GameObject* go) {
 	collider* phys = go->getComponent<physical_collider>();
 	if (phys && !go->hasComponent<solid_object>()) {
 		aabb caabb = phys->to_aabb();
-		ctree.insert(int(go->id), caabb);
+		ctree.insert(go->id, caabb);
 	}
 	return go->id;
 }
@@ -57,6 +57,20 @@ void engine::Scene::deleteGameObject(ullong id) {
 	}
 	gameObjects.erase(id);
 	ctree.erase(id);
+}
+
+void engine::Scene::regenerateCtree() {
+	for (auto g : gameObjects) {
+		GameObject *go = g.second;
+		collider* phys = go->getComponent<physical_collider>();
+		if (phys) {
+			aabb caabb = phys->to_aabb();
+			ctree.insert(g.first, caabb);
+		}
+		if(go->hasComponent<solid_object>()) {
+			ctree.erase(g.first);
+		}
+	}
 }
 
 boost::property_tree::ptree engine::Scene::serialize() {

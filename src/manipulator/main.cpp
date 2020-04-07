@@ -57,6 +57,12 @@ bool try_save(std::string line)
     man -> save();
     return true;
   }
+  char file[256];
+  if(sscanf(line.c_str(), "save %s", file) == 1)
+  {
+    man -> save(std::string(file));
+    return true;
+  }
   return false;
 }
 
@@ -85,20 +91,27 @@ bool try_add(std::string line)
 {
   unsigned long long id;
   boost::property_tree::ptree recipe;
-  if(sscanf(line.c_str(), "add %llu solid_object", &id) == 1)
+  if(sscanf(line.c_str(), "add solid_object to %llu", &id) == 1)
   {
     recipe.put("type", "solid_object");
     man -> comp_add(id, recipe);
     return true;
   }
-  if(sscanf(line.c_str(), "add %llu phys_collider box", &id) == 1)
+  if(sscanf(line.c_str(), "add phys_collider to %llu", &id) == 1)
+  {
+    recipe.put("type", "physical_collider");
+    recipe.put("shape", "sphere");
+    man -> comp_add(id, recipe);
+    return true;
+  }
+  if(sscanf(line.c_str(), "add phys_collider box to %llu", &id) == 1)
   {
     recipe.put("type", "physical_collider");
     recipe.put("shape", "box");
     man -> comp_add(id, recipe);
     return true;
   }
-  if(sscanf(line.c_str(), "add %llu phys_collider caps", &id) == 1)
+  if(sscanf(line.c_str(), "add phys_collider caps to %llu", &id) == 1)
   {
     recipe.put("type", "physical_collider");
     recipe.put("shape", "caps");

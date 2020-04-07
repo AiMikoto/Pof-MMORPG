@@ -148,7 +148,7 @@ slice_t slice(engine::Scene *e)
   slicer_injection_objects.clear();
   for(auto it : slicer_injection_components)
   {
-    ret.components[it.first] = it.second -> serialize();
+    ret.components[it.first].put_child(it.second -> name, it.second -> serialize());
     delete it.second;
   }
   slicer_injection_components.clear();
@@ -275,6 +275,7 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
   {
     e -> deleteGameObject(it);
   }
+  e -> regenerateCtree();
   return e;
 }
 

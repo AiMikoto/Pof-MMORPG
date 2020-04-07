@@ -15,6 +15,9 @@
 #include "instance/token.h"
 #include "include/maps.h"
 
+#include "components/phys_collider.h"
+#include "components/solid_object.h"
+
 client *master = NULL;
 
 boost::asio::io_context irc_context;
@@ -212,6 +215,7 @@ void client::handle_cmd(call c)
     ept.add(OP_EDIT_MOVE_OBJECT, boost::bind(&client::obj_move, this, _1));
     ept.add(OP_EDIT_SAVE, boost::bind(&client::map_save, this, _1));
     ept.add(OP_EDIT_ADD_OBJ, boost::bind(&client::add_obj, this, _1));
+    ept.add(OP_EDIT_ADD_COMP, boost::bind(&client::add_comp, this, _1));
     ept.add(OP_EDIT_DELETE_OBJ, boost::bind(&client::remove_obj, this, _1));
     return;
   }
@@ -303,6 +307,40 @@ void client::add_obj(call c)
 {
   c.tree().put(OPCODE, OP_EDIT_CB);
   c.tree().put("id", game_inject_object());
+  safe_write(c);
+}
+
+void client::add_comp(call c)
+{
+  engine::Component *comp = NULL;
+  unsigned long long id = c.tree().get<unsigned long long>("target");
+  std::string comp_type = c.tree().get<std::string>("recipe.type");
+  if(comp_type == "solid_object")
+  {
+    comp = new solid_object();
+  }
+  if(comp_type == "physical_collider")
+  {
+    collider_t c_type;
+    std::string shape = c.tree().get<std::string>("recipe.shape");
+    if(shape == "sphere")
+    {
+      c_type = sphere;
+    }
+    if(shape == "box")
+    {
+      c_type = box;
+    }
+    if(shape == "capsule")
+    {
+      c_type = caps;
+    }
+    comp = new physical_collider({2, 2, 2}, c_type);
+  }
+  slicer_acquire();
+  slicer_inject_component(id, comp);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }
 

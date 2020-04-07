@@ -58,7 +58,11 @@ void octree::insert(unsigned long long id, aabb box)
 {
   if(no_intersect(box, this -> base))
   {
-    return;
+    return; // nothing to do
+  }
+  if(boxes_i.find(id) != boxes_i.end())
+  {
+    return; // already present
   }
   weight++;
   boxes[id] = box;

@@ -134,7 +134,7 @@ void manipulator::save(map_t map)
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(save_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_SAVE);
-  c.tree().put("map", map);
+  c.tree().put("name", map);
   proto -> safe_write(c);
   bar.wait();
 }
