@@ -22,6 +22,8 @@ public:
   std::map<unsigned long long, glm::dvec3> pos_delta;
   std::map<unsigned long long, glm::dvec3> vel_delta;
   std::map<unsigned long long, glm::dvec3> shift;
+  std::map<unsigned long long, glm::dvec3> scale;
+  std::map<unsigned long long, glm::dvec3> rotation;
   std::map<unsigned long long, boost::property_tree::ptree> objects;
   std::map<unsigned long long, boost::property_tree::ptree> components;
   std::vector <unsigned long long> ejections;
@@ -49,6 +51,10 @@ void slicer_set_status(bool status);
 void slicer_set_sps(double val);
 
 void slicer_move(unsigned long long id, glm::dvec3 pos);
+
+void slicer_scale(unsigned long long id, glm::dvec3 scale);
+
+void slicer_rotate(unsigned long long id, glm::dvec3 rotation);
 
 void slicer_inject_object(engine::GameObject *go);
 

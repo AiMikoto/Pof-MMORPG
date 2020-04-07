@@ -40,6 +40,8 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   boost::property_tree::ptree pos_node = tree.get_child("pos");
   boost::property_tree::ptree vel_node = tree.get_child("vel");
   boost::property_tree::ptree shift_node = tree.get_child("shift");
+  boost::property_tree::ptree scale_node = tree.get_child("scale");
+  boost::property_tree::ptree rotation_node = tree.get_child("rotation");
   boost::property_tree::ptree object_node = tree.get_child("obj");
   boost::property_tree::ptree component_node = tree.get_child("comp");
   boost::property_tree::ptree eject_node = tree.get_child("eje");
@@ -54,6 +56,14 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   for(auto it : shift_node)
   {
     this -> shift[std::stoi(it.first)] = decode_dvec3(it.second);
+  }
+  for(auto it : scale_node)
+  {
+    this -> scale[std::stoi(it.first)] = decode_dvec3(it.second);
+  }
+  for(auto it : rotation_node)
+  {
+    this -> rotation[std::stoi(it.first)] = decode_dvec3(it.second);
   }
   for(auto it : object_node)
   {
@@ -74,7 +84,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
 
 boost::property_tree::ptree slice_t::encode()
 {
-  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, object_node, component_node, eject_node;
+  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, scale_node, rotation_node, object_node, component_node, eject_node;
   for(auto it : this -> pos_delta)
   {
     pos_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
@@ -86,6 +96,14 @@ boost::property_tree::ptree slice_t::encode()
   for(auto it : this -> shift)
   {
     shift_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+  }
+  for(auto it : this -> scale)
+  {
+    scale_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+  }
+  for(auto it : this -> rotation)
+  {
+    rotation_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
   }
   for(auto it : this -> objects)
   {
@@ -102,6 +120,8 @@ boost::property_tree::ptree slice_t::encode()
   ret.put_child("pos", pos_node);
   ret.put_child("vel", vel_node);
   ret.put_child("shift", shift_node);
+  ret.put_child("scale", scale_node);
+  ret.put_child("rotation", rotation_node);
   ret.put_child("obj", object_node);
   ret.put_child("comp", component_node);
   ret.put_child("eje", eject_node);
@@ -115,6 +135,8 @@ boost::property_tree::ptree slice_t::encode()
 
 glm::dvec3 gravity_vector = {0, -2, 0};
 std::map <unsigned long long, glm::dvec3> slicer_injection_shift;
+std::map <unsigned long long, glm::dvec3> slicer_injection_scale;
+std::map <unsigned long long, glm::dvec3> slicer_injection_rotation;
 // note on injection_objects - allocated memory is created by the caller of
 // inject_object, but memory is deleted by slicer.
 std::map <unsigned long long, engine::GameObject *> slicer_injection_objects;
@@ -139,6 +161,10 @@ slice_t slice(engine::Scene *e)
   double dt = 1 / SPS;
   slicer_lock.lock();
   ret.shift = slicer_injection_shift;
+  slicer_injection_shift.clear();
+  ret.scale = slicer_injection_scale;
+  slicer_injection_shift.clear();
+  ret.rotation = slicer_injection_rotation;
   slicer_injection_shift.clear();
   for(auto it : slicer_injection_objects)
   {
@@ -277,6 +303,16 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
     engine::GameObject *go = e -> gameObjects[it.first];
     go -> transform.position = it.second;
   }
+  for(auto it : slice.scale)
+  {
+    engine::GameObject *go = e -> gameObjects[it.first];
+    go -> transform.scale = it.second;
+  }
+  for(auto it : slice.rotation)
+  {
+    engine::GameObject *go = e -> gameObjects[it.first];
+    go -> transform.rotateTo(1, it.second);
+  }
   for(auto it : slice.ejections)
   {
     e -> deleteGameObject(it);
@@ -305,6 +341,16 @@ void slicer_set_sps(double val)
 void slicer_move(unsigned long long id, glm::dvec3 pos)
 {
   slicer_injection_shift[id] = pos;
+}
+
+void slicer_scale(unsigned long long id, glm::dvec3 scale)
+{
+  slicer_injection_scale[id] = scale;
+}
+
+void slicer_rotate(unsigned long long id, glm::dvec3 rotation)
+{
+  slicer_injection_rotation[id] = rotation;
 }
 
 void slicer_inject_object(engine::GameObject *go)

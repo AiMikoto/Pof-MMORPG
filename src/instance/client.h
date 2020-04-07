@@ -22,6 +22,8 @@ private:
   void set_slicer(call c);
   void set_sps(call c);
   void obj_move(call c);
+  void obj_scale(call c);
+  void obj_rotate(call c);
   void map_save(call c);
   void add_obj(call c);
   void add_comp(call c);

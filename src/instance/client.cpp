@@ -215,6 +215,8 @@ void client::handle_cmd(call c)
     ept.add(OP_EDIT_SLICER_STATUS, boost::bind(&client::set_slicer, this, _1));
     ept.add(OP_EDIT_SPS, boost::bind(&client::set_sps, this, _1));
     ept.add(OP_EDIT_MOVE_OBJECT, boost::bind(&client::obj_move, this, _1));
+    ept.add(OP_EDIT_SCALE_OBJECT, boost::bind(&client::obj_scale, this, _1));
+    ept.add(OP_EDIT_ROTATE_OBJECT, boost::bind(&client::obj_rotate, this, _1));
     ept.add(OP_EDIT_SAVE, boost::bind(&client::map_save, this, _1));
     ept.add(OP_EDIT_ADD_OBJ, boost::bind(&client::add_obj, this, _1));
     ept.add(OP_EDIT_ADD_COMP, boost::bind(&client::add_comp, this, _1));
@@ -285,6 +287,28 @@ void client::obj_move(call c)
   glm::dvec3 pos = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("pos"));
   slicer_acquire();
   slicer_move(id, pos);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::obj_scale(call c)
+{
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  glm::dvec3 scale = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("scale"));
+  slicer_acquire();
+  slicer_scale(id, scale);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::obj_rotate(call c)
+{
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  glm::dvec3 rotation = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("rotation"));
+  slicer_acquire();
+  slicer_rotate(id, rotation);
   slicer_release();
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
