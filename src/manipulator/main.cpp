@@ -70,6 +70,17 @@ bool try_spawn(std::string line)
   return false;
 }
 
+bool try_delete(std::string line)
+{
+  unsigned long long id;
+  if(sscanf(line.c_str(), "delete %llu", &id) == 1)
+  {
+    man -> obj_delete(id);
+    return true;
+  }
+  return false;
+}
+
 int main()
 {
   log_init("manipulator");
@@ -84,7 +95,7 @@ int main()
     {
       break;
     }
-    try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
+    try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
   }
   return 0;
   destroy_crypto();

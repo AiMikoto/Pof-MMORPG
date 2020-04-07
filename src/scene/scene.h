@@ -23,6 +23,7 @@ namespace engine {
 		~Scene();
 		ullong addGameObject(GameObject* go);
 		ullong addGameObject(boost::property_tree::ptree node);
+		void deleteGameObject(ullong id);
 		void update();
 		void sceneToJSON(std::string path);
 		void sceneFromJSON(std::string data);

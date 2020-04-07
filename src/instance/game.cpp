@@ -77,6 +77,13 @@ unsigned long long game_inject_object()
   return pos;
 }
 
+void game_delete_object(unsigned long long id)
+{
+  slicer_acquire();
+  slicer_eject_object(id);
+  slicer_release();
+}
+
 void slicer()
 {
   boost::chrono::system_clock::time_point last = boost::chrono::system_clock::now();

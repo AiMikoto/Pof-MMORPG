@@ -3,6 +3,7 @@
 
 #include "scene/scene.h"
 #include <map>
+#include <vector>
 #include <boost/property_tree/ptree.hpp>
 
 enum collision_handling_model_t
@@ -22,6 +23,7 @@ public:
   std::map<unsigned long long, glm::dvec3> vel_delta;
   std::map<unsigned long long, glm::dvec3> shift;
   std::map<unsigned long long, boost::property_tree::ptree> objects;
+  std::vector <unsigned long long> ejections;
   boost::property_tree::ptree encode();
   long long origin_generation;
   long long target_generation;
@@ -48,6 +50,8 @@ void slicer_set_sps(double val);
 void slicer_move(unsigned long long id, glm::dvec3 pos);
 
 void slicer_inject_object(engine::GameObject *go);
+
+void slicer_eject_object(unsigned long long id);
 
 void slicer_acquire();
 

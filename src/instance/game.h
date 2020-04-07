@@ -25,6 +25,8 @@ bool is_loaded();
 
 unsigned long long game_inject_object();
 
+void game_delete_object(unsigned long long id);
+
 void slicer();
 
 #endif // INSTANCE_GAME_H

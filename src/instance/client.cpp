@@ -212,6 +212,7 @@ void client::handle_cmd(call c)
     ept.add(OP_EDIT_MOVE_OBJECT, boost::bind(&client::obj_move, this, _1));
     ept.add(OP_EDIT_SAVE, boost::bind(&client::map_save, this, _1));
     ept.add(OP_EDIT_ADD_OBJ, boost::bind(&client::add_obj, this, _1));
+    ept.add(OP_EDIT_DELETE_OBJ, boost::bind(&client::remove_obj, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -302,5 +303,13 @@ void client::add_obj(call c)
 {
   c.tree().put(OPCODE, OP_EDIT_CB);
   c.tree().put("id", game_inject_object());
+  safe_write(c);
+}
+
+void client::remove_obj(call c)
+{
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  game_delete_object(id);
+  c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }

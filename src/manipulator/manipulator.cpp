@@ -80,6 +80,22 @@ void manipulator::obj_move(unsigned long long id, glm::dvec3 pos)
   bar.wait();
 }
 
+void obj_delete_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::obj_delete(unsigned long long id)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_delete_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_DELETE_OBJ);
+  c.tree().put("id", id);
+  proto -> safe_write(c);
+  bar.wait();
+}
+
 void save_cb(boost::barrier *bar, call c)
 {
   bar -> wait();

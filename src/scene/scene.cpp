@@ -29,14 +29,12 @@ void engine::Scene::update() {
 }
 
 ullong engine::Scene::addGameObject(GameObject* go) {
-	if(go->id == 0)
-	{
+	if(go->id == 0) {
 		ullong id = getFirstAvailableMapIndex(gameObjects);
 		go->id = id;
 	}
 	auto it = gameObjects.find(go->id);
-	if(it != gameObjects.end())
-	{ // new object takes priority
+	if(it != gameObjects.end()) { // new object takes priority
 		delete it -> second;
 	}
 	gameObjects[go->id] = go;
@@ -50,6 +48,14 @@ ullong engine::Scene::addGameObject(GameObject* go) {
 
 ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {
 	return addGameObject(new GameObject(node.get_child("Game Object")));
+}
+
+void engine::Scene::deleteGameObject(ullong id) {	
+	auto it = gameObjects.find(id);
+	if(it != gameObjects.end()) {
+		delete it -> second;
+	}
+	gameObjects.erase(id);
 }
 
 boost::property_tree::ptree engine::Scene::serialize() {

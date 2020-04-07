@@ -13,6 +13,7 @@ public:
   void set_slicer(bool mode);
   void set_sps(double sps);
   void obj_move(unsigned long long id, glm::dvec3 pos);
+  void obj_delete(unsigned long long id);
   void save();
   void save(map_t map);
 };
