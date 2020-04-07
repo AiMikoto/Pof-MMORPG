@@ -174,9 +174,13 @@ slice_t slice(engine::Scene *e)
       ret.vel_delta[it.first] = gop -> im * gop -> force_acc * dt;
       gop -> force_acc = {0, 0, 0};
       ret.pos_delta[it.first] = (gop -> velocity + ret.vel_delta[it.first]) * dt;
+      collider *c = go -> getComponent<physical_collider>();
+      if(!c)
+      { // pointless checking for collisions without a collider
+        continue;
+      }
       // emulating position change for the purpose of collision detection
       go -> transform.position += ret.pos_delta[it.first];
-      collider *c = go -> getComponent<physical_collider>();
       aabb caabb = c -> to_aabb();
       BOOST_LOG_TRIVIAL(trace) << "Checking for colisions";
       std::set<unsigned long long> collisions;
