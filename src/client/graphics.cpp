@@ -82,6 +82,7 @@ void gfx_duty()
     {
       gfx_push();
     }
+    apply_slice_buffer();
     scene_lock.lock();
     engine::gpu -> update();
     scene_lock.unlock();
