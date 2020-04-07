@@ -118,6 +118,14 @@ bool try_add(std::string line)
     man -> comp_add(id, recipe);
     return true;
   }
+  char path[256];
+  if(sscanf(line.c_str(), "add mesh_filter %s to %llu", path, &id) == 2)
+  {
+    recipe.put("type", "mesh_filter");
+    recipe.put("path", std::string(path));
+    man -> comp_add(id, recipe);
+    return true;
+  }
   return false;
 }
 

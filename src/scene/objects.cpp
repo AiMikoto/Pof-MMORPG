@@ -140,16 +140,21 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 
 bool engine::GameObject::constructComponent(boost::property_tree::ptree node) {
 	for (auto c : node) {
-		if (c.first == "Camera")
+		if (c.first == "Camera") {
 			return addComponent(new Camera(c.second));
-		if (c.first == "MeshFilter")
+		}
+		if (c.first == "MeshFilter") {
 			return addComponent(new MeshFilter(c.second));
-		if (c.first == "MeshRenderer")
+		}
+		if (c.first == "MeshRenderer") {
 			return addComponent(new MeshRenderer(c.second));
-		if (c.first == "physical_collider")
+		}
+		if (c.first == "physical_collider") {
 			return addComponent(new physical_collider(c.second));
-		if (c.first == "solid_object")
+		}
+		if (c.first == "solid_object") {
 			return addComponent(new solid_object(c.second));
+		}
 	}
 	return false;
 }

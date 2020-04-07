@@ -18,7 +18,7 @@ namespace engine {
 		virtual boost::property_tree::ptree serialize() = 0;
 		virtual void setup() = 0;
 	protected:
-		bool initialized;
+		bool initialized = false;
 		virtual void setType() = 0; //you can also set the name in here
 	};
 }
