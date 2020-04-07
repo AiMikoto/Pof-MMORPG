@@ -126,6 +126,12 @@ bool try_add(std::string line)
     man -> comp_add(id, recipe);
     return true;
   }
+  if(sscanf(line.c_str(), "add mesh_renderer to %llu", &id) == 1)
+  {
+    recipe.put("type", "mesh_renderer");
+    man -> comp_add(id, recipe);
+    return true;
+  }
   return false;
 }
 

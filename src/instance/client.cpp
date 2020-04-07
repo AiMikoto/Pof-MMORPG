@@ -18,6 +18,7 @@
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
 #include "components/meshFilter.h"
+#include "components/meshRenderer.h"
 
 client *master = NULL;
 
@@ -342,6 +343,10 @@ void client::add_comp(call c)
   {
     std::string path = c.tree().get<std::string>("recipe.path");
     comp = new engine::MeshFilter(path);
+  }
+  if(comp_type == "mesh_renderer")
+  {
+    comp = new engine::MeshRenderer();
   }
   slicer_acquire();
   slicer_inject_component(id, comp);
