@@ -69,7 +69,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
 
 boost::property_tree::ptree slice_t::encode()
 {
-  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, object_node, eject_node;
+  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, object_node, component_node, eject_node;
   for(auto it : this -> pos_delta)
   {
     pos_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
@@ -86,6 +86,10 @@ boost::property_tree::ptree slice_t::encode()
   {
     object_node.put_child(std::to_string(it.first), it.second);
   }
+  for(auto it : this -> components)
+  {
+    component_node.put_child(std::to_string(it.first), it.second);
+  }
   for(auto it : this -> ejections)
   {
     eject_node.put(std::to_string(it), it);
@@ -94,6 +98,7 @@ boost::property_tree::ptree slice_t::encode()
   ret.put_child("vel", vel_node);
   ret.put_child("shift", shift_node);
   ret.put_child("obj", object_node);
+  ret.put_child("comp", component_node);
   ret.put_child("eje", eject_node);
   ret.put("og", this -> origin_generation);
   ret.put("tg", this -> target_generation);
@@ -109,6 +114,7 @@ std::map <unsigned long long, glm::dvec3> slicer_injection_shift;
 // inject_object, but memory is deleted by slicer.
 std::map <unsigned long long, engine::GameObject *> slicer_injection_objects;
 std::vector <unsigned long long> slicer_ejection_objects;
+std::map <unsigned long long, engine::Component *> slicer_injection_components;
 
 // slicing constants
 
@@ -135,6 +141,12 @@ slice_t slice(engine::Scene *e)
     delete it.second;
   }
   slicer_injection_objects.clear();
+  for(auto it : slicer_injection_components)
+  {
+    ret.components[it.first] = it.second -> serialize();
+    delete it.second;
+  }
+  slicer_injection_components.clear();
   ret.ejections = slicer_ejection_objects;
   slicer_ejection_objects.clear();
   if(!slicer_active)
@@ -234,6 +246,10 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
     engine::GameObject *go = new engine::GameObject(it.second);
     e -> addGameObject(go);
   }
+  for(auto it : slice.components)
+  {
+    e -> gameObjects[it.first] -> constructComponent(it.second);
+  }
   for(auto it : slice.pos_delta)
   {
     engine::GameObject *go = e -> gameObjects[it.first];
@@ -282,6 +298,11 @@ void slicer_move(unsigned long long id, glm::dvec3 pos)
 void slicer_inject_object(engine::GameObject *go)
 {
   slicer_injection_objects[go -> id] = go;
+}
+
+void slicer_inject_component(unsigned long long id, engine::Component *c)
+{
+  slicer_injection_components[id] = c;
 }
 
 void slicer_eject_object(unsigned long long id)
