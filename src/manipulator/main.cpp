@@ -81,6 +81,33 @@ bool try_delete(std::string line)
   return false;
 }
 
+bool try_add(std::string line)
+{
+  unsigned long long id;
+  boost::property_tree::ptree recipe;
+  if(sscanf(line.c_str(), "add %llu solid_object", &id) == 1)
+  {
+    recipe.put("type", "solid_object");
+    man -> comp_add(id, recipe);
+    return true;
+  }
+  if(sscanf(line.c_str(), "add %llu phys_collider box", &id) == 1)
+  {
+    recipe.put("type", "physical_collider");
+    recipe.put("shape", "box");
+    man -> comp_add(id, recipe);
+    return true;
+  }
+  if(sscanf(line.c_str(), "add %llu phys_collider caps", &id) == 1)
+  {
+    recipe.put("type", "physical_collider");
+    recipe.put("shape", "caps");
+    man -> comp_add(id, recipe);
+    return true;
+  }
+  return false;
+}
+
 int main()
 {
   log_init("manipulator");
@@ -95,7 +122,7 @@ int main()
     {
       break;
     }
-    try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
+    try_add(line) || try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
   }
   return 0;
   destroy_crypto();

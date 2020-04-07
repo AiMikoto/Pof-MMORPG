@@ -14,6 +14,7 @@ public:
   void set_sps(double sps);
   void obj_move(unsigned long long id, glm::dvec3 pos);
   void obj_delete(unsigned long long id);
+  void comp_add(unsigned long long target, boost::property_tree::ptree recipe);
   void save();
   void save(map_t map);
 };

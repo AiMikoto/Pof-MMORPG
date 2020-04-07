@@ -96,6 +96,23 @@ void manipulator::obj_delete(unsigned long long id)
   bar.wait();
 }
 
+void comp_add_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::comp_add(unsigned long long target, boost::property_tree::ptree recipe)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(comp_add_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_ADD_COMP);
+  c.tree().put("target", target);
+  c.tree().put_child("recipe", recipe);
+  proto -> safe_write(c);
+  bar.wait();
+}
+
 void save_cb(boost::barrier *bar, call c)
 {
   bar -> wait();
