@@ -80,6 +80,40 @@ void manipulator::obj_move(unsigned long long id, glm::dvec3 pos)
   bar.wait();
 }
 
+void obj_scale_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::obj_scale(unsigned long long id, glm::dvec3 scale)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_scale_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_SCALE_OBJECT);
+  c.tree().put("id", id);
+  c.tree().put_child("scale", engine::vecSerializer(scale));
+  proto -> safe_write(c);
+  bar.wait();
+}
+
+void obj_rotate_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::obj_rotate(unsigned long long id, glm::dvec3 rotation)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_rotate_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_ROTATE_OBJECT);
+  c.tree().put("id", id);
+  c.tree().put_child("rotation", engine::vecSerializer(rotation));
+  proto -> safe_write(c);
+  bar.wait();
+}
+
 void obj_delete_cb(boost::barrier *bar, call c)
 {
   bar -> wait();

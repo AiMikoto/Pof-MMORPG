@@ -13,6 +13,8 @@ public:
   void set_slicer(bool mode);
   void set_sps(double sps);
   void obj_move(unsigned long long id, glm::dvec3 pos);
+  void obj_scale(unsigned long long id, glm::dvec3 scale);
+  void obj_rotate(unsigned long long id, glm::dvec3 rotation);
   void obj_delete(unsigned long long id);
   void comp_add(unsigned long long target, boost::property_tree::ptree recipe);
   void save();

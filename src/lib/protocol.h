@@ -34,6 +34,7 @@
 #define OP_EDIT_SLICER_STATUS "e_ss"
 #define OP_EDIT_SPS "e_sps"
 #define OP_EDIT_MOVE_OBJECT "e_mov"
+#define OP_EDIT_SCALE_OBJECT "e_sca"
 #define OP_EDIT_ROTATE_OBJECT "e_rot"
 #define OP_EDIT_SAVE "e_sav"
 #define OP_EDIT_ADD_OBJ "e_obj+"

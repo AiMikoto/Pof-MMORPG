@@ -50,6 +50,30 @@ bool try_move(std::string line)
   return false;
 }
 
+bool try_scale(std::string line)
+{
+  unsigned long long id;
+  glm::dvec3 scale;
+  if(sscanf(line.c_str(), "scale %llu {%lf, %lf, %lf}", &id, &scale.x, &scale.y, &scale.z) == 4)
+  {
+    man -> obj_scale(id, scale);
+    return true;
+  }
+  return false;
+}
+
+bool try_rotate(std::string line)
+{
+  unsigned long long id;
+  glm::dvec3 rotation;
+  if(sscanf(line.c_str(), "rotate %llu {%lf, %lf, %lf}", &id, &rotation.x, &rotation.y, &rotation.z) == 4)
+  {
+    man -> obj_rotate(id, rotation);
+    return true;
+  }
+  return false;
+}
+
 bool try_save(std::string line)
 {
   if(line == "save")
@@ -149,7 +173,7 @@ int main()
     {
       break;
     }
-    try_add(line) || try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
+    try_rotate(line) || try_scale(line) || try_add(line) || try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || printf("unknown command\n");
   }
   return 0;
   destroy_crypto();
