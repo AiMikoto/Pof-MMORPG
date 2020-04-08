@@ -870,7 +870,6 @@ void test_slicing()
   go -> addComponent(c);
   solid_object *gop = new solid_object();
   go -> addComponent(gop);
-  go -> addComponent(gop);
   e -> addGameObject(go);
   int ticks = 300;
   while(ticks--)

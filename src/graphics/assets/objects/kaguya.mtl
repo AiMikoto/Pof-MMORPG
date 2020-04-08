@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd textures/texture_eye.jpg
+map_Kd textures/kaguya/texture_eye.jpg
 
 newmtl MainMaterial
 Ns 96.078431
@@ -21,7 +21,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd textures/texture_main.jpg
+map_Kd textures/kaguya/texture_main.jpg
 
 newmtl RibbonMaterial
 Ns 96.078431
@@ -32,4 +32,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd textures/texture_ribbon.jpg
+map_Kd textures/kaguya/texture_ribbon.jpg

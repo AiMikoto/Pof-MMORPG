@@ -10,21 +10,10 @@ engine::Component::Component(bool allowMultiple) {
 	this->gameObject = NULL;
 }
 
+engine::Component::Component(const Component& component) {
+	this->allowMultiple = component.allowMultiple;
+	this->gameObject = component.gameObject;
+	this->initialized = component.initialized;
+}
+
 engine::Component::~Component() {}
-
-void engine::Component::setType() {}
-
-boost::property_tree::ptree engine::Component::serialize() {
-	boost::property_tree::ptree node;
-	return node;
-}
-
-void engine::Component::deserialize(boost::property_tree::ptree node) {}
-
-engine::Component* engine::Component::instantiate() {
-	return NULL;
-}
-
-void engine::Component::setup() {
-	initialized = true;
-}

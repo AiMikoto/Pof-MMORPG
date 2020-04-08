@@ -6,3 +6,9 @@ CREATE TABLE userinfo (
 	username varchar(64) UNIQUE NOT NULL,
 	passwordhash varchar(256) NOT NULL
 );
+
+CREATE TABLE mapinfo (
+	ID serial NOT NULL PRIMARY KEY,
+	name varchar(64) UNIQUE NOT NULL,
+	data json NOT NULL
+);

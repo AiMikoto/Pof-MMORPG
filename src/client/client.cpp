@@ -42,6 +42,8 @@ instance::instance(boost::asio::ip::tcp::socket *sock):protocol(sock, g_rsa)
   ept.add(OP_UC_TRANS, boost::bind(&instance::uc_transfer, this, _1));
   ept.add(OP_MOVE, boost::bind(&instance::move_cb, this, _1));
   ept.add(OP_IRC, boost::bind(&instance::irc_cb, this, _1));
+  ept.add(OP_SLICE, boost::bind(&instance::slice_cb, this, _1));
+  ept.add(OP_SCENE, boost::bind(&instance::scene_cb, this, _1));
 }
 
 instance::~instance()
@@ -157,4 +159,17 @@ void instance::irc_cb(call c)
   BOOST_LOG_TRIVIAL(info) << "received message";
   message m(c.tree().get_child("payload"));
   cl.add(m);
+}
+
+void instance::slice_cb(call c)
+{
+  BOOST_LOG_TRIVIAL(info) << "received slice";
+  slice_t next_slice(c.tree().get_child("data"));
+  add_slice(next_slice);
+}
+
+void instance::scene_cb(call c)
+{
+  BOOST_LOG_TRIVIAL(info) << "received scene";
+  set_scene(c.tree().get_child("data"));
 }

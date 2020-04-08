@@ -11,30 +11,32 @@ namespace engine {
 		Texture();
 		Texture(std::string path);
 		Texture(std::string path, uint type);
+		Texture(boost::property_tree::ptree node);
 		~Texture();
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
 	private:
 		void load();
 	};
 
 	struct Material {
-		uint shaderID;
+		uint shaderType;
 		glm::vec4 colorDiffuse, colorSpecular, colorAmbient, colorEmissive, colorTransparent;
 		bool twoSided;
 		int blend, shading;
 		float opacity, shininess, shininessStrength;
-		std::vector<uint> texturesIDs;
+		std::vector<std::string> texturesPaths;
 		std::vector<int> texturesOP;
 		std::vector<float> texturesStrength;
 		std::string path;
 
 		Material();
 		~Material();
-		Material(uint shaderID);
-
+		Material(uint shaderType);
+		Material(boost::property_tree::ptree node);
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
 		void contextSetup();
+		void writeToFile();
+	private:
+		void load();
 	};
 }

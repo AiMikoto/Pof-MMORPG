@@ -14,6 +14,7 @@ namespace engine {
 		Transform();
 		~Transform();
 		Transform(glm::dvec3 position, glm::dquat rotation, glm::dvec3 scale);
+		Transform(boost::property_tree::ptree node);
 		glm::dvec3 forward();
 		glm::dvec3 right();
 		glm::dvec3 up();
@@ -31,7 +32,6 @@ namespace engine {
 		glm::mat4 model();
 
 		boost::property_tree::ptree serialize();
-		void deserialize(boost::property_tree::ptree node);
 	private:
 		std::pair<double, glm::dvec3> anglesToAngleAxis(glm::dvec3 rotationAngles);
 	};
