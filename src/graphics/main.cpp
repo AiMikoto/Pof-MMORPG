@@ -8,6 +8,12 @@
 #include "graphics/model/model.h"
 #include "components/meshRenderer.h"
 #include "components/meshFilter.h"
+#include "lib/nuklear.h"
+
+void uiworks()
+{
+  engine::gpu -> initializeGUI();
+}
 
 int main() {
 	log_init("graphics");
@@ -32,19 +38,17 @@ int main() {
 			model->transform.position = glm::dvec3(2 * i - 30, 0, 2 * j - 30);
 			model->transform.rotateTo(glm::dvec3(6 * i, 6 * (i + j), 6 * j));
 			model->transform.scale = glm::dvec3(1, 1, 1);
-			model->addComponent(new engine::MeshFilter());
-			model->getComponent<engine::MeshFilter>()->modelPath = modelPath;
-			model->getComponent<engine::MeshFilter>()->defaultModelPath = defaultModelPath;
-			model->getComponent<engine::MeshFilter>()->computeModelSize();
+			model->addComponent(new engine::MeshFilter(modelPath));
 			model->addComponent(new engine::MeshRenderer());
 			
 			scene->addGameObject(model);
 		}
 	}
-	//scene->readFromFile("../src/graphics/assets/scenes/test.json");
+	// scene->readFromFile("../src/graphics/assets/scenes/test.json");
 	BOOST_LOG_TRIVIAL(trace) << scene->gameObjects.size();
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
 	glfwSwapInterval(0);
+	uiworks();
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!engine::gpu->glContext->quit) {
 		engine::gpu->update();

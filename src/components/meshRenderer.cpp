@@ -18,12 +18,14 @@ engine::MeshRenderer::MeshRenderer(const MeshRenderer& renderer) {
 }
 
 engine::MeshRenderer::MeshRenderer(boost::property_tree::ptree node) {
+/*
 	for (auto mat : node.get_child("Materials")) {
 		if(mat.first == "Material")
 			materialsPaths.push_back(mat.second.get_value<std::string>());
 		if (mat.first == "Default Material")
 			defaultMaterialPath = mat.second.get_value<std::string>();
 	}
+*/
 	setType();
 }
 
@@ -33,11 +35,13 @@ engine::MeshRenderer::~MeshRenderer() {
 
 boost::property_tree::ptree engine::MeshRenderer::serialize() {
 	boost::property_tree::ptree node, matNode;
+/*
 	matNode.add("Default Material", defaultMaterialPath);
 	for (auto path : materialsPaths) {
 		matNode.add("Material", path);
 	}
 	node.add_child("Materials", matNode);
+*/
 	return node;
 }
 

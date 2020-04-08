@@ -6,7 +6,14 @@
 #include "client/game.h"
 #include "include/maps.h"
 #include "include/regions.h"
+#include "client/graphics.h"
 #include <boost/thread/barrier.hpp>
+#include "client/shutdown.h"
+#include "client/crypto.h"
+
+#ifdef __linux__
+#include <csignal>
+#endif
 
 #define LOGIN_SV_HOST "localhost"
 #define LOGIN_SV_PORT 7777
@@ -50,10 +57,16 @@ int main(int argc, char **argv)
     }
     BOOST_LOG_TRIVIAL(warning) << "unknown parameter " << args[i];
   }
+#ifdef __linux__
+  BOOST_LOG_TRIVIAL(trace) << "loading handler for SIGINT";
+  std::signal(SIGINT, shutdown);
+#endif
   BOOST_LOG_TRIVIAL(trace) << "loading keys";
   init_crypto(pub);
   BOOST_LOG_TRIVIAL(trace) << "client initialising";
   init_l.lock();
+  BOOST_LOG_TRIVIAL(trace) << "initialising graphics";
+  gfx_init();
   // artificially create a new game
   BOOST_LOG_TRIVIAL(trace) << "attempting to connect to login server";
   current_instance = instance_builder(host, port);
@@ -69,13 +82,19 @@ int main(int argc, char **argv)
   }
   BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
   init_l.unlock();
-  boost::this_thread::sleep(boost::posix_time::seconds(25));
+  boost::this_thread::sleep(boost::posix_time::seconds(5));
   BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
   current_instance -> change_map(MAP_FLATLANDS, REG_EU);
-  boost::this_thread::sleep(boost::posix_time::seconds(25));
+  boost::this_thread::sleep(boost::posix_time::seconds(5));
   send_message(world, "fluffy kittens");
-  boost::barrier b(2);
   BOOST_LOG_TRIVIAL(error) << "client finished successfully";
-  b.wait();
+  main_barrier.wait();
+  BOOST_LOG_TRIVIAL(error) << "shutdown initiated";
+  BOOST_LOG_TRIVIAL(error) << "deleting connection";
+  delete current_instance;
+  BOOST_LOG_TRIVIAL(error) << "destroying gfx";
+  gfx_destroy();
+  BOOST_LOG_TRIVIAL(error) << "deleting keys";
+  destroy_crypto();
   return 0;
 }
