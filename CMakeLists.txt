@@ -27,6 +27,7 @@ file(GLOB CORE_SOURCES "src/core/*.cpp")
 file(GLOB SCENE_SOURCES "src/scene/*.cpp")
 file(GLOB CONTROLS_SOURCES "src/controls/*.cpp")
 file(GLOB COMPONENTS_SOURCES "src/components/*.cpp")
+file(GLOB UI_SOURCES "src/ui/*.cpp")
 include_directories(src)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -74,6 +75,8 @@ add_library(nuklear STATIC src/lib/nuklear.cpp)
 link_libraries(nuklear phys components control scene core rcon protocol database call crypto log user_card uuid chat glfw glm assimp OpenGL::GL ${Boost_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} dl chat uuid user_card log crypto call database protocol rcon core scene control components phys nuklear)
 add_library(graphics STATIC ${GRAPHICS_SOURCES})
 link_libraries(graphics nuklear phys components control scene core rcon protocol database call crypto log user_card uuid chat glfw glm assimp OpenGL::GL ${Boost_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} dl chat uuid user_card log crypto call database protocol rcon core scene control components phys nuklear graphics)
+add_library(ui STATIC ${UI_SOURCES})
+link_libraries(ui graphics nuklear phys components control scene core rcon protocol database call crypto log user_card uuid chat glfw glm assimp OpenGL::GL ${Boost_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} dl chat uuid user_card log crypto call database protocol rcon core scene control components phys nuklear graphics ui)
 
 # idk how to set this for windows
 set(OPENSSL openssl)

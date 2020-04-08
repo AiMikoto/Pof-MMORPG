@@ -12,6 +12,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include "graphics/renderLayer.h"
 #include "lib/nuklear.h"
+#include "ui/ui.h"
 
 namespace engine {
 	class GPU {
@@ -27,12 +28,14 @@ namespace engine {
 		GLContext* glContext;
 		Camera* editorCamera;
 		ModelLoader* modelLoader;
-		struct nk_context *ctx;
+		struct nk_context *ctx = NULL;
+		UI *ui = NULL;
 
 		GPU();
 		~GPU();
 		void initializeContext();
 		void initializeGUI();
+		void addUI(UI *ui);
 		void draw();
 		void update();
 		void addRenderer(MeshRenderer* renderer);
