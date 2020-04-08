@@ -3,7 +3,6 @@
 #include "lib/log.h"
 #include "core/time_values.h"
 #include <boost/property_tree/json_parser.hpp>
-#include "lib/nuklear.h"
 
 engine::GPU::GPU() {}
 
@@ -58,10 +57,14 @@ void engine::GPU::initializeContext() {
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
 void engine::GPU::initializeGUI() {
-	struct nk_context *ctx;
 	BOOST_LOG_TRIVIAL(trace) << "Attempting to initialise nuklear context";
-	// ctx = nk_glfw3_init(glContext -> window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
-	BOOST_LOG_TRIVIAL(trace) << "nuklear context initialised";
+	ctx = nk_glfw3_init(glContext -> window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+	BOOST_LOG_TRIVIAL(trace) << "Loading font";
+	{
+		struct nk_font_atlas *atlas;
+		nk_glfw3_font_stash_begin(&atlas);
+		nk_glfw3_font_stash_end();
+	}
 }
 
 void engine::GPU::draw() {
@@ -82,10 +85,23 @@ void engine::GPU::drawScene() {
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
-
 }
 
 void engine::GPU::drawUI() {
+	nk_glfw3_new_frame();
+	enum {EASY, HARD};
+	static int op = EASY;
+	static float value = 0.6f;
+	static int i =  20;
+	if (nk_begin(ctx, "Demo", nk_rect(50, 50, 230, 250), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE)) {
+		BOOST_LOG_TRIVIAL(trace) << "Box created";
+		nk_layout_row_static(ctx, 30, 80, 1);
+		if (nk_button_label(ctx, "button")) {
+			BOOST_LOG_TRIVIAL(trace) << "button pressed";
+		}
+	}
+	nk_end(ctx);
+	nk_glfw3_render(NK_ANTI_ALIASING_ON);
 	glDisable(GL_DEPTH_TEST);
 }
 
