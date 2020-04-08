@@ -5,6 +5,7 @@ boost::asio::io_context rcon_ioc;
 
 rcon::rcon(std::string hostname, int port, std::string tok, rsa_crypto *rsa, aes_crypto *aes)
 {
+  this -> tok = tok;
   boost::asio::ip::tcp::socket *sock = new boost::asio::ip::tcp::socket(rcon_ioc);
   BOOST_LOG_TRIVIAL(info) << "attempting rcon to " << hostname << ":" << port;
   boost::asio::ip::tcp::resolver resolver(rcon_ioc);

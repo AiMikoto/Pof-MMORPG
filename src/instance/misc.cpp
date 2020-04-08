@@ -22,11 +22,23 @@ void send_message(user_card& uc, call c)
   {
     BOOST_LOG_TRIVIAL(trace) << "message approved";
     client *cli = (client *)uc.aux;
-    cli -> safe_write(c);
+    if(cli)
+    {
+      cli -> safe_write(c);
+    }
   }
 }
 
 void saver(user_card &uc)
 {
   db -> uc_save(uc.tree().get<std::string>("user.name"), uc);
+}
+
+void ucl_broadcast(user_card &uc, call c)
+{
+  client *cli = (client *)uc.aux;
+  if(cli)
+  {
+    cli -> safe_write(c);
+  }
 }

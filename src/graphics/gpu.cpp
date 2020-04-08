@@ -3,6 +3,7 @@
 #include "lib/log.h"
 #include "core/time_values.h"
 #include <boost/property_tree/json_parser.hpp>
+#include "lib/nuklear.h"
 
 engine::GPU::GPU() {}
 
@@ -53,6 +54,16 @@ void engine::GPU::initializeContext() {
 	modelLoader = new ModelLoader();
 }
 
+#define MAX_VERTEX_BUFFER 512 * 1024
+#define MAX_ELEMENT_BUFFER 128 * 1024
+
+void engine::GPU::initializeGUI() {
+	struct nk_context *ctx;
+	BOOST_LOG_TRIVIAL(trace) << "Attempting to initialise nuklear context";
+	// ctx = nk_glfw3_init(glContext -> window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+	BOOST_LOG_TRIVIAL(trace) << "nuklear context initialised";
+}
+
 void engine::GPU::draw() {
 	drawScene();
 	drawUI();
@@ -71,6 +82,7 @@ void engine::GPU::drawScene() {
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
+
 }
 
 void engine::GPU::drawUI() {

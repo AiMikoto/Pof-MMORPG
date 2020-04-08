@@ -7,6 +7,12 @@ collider::collider(glm::dvec3 size, collider_t c_type) : Component(true)
   this -> size = size;
 }
 
+collider::collider(boost::property_tree::ptree node) : Component(true)
+{
+  size = engine::vecDeserializer<glm::dvec3, double>(node.get_child("size"));
+  c_type = static_cast<collider_t>(node.get<int>("shape"));
+}
+
 collider::~collider()
 {
 }
@@ -16,7 +22,7 @@ aabb collider::to_aabb()
   aabb ret;
   glm::dvec3 position = this -> gameObject -> transform.position;
   glm::dvec3 scale = this -> gameObject -> transform.scale;
-  glm::dvec3 size = this ->size;
+  glm::dvec3 size = this -> size;
   if(this -> c_type == sphere)
   {
     // Assumptions

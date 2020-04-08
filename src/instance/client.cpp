@@ -13,6 +13,12 @@
 #include "instance/chat_client.h"
 #include "instance/shutdown.h"
 #include "instance/token.h"
+#include "include/maps.h"
+
+#include "components/phys_collider.h"
+#include "components/solid_object.h"
+#include "components/meshFilter.h"
+#include "components/meshRenderer.h"
 
 client *master = NULL;
 
@@ -72,12 +78,16 @@ void client::handle_auth(call c)
         BOOST_LOG_TRIVIAL(trace) << "user login successful - " << username;
         uclp.remove(username);
         uc.aux = (void *) this;
-        ucl.add(uc);
+        ucl.add(uc); // at this point client will start receiving slices
         // TODO: subscribe user to irc
         answer.tree().put("status", true);
         ept.remove(OP_AUTH_TOKEN);
         ept.add(OP_REQUEST_CHANGE_MAP, boost::bind(&client::handle_map_change_request, this, _1));
         ept.add(OP_IRC, boost::bind(&client::handle_irc_request, this, _1));
+        call scene_transfer;
+        scene_transfer.tree().put(OPCODE, OP_SCENE);
+        scene_transfer.tree().put_child("data", current -> serialize());
+        safe_write(scene_transfer);
         // TODO: populate calls
         break;
       }
@@ -187,7 +197,7 @@ void client::handle_cmd(call c)
     {
       unload();
     }
-    load();
+    load(c.tree().get<map_t>("map"));
     return;
   }
   if(command == "rcon")
@@ -197,6 +207,20 @@ void client::handle_cmd(call c)
     std::string iv = c.tree().get<std::string>("aes.iv");
     aes = new aes_crypto(key, iv);
     replace_crypto(aes);
+    return;
+  }
+  if(command == "edit")
+  {
+    BOOST_LOG_TRIVIAL(warning) << "enabling editor";
+    ept.add(OP_EDIT_SLICER_STATUS, boost::bind(&client::set_slicer, this, _1));
+    ept.add(OP_EDIT_SPS, boost::bind(&client::set_sps, this, _1));
+    ept.add(OP_EDIT_MOVE_OBJECT, boost::bind(&client::obj_move, this, _1));
+    ept.add(OP_EDIT_SCALE_OBJECT, boost::bind(&client::obj_scale, this, _1));
+    ept.add(OP_EDIT_ROTATE_OBJECT, boost::bind(&client::obj_rotate, this, _1));
+    ept.add(OP_EDIT_SAVE, boost::bind(&client::map_save, this, _1));
+    ept.add(OP_EDIT_ADD_OBJ, boost::bind(&client::add_obj, this, _1));
+    ept.add(OP_EDIT_ADD_COMP, boost::bind(&client::add_comp, this, _1));
+    ept.add(OP_EDIT_DELETE_OBJ, boost::bind(&client::remove_obj, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -233,4 +257,132 @@ void client::handle_shutdown(call c)
   validate_authority(c.tree().get<std::string>("authority.token"));
   BOOST_LOG_TRIVIAL(trace) << "remote shutdown initiated";
   shutdown();
+}
+
+// editor functions
+
+void client::set_slicer(call c)
+{
+  bool status = c.tree().get<bool>("status");
+  slicer_acquire();
+  slicer_set_status(status);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::set_sps(call c)
+{
+  double sps = c.tree().get<double>("sps");
+  slicer_acquire();
+  slicer_set_sps(sps);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::obj_move(call c)
+{
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  glm::dvec3 pos = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("pos"));
+  slicer_acquire();
+  slicer_move(id, pos);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::obj_scale(call c)
+{
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  glm::dvec3 scale = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("scale"));
+  slicer_acquire();
+  slicer_scale(id, scale);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::obj_rotate(call c)
+{
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  glm::dvec3 rotation = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("rotation"));
+  slicer_acquire();
+  slicer_rotate(id, rotation);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::map_save(call c)
+{
+  try
+  {
+    map_t map = c.tree().get<map_t>("name");
+    save(map);
+  }
+  catch(std::exception &e)
+  {
+    save();
+  }
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::add_obj(call c)
+{
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  c.tree().put("id", game_inject_object());
+  safe_write(c);
+}
+
+void client::add_comp(call c)
+{
+  engine::Component *comp = NULL;
+  unsigned long long id = c.tree().get<unsigned long long>("target");
+  std::string comp_type = c.tree().get<std::string>("recipe.type");
+  if(comp_type == "solid_object")
+  {
+    comp = new solid_object();
+  }
+  if(comp_type == "physical_collider")
+  {
+    collider_t c_type;
+    std::string shape = c.tree().get<std::string>("recipe.shape");
+    if(shape == "sphere")
+    {
+      c_type = sphere;
+    }
+    if(shape == "box")
+    {
+      c_type = box;
+    }
+    if(shape == "capsule")
+    {
+      c_type = caps;
+    }
+    comp = new physical_collider({2, 2, 2}, c_type);
+  }
+  if(comp_type == "mesh_filter")
+  {
+    std::string path = c.tree().get<std::string>("recipe.path");
+    comp = new engine::MeshFilter(path);
+  }
+  if(comp_type == "mesh_renderer")
+  {
+    comp = new engine::MeshRenderer();
+  }
+  slicer_acquire();
+  slicer_inject_component(id, comp);
+  slicer_release();
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::remove_obj(call c)
+{
+  unsigned long long id = c.tree().get<unsigned long long>("id");
+  game_delete_object(id);
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
 }

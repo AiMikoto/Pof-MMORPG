@@ -8,6 +8,8 @@
 
 void log_init(std::string name);
 
+void log_mute();
+
 void log_test();
 
 #endif // LIB_LOG_INIT

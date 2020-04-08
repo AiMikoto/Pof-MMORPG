@@ -30,6 +30,7 @@ namespace engine {
 		GPU();
 		~GPU();
 		void initializeContext();
+		void initializeGUI();
 		void draw();
 		void update();
 		void addRenderer(MeshRenderer* renderer);

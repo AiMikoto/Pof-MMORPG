@@ -288,3 +288,4 @@ typedef enum {
 } khronos_boolean_enum_t;
 
 #endif /* __khrplatform_h_ */
+

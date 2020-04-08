@@ -12,6 +12,11 @@
 #include "instance/misc.h"
 #include "instance/token.h"
 
+#include "components/phys_collider.h"
+#include "components/solid_object.h"
+#include "components/meshFilter.h"
+#include "components/meshRenderer.h"
+
 #ifdef __linux__
 #include <csignal>
 #endif
