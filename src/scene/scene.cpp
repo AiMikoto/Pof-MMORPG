@@ -54,9 +54,9 @@ void engine::Scene::deleteGameObject(ullong id) {
 	auto it = gameObjects.find(id);
 	if(it != gameObjects.end()) {
 		delete it -> second;
+		gameObjects.erase(id);
+		ctree.erase(id);
 	}
-	gameObjects.erase(id);
-	ctree.erase(id);
 }
 
 void engine::Scene::regenerateCtree() {

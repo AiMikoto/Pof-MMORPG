@@ -163,9 +163,9 @@ slice_t slice(engine::Scene *e)
   ret.shift = slicer_injection_shift;
   slicer_injection_shift.clear();
   ret.scale = slicer_injection_scale;
-  slicer_injection_shift.clear();
+  slicer_injection_scale.clear();
   ret.rotation = slicer_injection_rotation;
-  slicer_injection_shift.clear();
+  slicer_injection_rotation.clear();
   for(auto it : slicer_injection_objects)
   {
     ret.objects[it.first] = it.second -> serialize();

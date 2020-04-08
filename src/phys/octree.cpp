@@ -92,7 +92,7 @@ void octree::erase(unsigned long long id)
 std::set<unsigned long long> octree::get_collisions(aabb box)
 {
   std::set<unsigned long long> ret;
-  get_collisions_h(box, &ret);
+  get_collisions_h(box, ret);
   return ret;
 }
 
@@ -132,7 +132,7 @@ void octree::assert_partialbox(int index)
   }
 }
 
-void octree::get_collisions_sector(int index, aabb box, std::set<unsigned long long> *ret)
+void octree::get_collisions_sector(int index, aabb box, std::set<unsigned long long> &ret)
 {
   for(auto it:lazy_boxes[index])
   {
@@ -144,14 +144,14 @@ void octree::get_collisions_sector(int index, aabb box, std::set<unsigned long l
     children[index] -> erase(it);
   }
   std::set<int> difference;
-  std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret -> begin(), ret -> end(), std::inserter(difference, difference.end()));
+  std::set_difference(children[index] -> boxes_i.begin(), children[index] -> boxes_i.end(), ret.begin(), ret.end(), std::inserter(difference, difference.end()));
   if(difference.size() != 0)
   {
     children[index] -> get_collisions_h(box, ret);
   }
 }
 
-void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
+void octree::get_collisions_h(aabb box, std::set<unsigned long long> &ret)
 {
   if(weight == 0)
   {
@@ -165,7 +165,7 @@ void octree::get_collisions_h(aabb box, std::set<unsigned long long> *ret)
   {
     for(auto it:boxes)
     {
-      ret -> insert(it.first);
+      ret.insert(it.first);
     }
   }
   else

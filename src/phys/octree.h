@@ -17,8 +17,8 @@ public:
   std::set<unsigned long long> get_collisions(aabb box);
 protected:
   void assert_partialbox(int index);
-  void get_collisions_sector(int index, aabb box, std::set<unsigned long long> *ret);
-  void get_collisions_h(aabb box, std::set<unsigned long long> *ret);
+  void get_collisions_sector(int index, aabb box, std::set<unsigned long long> &ret);
+  void get_collisions_h(aabb box, std::set<unsigned long long> &ret);
   octree(aabb base, int depth);
   aabb base;
   octree *children[8];
