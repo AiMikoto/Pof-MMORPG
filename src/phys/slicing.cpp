@@ -283,9 +283,7 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
   }
   for(auto it : slice.components)
   {
-    BOOST_LOG_TRIVIAL(trace) << "Constructing component for " << it.first;
     e -> gameObjects[it.first] -> constructComponent(it.second);
-    BOOST_LOG_TRIVIAL(trace) << "finished constructing component";
   }
   for(auto it : slice.pos_delta)
   {
