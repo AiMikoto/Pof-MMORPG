@@ -68,9 +68,7 @@ void engine::GLContext::initGLAD() {
 
 void engine::GLContext::setGLFWcallbacks() {
 	BOOST_LOG_TRIVIAL(trace) << "Setting callbacks for GLFW";
-	glfwSetScrollCallback(window, scrollCallback);
 	glfwSetCursorPosCallback(window, moveCursorCallback);
-	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyboardCallback);
 	glfwSetWindowSizeCallback(window, windowResizeCallback);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
