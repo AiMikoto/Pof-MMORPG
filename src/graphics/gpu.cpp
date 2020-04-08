@@ -104,6 +104,9 @@ void engine::GPU::drawScene() {
 }
 
 void engine::GPU::drawUI() {
+	if (ui) {
+		ui -> init(ctx);
+	}
 	nk_glfw3_new_frame();
 	if (ui) {
 		ui -> visit(ctx);
