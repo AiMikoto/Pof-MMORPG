@@ -39,22 +39,23 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 	for (auto c : gameObject.children) {
 		this->addChild(new GameObject(*c));
 	}
+	id = gameObject.id;
+	name = gameObject.name;
+	tag = gameObject.tag;
 }
 
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
+	try{
+		id = node.get<int>("id");
+	} catch (std::exception &e) {
+		id = 0;
+	}
 	name = node.get<std::string>("name");
 	tag = node.get<std::string>("tag");
 	for (auto c : node.get_child("Components")) {
-		if (c.first == "Camera")
-			addComponent(new Camera(c.second));
-		if (c.first == "MeshFilter")
-			addComponent(new MeshFilter(c.second));
-		if (c.first == "MeshRenderer")
-			addComponent(new MeshRenderer(c.second));
-		if (c.first == "physical_collider")
-			addComponent(new physical_collider(c.second));
-		if (c.first == "solid_object")
-			addComponent(new solid_object(c.second));
+		boost::property_tree::ptree t;
+		t.put_child(c.first, c.second);
+		constructComponent(t);
 	}
 	transform = Transform(node.get_child("Transform"));
 	for (auto c : node.get_child("Children")) {
@@ -120,30 +121,11 @@ void engine::GameObject::addChildren(std::vector<GameObject*> children) {
 	}
 }
 
-void engine::GameObject::addComponent(Component* component) {
-	bool found = false;
-	for (auto i : this->components) {
-		if (i == component) {
-			found = true;
-			break;
-		}
-	}
-	if (!found) {
-		this->components.push_back(component);
-		component->gameObject = this;
-	}
-}
-
-void engine::GameObject::addComponents(std::vector<Component*> components) {
-	for (auto i : components) {
-		this->addComponent(i);
-	}
-}
-
 boost::property_tree::ptree engine::GameObject::serialize() {
 	boost::property_tree::ptree node, componentsNode, childrenNode;
 	node.put("name", name);
 	node.put("tag", tag);
+	node.put("id", id);
 	for (auto c : components) {
 		componentsNode.add_child(c->name, c->serialize());
 	}
@@ -155,3 +137,25 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	node.add_child("Children", childrenNode);
 	return node;
 }
+
+bool engine::GameObject::constructComponent(boost::property_tree::ptree node) {
+	for (auto c : node) {
+		if (c.first == "Camera") {
+			return addComponent(new Camera(c.second));
+		}
+		if (c.first == "MeshFilter") {
+			return addComponent(new MeshFilter(c.second));
+		}
+		if (c.first == "MeshRenderer") {
+			return addComponent(new MeshRenderer(c.second));
+		}
+		if (c.first == "physical_collider") {
+			return addComponent(new physical_collider(c.second));
+		}
+		if (c.first == "solid_object") {
+			return addComponent(new solid_object(c.second));
+		}
+	}
+	return false;
+}
+

@@ -76,7 +76,7 @@ engine::Camera::Camera(boost::property_tree::ptree node) {
 }
 
 void engine::Camera::setup() {
-	moveSpeed = 5.0f;
+	moveSpeed = 50.0f;
 	rotationSpeed = 1;
 	fieldOfView = 45.0f;
 	nearClipDistance = 0.1f;

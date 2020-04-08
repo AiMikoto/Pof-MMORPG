@@ -77,6 +77,17 @@ void test_octree()
   {
     FAIL;
   }
+  TEST("TESTING OCTREE REMOVAL");
+  t.erase(2);
+  collisions = t.get_collisions(box);
+  if(collisions.size() == 2)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
   TEST("TESTING PERFORMANCE OF OCTREE");
   box.minx =  -1;
   box.miny =  -7;

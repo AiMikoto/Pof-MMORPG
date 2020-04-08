@@ -35,8 +35,6 @@ namespace engine {
 		virtual void update();
 		void addChild(GameObject* child);
 		void addChildren(std::vector<GameObject*> children);
-		void addComponent(Component* component);
-		void addComponents(std::vector<Component*> components);
 		boost::property_tree::ptree serialize();
 		template<typename T> bool hasComponent() {
 			for (auto c : components) {
@@ -94,6 +92,7 @@ namespace engine {
 			component->setup();
 			return true;
 		}
+		bool constructComponent(boost::property_tree::ptree node);
 		//don't call a component destructor separate from the functions in this file
 		//only call this function if you know for sure the component is unique
 		template<typename T> void removeComponent() {

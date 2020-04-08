@@ -15,9 +15,17 @@ extern engine::Scene *current;
 
 void unload();
 
+void save();
+
+void save(map_t map);
+
 void load(map_t map);
 
 bool is_loaded();
+
+unsigned long long game_inject_object();
+
+void game_delete_object(unsigned long long id);
 
 void slicer();
 

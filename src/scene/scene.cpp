@@ -29,19 +29,48 @@ void engine::Scene::update() {
 }
 
 ullong engine::Scene::addGameObject(GameObject* go) {
-	ullong id = getFirstAvailableMapIndex(gameObjects);
-	gameObjects[id] = go;
-	go->id = id;
+	if(go->id == 0) {
+		ullong id = getFirstAvailableMapIndex(gameObjects);
+		go->id = id;
+	}
+	auto it = gameObjects.find(go->id);
+	if(it != gameObjects.end()) { // new object takes priority
+		delete it -> second;
+	}
+	gameObjects[go->id] = go;
 	collider* phys = go->getComponent<physical_collider>();
 	if (phys && !go->hasComponent<solid_object>()) {
 		aabb caabb = phys->to_aabb();
-		ctree.insert(int(id), caabb);
+		ctree.insert(go->id, caabb);
 	}
-	return id;
+	return go->id;
 }
 
 ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {
 	return addGameObject(new GameObject(node.get_child("Game Object")));
+}
+
+void engine::Scene::deleteGameObject(ullong id) {	
+	auto it = gameObjects.find(id);
+	if(it != gameObjects.end()) {
+		delete it -> second;
+		gameObjects.erase(id);
+		ctree.erase(id);
+	}
+}
+
+void engine::Scene::regenerateCtree() {
+	for (auto g : gameObjects) {
+		GameObject *go = g.second;
+		collider* phys = go->getComponent<physical_collider>();
+		if (phys) {
+			aabb caabb = phys->to_aabb();
+			ctree.insert(g.first, caabb);
+		}
+		if(go->hasComponent<solid_object>()) {
+			ctree.erase(g.first);
+		}
+	}
 }
 
 boost::property_tree::ptree engine::Scene::serialize() {

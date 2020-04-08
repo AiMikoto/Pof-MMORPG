@@ -9,12 +9,13 @@ namespace engine {
 	public:
 		std::string modelPath, defaultModelPath;
 
-		MeshFilter();
+		MeshFilter(std::string path);
 		MeshFilter(const MeshFilter& meshFilter);
 		MeshFilter(boost::property_tree::ptree node);
 		~MeshFilter();
 
 		void setup();
+		void assertModel();
 		boost::property_tree::ptree serialize();
 		bool hasModel();
 		double modelSize();

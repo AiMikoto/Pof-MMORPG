@@ -18,6 +18,16 @@ private:
   void handle_cmd(call c);
   void handle_irc_request(call c);
   void handle_shutdown(call c);
+  // editor calls
+  void set_slicer(call c);
+  void set_sps(call c);
+  void obj_move(call c);
+  void obj_scale(call c);
+  void obj_rotate(call c);
+  void map_save(call c);
+  void add_obj(call c);
+  void add_comp(call c);
+  void remove_obj(call c);
 };
 
 extern client *master;

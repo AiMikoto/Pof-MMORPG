@@ -41,7 +41,6 @@ void add_slice(slice_t next_slice)
 {
   BOOST_LOG_TRIVIAL(trace) << "received slice " << next_slice.tag << ":" << next_slice.target_generation;
   slices[next_slice.tag][next_slice.origin_generation] = next_slice;
-  apply_slice_buffer();
 }
 
 void apply_slice_buffer()

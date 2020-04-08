@@ -58,7 +58,7 @@ user_card database::auth(std::string username, std::string password, int *status
   return uc;
 }
 
-void database::map_add(map_t map, engine::Scene *s)
+void database::add_map(map_t map, engine::Scene *s)
 {
   std::string query = "INSERT INTO mapinfo(data, name) VALUES(\'" + s -> toJSON() + "\', \'" + map + "\')";
   pqxx::work W{*conn};
@@ -66,7 +66,7 @@ void database::map_add(map_t map, engine::Scene *s)
   W.commit();
 }
 
-void database::map_save(map_t map, engine::Scene *s)
+void database::save_map(map_t map, engine::Scene *s)
 {
   std::string query = "UPDATE mapinfo SET data = \'" + s -> toJSON() + "\' WHERE name = \'" + map + "\'";
   pqxx::work W{*conn};
@@ -86,6 +86,7 @@ engine::Scene *database::load_map(map_t map, int *status)
     std::string data = std::string(R[0][0].c_str());
     s = new engine::Scene();
     s -> fromJSON(data);
+    s -> map = map;
   }
   return s;
 }

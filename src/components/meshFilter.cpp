@@ -2,7 +2,10 @@
 #include "components/meshRenderer.h"
 #include "graphics/gpu.h"
 
-engine::MeshFilter::MeshFilter() {
+engine::MeshFilter::MeshFilter(std::string path) {
+	this->modelPath = path;
+	this->defaultModelPath = path;
+	this->size = 0;
 	setType();
 }
 
@@ -17,9 +20,6 @@ engine::MeshFilter::MeshFilter(boost::property_tree::ptree node) {
 	modelPath = node.get<std::string>("model");
 	defaultModelPath = node.get<std::string>("defaultModel");
 	size = node.get<double>("modelSize");
-	//for now load the model on scene initialization
-	if (gpu != NULL)
-		gpu->modelLoader->loadModel(modelPath);
 	setType();
 }
 
@@ -37,7 +37,20 @@ void engine::MeshFilter::setType() {
 	name = "MeshFilter";
 }
 
+// implements lazy loading
+void engine::MeshFilter::assertModel()
+{
+	if (hasModel()) {
+		return;
+	}
+	// time to load
+	if (gpu != NULL) {
+		gpu->modelLoader->loadModel(modelPath);
+	}
+}
+
 void engine::MeshFilter::setup() {
+	assertModel();
 	if (gpu != NULL && hasModel() && !initialized) {
 		MeshRenderer* meshRenderer = gameObject->getComponent<MeshRenderer>();
 		if (meshRenderer != NULL) {
@@ -56,6 +69,9 @@ boost::property_tree::ptree engine::MeshFilter::serialize() {
 }
 
 bool engine::MeshFilter::hasModel() {
+	if (gpu == NULL) {
+		return false;
+	}
 	return gpu->models.count(modelPath) == 1;
 }
 
