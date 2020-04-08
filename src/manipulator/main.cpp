@@ -4,6 +4,10 @@
 #include <iostream>
 #include "include/common_macro.h"
 #include "lib/log.h"
+#ifdef __linux__
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 manipulator *man;
 
@@ -68,6 +72,19 @@ bool try_rotate(std::string line)
   glm::dvec3 rotation;
   if(sscanf(line.c_str(), "rotate %llu {%lf, %lf, %lf}", &id, &rotation.x, &rotation.y, &rotation.z) == 4)
   {
+    man -> obj_rotate(id, rotation);
+    return true;
+  }
+  if(sscanf(line.c_str(), "rotate %llu rad {%lf, %lf, %lf}", &id, &rotation.x, &rotation.y, &rotation.z) == 4)
+  {
+    man -> obj_rotate(id, rotation);
+    return true;
+  }
+  if(sscanf(line.c_str(), "rotate %llu deg {%lf, %lf, %lf}", &id, &rotation.x, &rotation.y, &rotation.z) == 4)
+  {
+    rotation.x = rotation.x * M_PI / 180;
+    rotation.y = rotation.y * M_PI / 180;
+    rotation.z = rotation.z * M_PI / 180;
     man -> obj_rotate(id, rotation);
     return true;
   }
@@ -168,7 +185,18 @@ int main()
   forever
   {
     std::string line;
+#ifdef __linux__
+    char *l = readline("> ");
+    if(!l)
+    {
+      break;
+    }
+    add_history(l);
+    line = std::string(l);
+    free(l);
+#else
     getline(std::cin, line);
+#endif
     if(try_exit(line))
     {
       break;

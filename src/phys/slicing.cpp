@@ -309,7 +309,7 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
   for(auto it : slice.rotation)
   {
     engine::GameObject *go = e -> gameObjects[it.first];
-    go -> transform.rotateTo(1, it.second);
+    go -> transform.rotateTo(it.second);
   }
   for(auto it : slice.ejections)
   {
