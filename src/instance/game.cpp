@@ -29,7 +29,7 @@ void unload()
     BOOST_LOG_TRIVIAL(trace) << "deleting scene";
     int status;
     // TODO: check if maps needs to be saved
-    if(false)
+    if(current -> saveOnExit)
     {
       save(current -> map);
     }

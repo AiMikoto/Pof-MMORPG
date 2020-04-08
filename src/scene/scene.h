@@ -17,6 +17,7 @@ namespace engine {
 		// tag is unique and not saved
 		std::string tag;
 		map_t map;
+		bool saveOnExit = false;
 
 		Scene();
 		Scene(boost::property_tree::ptree node);
