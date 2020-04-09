@@ -12,6 +12,7 @@ class UI_element
 public:
   virtual void init(ctx_t *ctx) = 0;
   virtual void visit(ctx_t *ctx) = 0;
+  bool suicide = false;
 };
 
 class UI
@@ -22,6 +23,7 @@ public:
   void erase(UI_element *e);
   void init(ctx_t *ctx);
   void visit(ctx_t *ctx);
+  void cleanup(ctx_t *ctx);
 private:
   std::set<UI_element *> active_elements;
   std::set<UI_element *> initialisation_queue;

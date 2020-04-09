@@ -2,6 +2,7 @@
 
 UI::~UI()
 {
+  lock.lock();
   for(auto elem:initialisation_queue)
   {
     delete elem;
@@ -10,6 +11,7 @@ UI::~UI()
   {
     delete elem;
   }
+  lock.unlock();
 }
 
 void UI::insert(UI_element *e)
@@ -47,4 +49,18 @@ void UI::visit(ctx_t *ctx)
     elem -> visit(ctx);
   }
   lock.unlock();
+}
+
+void UI::cleanup(ctx_t *ctx)
+{
+  lock.lock();
+  auto ae = active_elements;
+  lock.unlock();
+  for(auto elem:ae)
+  {
+    if(elem -> suicide)
+    {
+      erase(elem);
+    }
+  }
 }

@@ -9,10 +9,16 @@
 #include "components/meshRenderer.h"
 #include "components/meshFilter.h"
 #include "lib/nuklear.h"
+#include "ui/ui.h"
+#include "ui/console.h"
 
 void uiworks()
 {
-  engine::gpu -> initializeGUI();
+  UI *ui = new UI();
+  engine::gpu -> addUI(ui);
+  UI_console *c = new UI_console();
+  ui -> insert(c);
+  BOOST_LOG_TRIVIAL(trace) << "Inserted console";
 }
 
 int main() {

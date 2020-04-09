@@ -112,6 +112,9 @@ void engine::GPU::drawUI() {
 		ui -> visit(ctx);
 	}
 	nk_glfw3_render(NK_ANTI_ALIASING_ON);
+	if (ui) {
+		ui -> cleanup(ctx);
+	}
 	glDisable(GL_DEPTH_TEST);
 }
 
