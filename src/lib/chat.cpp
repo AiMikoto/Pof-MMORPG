@@ -33,6 +33,7 @@ void chat_log::add(message m)
   {
     chat.push_front(m);
     uuid_trie.add(m.uuid);
+    dirty = true;
   }
   if(chat.size() > CHAT_LIMIT)
   {
@@ -44,4 +45,11 @@ void chat_log::add(message m)
 std::deque<message> chat_log::get()
 {
   return chat;
+}
+
+bool chat_log::flush()
+{
+  bool ret = dirty;
+  dirty = false;
+  return ret;
 }

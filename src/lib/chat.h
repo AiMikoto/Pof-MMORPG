@@ -40,9 +40,11 @@ class chat_log
 public:
   void add(message m);
   std::deque<message> get();
+  bool flush();
 private:
   std::deque<message> chat;
   trie uuid_trie;
+  bool dirty = false;
 };
 
 #endif // LIB_CHAT_H

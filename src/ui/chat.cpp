@@ -42,6 +42,12 @@ void UI_chat::draw(ctx_t *ctx)
   {
     render_message(ctx, m);
   }
+  if(cl -> flush())
+  { // new message - scroll down
+    nk_uint x, y;
+    nk_group_get_scroll(ctx, "Chat_log", &x, &y);
+    nk_group_set_scroll(ctx, "Chat_log", x, 10000000);
+  }
   nk_group_end(ctx);
   nk_layout_row_dynamic(ctx, 23, 1);
   nk_flags event = nk_edit_string(ctx, NK_EDIT_FIELD|NK_EDIT_SIG_ENTER, buf, &len, CONSOLE_BUF_SIZE - 1, nk_filter_default);
