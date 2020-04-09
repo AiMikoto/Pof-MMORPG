@@ -5,6 +5,7 @@
 #include "client/editor.h"
 #include "ui/chat.h"
 #include "client/shutdown.h"
+#include "ui/scene_viewer.h"
 
 user_card_library ucl;
 engine::Scene *current = NULL;
@@ -51,6 +52,16 @@ bool try_editor_handler(std::string line)
   return false;
 }
 
+bool try_viewer_handler(std::string line)
+{
+  if(line == "viewer")
+  {
+    client_ui -> insert(new UI_scene_viewer(&current));
+    return true;
+  }
+  return false;
+}
+
 void handle_linear_input(std::string line)
 {
   if(std::all_of(line.begin(),line.end(),isspace))
@@ -69,6 +80,10 @@ void handle_linear_input(std::string line)
   {
     return;
   }
+  if(try_viewer_handler(line))
+  {
+    return;
+  }
   if(e && e -> try_handle(line))
   {
     return;
@@ -82,8 +97,8 @@ void handle_linear_input(std::string line)
 
 void game_init()
 {
-  client_ui -> insert(new UI_chat(&cl, handle_linear_input));
   csm = new client_system_manager(&cl);
+  client_ui -> insert(new UI_chat(&cl, handle_linear_input));
 }
 
 void game_destroy()

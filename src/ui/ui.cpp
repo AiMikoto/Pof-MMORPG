@@ -32,23 +32,25 @@ void UI_master::erase(UI_element *e)
 void UI_master::init(ctx_t *ctx)
 {
   lock.lock();
-  for(auto elem:initialisation_queue)
+  auto iq = initialisation_queue;
+  initialisation_queue.clear();
+  lock.unlock();
+  for(auto elem:iq)
   {
     elem -> init(ctx);
     active_elements.insert(elem);
   }
-  initialisation_queue.clear();
-  lock.unlock();
 }
 
 void UI_master::visit(ctx_t *ctx)
 {
   lock.lock();
-  for(auto elem:active_elements)
+  auto ae = active_elements;
+  lock.unlock();
+  for(auto elem:ae)
   {
     elem -> visit(ctx);
   }
-  lock.unlock();
 }
 
 void UI_master::cleanup(ctx_t *ctx)
