@@ -12,20 +12,6 @@
 #include "ui/ui.h"
 #include "ui/console.h"
 
-void pl(std::string line)
-{
-  BOOST_LOG_TRIVIAL(trace) << line;
-}
-
-void uiworks()
-{
-  UI_master *ui = new UI_master();
-  engine::gpu -> addUI(ui);
-  UI_console *c = new UI_console(pl);
-  ui -> insert(c);
-  BOOST_LOG_TRIVIAL(trace) << "Inserted console";
-}
-
 int main() {
 	log_init("graphics");
 	BOOST_LOG_TRIVIAL(trace) << "Initializing GPU context";
@@ -59,7 +45,6 @@ int main() {
 	BOOST_LOG_TRIVIAL(trace) << scene->gameObjects.size();
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
 	glfwSwapInterval(0);
-	uiworks();
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!engine::gpu->glContext->quit) {
 		engine::gpu->update();
