@@ -2,13 +2,41 @@
 #include "client/client.h"
 #include "client/graphics.h"
 #include "lib/log.h"
+#include "client/editor.h"
 
 user_card_library ucl;
 engine::Scene *current = NULL;
 std::mutex scene_lock;
 chat_log cl;
+editor *e = NULL;
 
 std::map<std::string, std::map<long long, slice_t>> slices;
+
+bool try_editor_handler(std::string line)
+{ 
+  char tok[256];
+  if(sscanf(line.c_str(), "editor open %s", tok) == 1)
+  {
+    e = new editor("localhost", 7000, std::string(tok));
+    return true;
+  }
+  if(line == "editor close")
+  {
+    delete e;
+    e = NULL;
+    return true;
+  }
+  return false;
+}
+
+void handle_linear_input(std::string line)
+{
+  try_editor_handler(line);
+  if(e && e -> try_handle(line))
+  {
+    return;
+  }
+}
 
 void move(std::string host, int port)
 {

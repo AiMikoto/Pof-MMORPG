@@ -19,6 +19,8 @@ extern std::mutex init_l;
 
 extern std::string username;
 
+void handle_linear_input(std::string s);
+
 void move(std::string host, int port);
 
 void set_scene(boost::property_tree::ptree node);

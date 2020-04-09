@@ -4,7 +4,7 @@
 #include "scene/scene.h"
 #include "ui/ui.h"
 
-extern UI_master *ui;
+extern UI_master *client_ui;
 
 void gfx_init();
 
