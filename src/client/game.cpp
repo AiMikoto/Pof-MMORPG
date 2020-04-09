@@ -4,14 +4,27 @@
 #include "lib/log.h"
 #include "client/editor.h"
 #include "ui/chat.h"
+#include "client/shutdown.h"
 
 user_card_library ucl;
 engine::Scene *current = NULL;
 std::mutex scene_lock;
 chat_log cl;
 editor *e = NULL;
+client_system_manager *csm;
 
 std::map<std::string, std::map<long long, slice_t>> slices;
+
+bool try_exit_handler(std::string line)
+{
+  if((line == "exit") || (line == "quit"))
+  {
+    csm -> say("okthxbye");
+    shutdown();
+    return true;
+  }
+  return false;
+}
 
 bool try_editor_handler(std::string line)
 {
@@ -19,11 +32,19 @@ bool try_editor_handler(std::string line)
   if(sscanf(line.c_str(), "editor open %s", tok) == 1)
   {
     e = new editor("localhost", 7000, std::string(tok));
+    csm -> say("Editor opened");
     return true;
   }
   if(line == "editor close")
   {
-    delete e;
+    if(e)
+    {
+      delete e;
+      csm -> say("Editor closed");
+    }
+    {
+      csm -> say("There is no editor");
+    }
     e = NULL;
     return true;
   }
@@ -52,15 +73,27 @@ void handle_linear_input(std::string line)
   {
     return;
   }
+  if(try_exit_handler(line))
+  {
+    return;
+  }
+  csm -> say("unrecognised command " + line);
 }
 
 void game_init()
 {
   client_ui -> insert(new UI_chat(&cl, handle_linear_input));
+  csm = new client_system_manager(&cl);
 }
 
 void game_destroy()
 {
+  if(e)
+  {
+    delete e;
+    e = NULL;
+  }
+  delete csm;
 }
 
 void move(std::string host, int port)

@@ -1,4 +1,6 @@
 #include "client/editor.h"
+#include "client/game.h"
+#include <boost/format.hpp>
 
 bool editor::try_ss(std::string line)
 {
@@ -95,7 +97,7 @@ bool editor::try_spawn(std::string line)
 {
   if(line == "spawn")
   {
-    printf("spawned [%llu]\n", man -> spawn());
+    csm -> say((boost::format("spawned [%llu]") % man -> spawn()).str());
     return true;
   }
   return false;
