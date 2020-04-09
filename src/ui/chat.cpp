@@ -15,7 +15,6 @@ UI_chat::UI_chat(chat_log *cl, UI_linear_callback callback)
 
 void UI_chat::init(ctx_t *ctx)
 {
-  draw(ctx);
 }
 
 void UI_chat::visit(ctx_t *ctx)
@@ -30,8 +29,12 @@ void UI_chat::render_message(ctx_t *ctx, message m)
 
 void UI_chat::draw(ctx_t *ctx)
 {
-  if(nk_begin(ctx, "Chat", nk_rect(50, 50, 800, 600), NK_WINDOW_TITLE | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE))
+  if(nk_begin(ctx, "Chat", nk_rect(50, 50, 800, 600), NK_WINDOW_BORDER | NK_WINDOW_TITLE | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE))
   {
+    struct nk_vec2 v = nk_window_get_size(ctx);
+    v.x = std::max(v.x, (float) 100);
+    v.y = std::max(v.y, (float) 100);
+    nk_window_set_size(ctx, "Chat", v);
     struct nk_rect bounds = nk_window_get_content_region (ctx);
     float wdth = bounds.w;
     float hght = bounds.h;
@@ -51,7 +54,7 @@ void UI_chat::draw(ctx_t *ctx)
     }
     nk_group_end(ctx);
     nk_layout_row_dynamic(ctx, 23, 1);
-    nk_flags event = nk_edit_string(ctx, NK_EDIT_FIELD|NK_EDIT_SIG_ENTER, buf, &len, CONSOLE_BUF_SIZE - 1, nk_filter_default);
+    nk_flags event = nk_edit_string(ctx, NK_EDIT_FIELD | NK_EDIT_SIG_ENTER, buf, &len, CONSOLE_BUF_SIZE - 1, nk_filter_default);
     if(event & NK_EDIT_COMMITED)
     {
       std::string line = std::string(buf, len);
