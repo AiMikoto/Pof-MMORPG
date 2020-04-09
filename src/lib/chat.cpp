@@ -34,17 +34,17 @@ void chat_log::add(message m)
 {
   if(!uuid_trie.has(m.uuid))
   {
-    chat.push(m);
+    chat.push_front(m);
     uuid_trie.add(m.uuid);
   }
   if(chat.size() > CHAT_LIMIT)
   {
     uuid_trie.remove(chat.front().uuid);
-    chat.pop();
+    chat.pop_back();
   }
 }
 
-std::queue<message> chat_log::get()
+std::deque<message> chat_log::get()
 {
   return chat;
 }

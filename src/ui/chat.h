@@ -18,6 +18,7 @@ public:
   void init(ctx_t *ctx);
   void visit(ctx_t *ctx);
 private:
+  void render_message(ctx_t *ctx, message m);
   void draw(ctx_t *ctx);
   void load_from_history();
   char buf[CONSOLE_BUF_SIZE];

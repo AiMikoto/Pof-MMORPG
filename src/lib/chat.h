@@ -1,7 +1,7 @@
 #ifndef LIB_CHAT_H
 #define LIB_CHAT_H
 
-#include <queue>
+#include <deque>
 #include <string>
 #include <boost/property_tree/ptree.hpp>
 #include "lib/uuid.h"
@@ -29,9 +29,9 @@ class chat_log
 {
 public:
   void add(message m);
-  std::queue<message> get();
+  std::deque<message> get();
 private:
-  std::queue<message> chat;
+  std::deque<message> chat;
   trie uuid_trie;
 };
 
