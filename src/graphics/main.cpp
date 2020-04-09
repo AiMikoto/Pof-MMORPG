@@ -9,8 +9,6 @@
 #include "components/meshRenderer.h"
 #include "components/meshFilter.h"
 #include "lib/nuklear.h"
-#include "ui/ui.h"
-#include "ui/console.h"
 
 int main() {
 	log_init("graphics");

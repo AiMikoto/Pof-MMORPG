@@ -5,7 +5,6 @@
 #include <boost/thread.hpp>
 #include <boost/thread/barrier.hpp>
 #include "client/shutdown.h"
-#include "ui/console.h"
 
 boost::thread *t_render;
 
@@ -23,7 +22,6 @@ void gfx_init()
   engine::gpu = new engine::GPU();
   BOOST_LOG_TRIVIAL(trace) << "Creating UI";
   client_ui = new UI_master();
-  client_ui -> insert(new UI_console(handle_linear_input));
   BOOST_LOG_TRIVIAL(trace) << "starting render thread";
   t_render = new boost::thread(gfx_duty);
 }

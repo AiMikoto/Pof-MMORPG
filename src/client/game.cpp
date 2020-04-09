@@ -3,6 +3,7 @@
 #include "client/graphics.h"
 #include "lib/log.h"
 #include "client/editor.h"
+#include "ui/chat.h"
 
 user_card_library ucl;
 engine::Scene *current = NULL;
@@ -36,6 +37,15 @@ void handle_linear_input(std::string line)
   {
     return;
   }
+}
+
+void game_init()
+{
+  client_ui -> insert(new UI_chat(&cl, handle_linear_input));
+}
+
+void game_destroy()
+{
 }
 
 void move(std::string host, int port)

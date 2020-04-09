@@ -21,6 +21,10 @@ extern std::string username;
 
 void handle_linear_input(std::string s);
 
+void game_init();
+
+void game_destroy();
+
 void move(std::string host, int port);
 
 void set_scene(boost::property_tree::ptree node);

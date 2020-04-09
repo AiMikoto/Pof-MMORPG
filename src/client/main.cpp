@@ -67,6 +67,8 @@ int main(int argc, char **argv)
   init_l.lock();
   BOOST_LOG_TRIVIAL(trace) << "initialising graphics";
   gfx_init();
+  BOOST_LOG_TRIVIAL(trace) << "initialising game";
+  game_init();
   // artificially create a new game
   BOOST_LOG_TRIVIAL(trace) << "attempting to connect to login server";
   current_instance = instance_builder(host, port);
@@ -88,6 +90,8 @@ cleanup:
   BOOST_LOG_TRIVIAL(error) << "shutdown initiated";
   BOOST_LOG_TRIVIAL(error) << "deleting connection";
   delete current_instance;
+  BOOST_LOG_TRIVIAL(trace) << "destroying game";
+  game_destroy();
   BOOST_LOG_TRIVIAL(error) << "destroying gfx";
   gfx_destroy();
   BOOST_LOG_TRIVIAL(error) << "deleting keys";

@@ -1,8 +1,9 @@
-#include "ui/console.h"
+#include "ui/chat.h"
 #include "lib/log.h"
 
-UI_console::UI_console(UI_console_callback callback)
+UI_chat::UI_chat(chat_log *cl, UI_linear_callback callback)
 {
+  this -> cl = cl;
   this -> cb = callback;
   BOOST_LOG_TRIVIAL(trace) << "Defining console";
   history[0] = ""; // root
@@ -11,12 +12,12 @@ UI_console::UI_console(UI_console_callback callback)
   load_from_history();
 }
 
-void UI_console::init(ctx_t *ctx)
+void UI_chat::init(ctx_t *ctx)
 {
   draw(ctx);
 }
 
-void UI_console::visit(ctx_t *ctx)
+void UI_chat::visit(ctx_t *ctx)
 {
   if(nk_window_is_closed(ctx, "Console"))
   {
@@ -29,9 +30,9 @@ void UI_console::visit(ctx_t *ctx)
   }
 }
 
-void UI_console::draw(ctx_t *ctx)
+void UI_chat::draw(ctx_t *ctx)
 {
-  nk_begin(ctx, "Console", nk_rect(0, 50, 1000, 80), NK_WINDOW_MOVABLE | NK_WINDOW_CLOSABLE | NK_WINDOW_MINIMIZABLE);
+  nk_begin(ctx, "Console", nk_rect(0, 50, 1000, 80), NK_WINDOW_MOVABLE);
   nk_layout_row_static(ctx, 30, 970, 10);
   nk_flags event = nk_edit_string(ctx, NK_EDIT_FIELD|NK_EDIT_SIG_ENTER, buf, &len, CONSOLE_BUF_SIZE - 1, nk_filter_default);
   if(event & NK_EDIT_COMMITED)
@@ -60,7 +61,7 @@ void UI_console::draw(ctx_t *ctx)
   nk_end(ctx);
 }
 
-void UI_console::load_from_history()
+void UI_chat::load_from_history()
 { 
   memset(buf, 0, CONSOLE_BUF_SIZE);
   len = history[history_index].size();
