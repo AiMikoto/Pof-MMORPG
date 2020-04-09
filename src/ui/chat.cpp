@@ -1,5 +1,6 @@
 #include "ui/chat.h"
 #include "lib/log.h"
+#include <boost/range/adaptor/reversed.hpp>
 
 UI_chat::UI_chat(chat_log *cl, UI_linear_callback callback)
 {
@@ -24,17 +25,25 @@ void UI_chat::visit(ctx_t *ctx)
 
 void UI_chat::render_message(ctx_t *ctx, message m)
 {
+  nk_labelf(ctx, NK_TEXT_LEFT, "[%s]%s", chat_target_as_string.at(m.target).c_str(), m.payload.c_str());
 }
 
 void UI_chat::draw(ctx_t *ctx)
 {
-  nk_begin(ctx, "Chat", nk_rect(0, 50, 1000, 80), NK_WINDOW_TITLE | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE);
-  nk_layout_row_static(ctx, 30, 970, 10);
+  nk_begin(ctx, "Chat", nk_rect(50, 50, 800, 600), NK_WINDOW_TITLE | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE);
+  struct nk_rect bounds = nk_window_get_content_region (ctx);
+  float wdth = bounds.w;
+  float hght = bounds.h;
   std::deque<message> messages = cl -> get();
-  for(auto m : messages)
+  nk_layout_row_static(ctx, hght - 40, wdth, 1);
+  nk_group_begin(ctx, "Chat_log", 0);
+  nk_layout_row_dynamic(ctx, 18, 1);
+  for(auto m : boost::adaptors::reverse(messages))
   {
     render_message(ctx, m);
   }
+  nk_group_end(ctx);
+  nk_layout_row_dynamic(ctx, 23, 1);
   nk_flags event = nk_edit_string(ctx, NK_EDIT_FIELD|NK_EDIT_SIG_ENTER, buf, &len, CONSOLE_BUF_SIZE - 1, nk_filter_default);
   if(event & NK_EDIT_COMMITED)
   {

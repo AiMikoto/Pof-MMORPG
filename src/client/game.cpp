@@ -14,7 +14,7 @@ editor *e = NULL;
 std::map<std::string, std::map<long long, slice_t>> slices;
 
 bool try_editor_handler(std::string line)
-{ 
+{
   char tok[256];
   if(sscanf(line.c_str(), "editor open %s", tok) == 1)
   {
@@ -32,7 +32,22 @@ bool try_editor_handler(std::string line)
 
 void handle_linear_input(std::string line)
 {
-  try_editor_handler(line);
+  if(std::all_of(line.begin(),line.end(),isspace))
+  {
+    BOOST_LOG_TRIVIAL(trace) << "empty whitespace input";
+    return;
+  }
+  if(line[0] != '/')
+  {
+    BOOST_LOG_TRIVIAL(trace) << "noncommand input";
+    send_message(ct_local, line);
+    return;
+  }
+  line.erase(0, 1);
+  if(try_editor_handler(line))
+  {
+    return;
+  }
   if(e && e -> try_handle(line))
   {
     return;
@@ -100,6 +115,7 @@ void wipe(std::string tag)
 void send_message(chat_target target, std::string payload)
 {
   message m(target, payload);
+  BOOST_LOG_TRIVIAL(trace) << "issuing message " << m.uuid;
   call c;
   c.tree().put(OPCODE, OP_IRC);
   c.tree().put_child("payload", m.encode());
