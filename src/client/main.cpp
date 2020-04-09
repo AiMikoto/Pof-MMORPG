@@ -74,6 +74,7 @@ int main(int argc, char **argv)
   if(!current_instance -> authenticate(username, password))
   {
     BOOST_LOG_TRIVIAL(error) << "authentication refused by login server.";
+    goto cleanup;
   }
   while(!ucl.contains(username))
   {
@@ -82,13 +83,8 @@ int main(int argc, char **argv)
   }
   BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
   init_l.unlock();
-  boost::this_thread::sleep(boost::posix_time::seconds(5));
-  BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
-  current_instance -> change_map(MAP_FLATLANDS, REG_EU);
-  boost::this_thread::sleep(boost::posix_time::seconds(5));
-  send_message(world, "fluffy kittens");
-  BOOST_LOG_TRIVIAL(error) << "client finished successfully";
   main_barrier.wait();
+cleanup:
   BOOST_LOG_TRIVIAL(error) << "shutdown initiated";
   BOOST_LOG_TRIVIAL(error) << "deleting connection";
   delete current_instance;

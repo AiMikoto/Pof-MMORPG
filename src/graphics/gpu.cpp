@@ -76,7 +76,7 @@ void engine::GPU::initializeGUI() {
 	}
 }
 
-void engine::GPU::addUI(UI *ui) {
+void engine::GPU::addUI(UI_master *ui) {
 	if (this -> ui) {
 		delete this -> ui;
 	}

@@ -2,6 +2,9 @@
 #define CLIENT_GRAPHICS_H
 
 #include "scene/scene.h"
+#include "ui/ui.h"
+
+extern UI_master *ui;
 
 void gfx_init();
 

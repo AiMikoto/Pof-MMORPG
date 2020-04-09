@@ -14,10 +14,14 @@ boost::barrier bar(2);
 
 bool buffer_full = false;
 
+UI_master *ui;
+
 void gfx_init()
 {
   BOOST_LOG_TRIVIAL(trace) << "Initializing GPU context";
   engine::gpu = new engine::GPU();
+  BOOST_LOG_TRIVIAL(trace) << "Creating UI";
+  ui = new UI_master();
   BOOST_LOG_TRIVIAL(trace) << "starting render thread";
   t_render = new boost::thread(gfx_duty);
 }
@@ -73,6 +77,8 @@ void gfx_duty()
   engine::gpu -> initializeContext();
   glfwSwapInterval(0);
   BOOST_LOG_TRIVIAL(trace) << "GPU context initialized";
+  engine::gpu -> addUI(ui);
+  BOOST_LOG_TRIVIAL(trace) << "UI attached";
   init_l.lock();
   init_l.unlock();
   BOOST_LOG_TRIVIAL(trace) << "Starting renderer";

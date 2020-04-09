@@ -19,7 +19,7 @@ void pl(std::string line)
 
 void uiworks()
 {
-  UI *ui = new UI();
+  UI_master *ui = new UI_master();
   engine::gpu -> addUI(ui);
   UI_console *c = new UI_console(pl);
   ui -> insert(c);

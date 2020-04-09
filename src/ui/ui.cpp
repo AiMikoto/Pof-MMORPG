@@ -1,6 +1,6 @@
 #include "ui/ui.h"
 
-UI::~UI()
+UI_master::~UI_master()
 {
   lock.lock();
   for(auto elem:initialisation_queue)
@@ -14,14 +14,14 @@ UI::~UI()
   lock.unlock();
 }
 
-void UI::insert(UI_element *e)
+void UI_master::insert(UI_element *e)
 {
   lock.lock();
   initialisation_queue.insert(e);
   lock.unlock();
 }
 
-void UI::erase(UI_element *e)
+void UI_master::erase(UI_element *e)
 {
   lock.lock();
   active_elements.erase(e);
@@ -29,7 +29,7 @@ void UI::erase(UI_element *e)
   lock.unlock();
 }
 
-void UI::init(ctx_t *ctx)
+void UI_master::init(ctx_t *ctx)
 {
   lock.lock();
   for(auto elem:initialisation_queue)
@@ -41,7 +41,7 @@ void UI::init(ctx_t *ctx)
   lock.unlock();
 }
 
-void UI::visit(ctx_t *ctx)
+void UI_master::visit(ctx_t *ctx)
 {
   lock.lock();
   for(auto elem:active_elements)
@@ -51,7 +51,7 @@ void UI::visit(ctx_t *ctx)
   lock.unlock();
 }
 
-void UI::cleanup(ctx_t *ctx)
+void UI_master::cleanup(ctx_t *ctx)
 {
   lock.lock();
   auto ae = active_elements;

@@ -15,10 +15,10 @@ public:
   bool suicide = false;
 };
 
-class UI
+class UI_master
 {
 public:
-  ~UI();
+  ~UI_master();
   void insert(UI_element *e);
   void erase(UI_element *e);
   void init(ctx_t *ctx);

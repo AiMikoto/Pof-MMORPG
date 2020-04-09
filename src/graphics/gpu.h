@@ -29,13 +29,13 @@ namespace engine {
 		Camera* editorCamera;
 		ModelLoader* modelLoader;
 		struct nk_context *ctx = NULL;
-		UI *ui = NULL;
+		UI_master *ui = NULL;
 
 		GPU();
 		~GPU();
 		void initializeContext();
 		void initializeGUI();
-		void addUI(UI *ui);
+		void addUI(UI_master *ui);
 		void draw();
 		void update();
 		void addRenderer(MeshRenderer* renderer);
