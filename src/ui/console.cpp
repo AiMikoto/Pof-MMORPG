@@ -1,11 +1,14 @@
 #include "ui/console.h"
 #include "lib/log.h"
 
-UI_console::UI_console()
+UI_console::UI_console(UI_console_callback callback)
 {
+  this -> cb = callback;
   BOOST_LOG_TRIVIAL(trace) << "Defining console";
-  memset(buf, 0, CONSOLE_BUF_SIZE);
-  len = 0;
+  history[0] = ""; // root
+  history[1] = ""; // currently edited
+  history_index = 1;
+  load_from_history();
 }
 
 void UI_console::init(ctx_t *ctx)
@@ -35,13 +38,32 @@ void UI_console::draw(ctx_t *ctx)
   if(event & NK_EDIT_COMMITED)
   {
     std::string line = std::string(buf, len);
-    memset(buf, 0, CONSOLE_BUF_SIZE);
-    len = 0;
-    BOOST_LOG_TRIVIAL(trace) << line;
+    history_index = history.size(); // return to present
+    if(history[history_index - 2] == line)
+    {
+      history_index--;
+    }
+    history[history_index - 1] = line; // last edited
+    history[history_index] = ""; // currently edited
+    load_from_history();
+    cb(line);
   }
   if(event & NK_EDIT_KEY_UP_PRESSED)
-  {
-    BOOST_LOG_TRIVIAL(trace) << "key_up happened";
+  { // look into the past
+    history_index = std::max(history_index - 1, 0);
+    load_from_history();
+  }
+  if(event & NK_EDIT_KEY_DOWN_PRESSED)
+  { // look into the future
+    history_index = std::min(history_index + 1, (int)history.size() - 1);
+    load_from_history();
   }
   nk_end(ctx);
+}
+
+void UI_console::load_from_history()
+{ 
+  memset(buf, 0, CONSOLE_BUF_SIZE);
+  len = history[history_index].size();
+  memcpy(buf, history[history_index].c_str(), len);
 }

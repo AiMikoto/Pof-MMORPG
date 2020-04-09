@@ -12,11 +12,16 @@
 #include "ui/ui.h"
 #include "ui/console.h"
 
+void pl(std::string line)
+{
+  BOOST_LOG_TRIVIAL(trace) << line;
+}
+
 void uiworks()
 {
   UI *ui = new UI();
   engine::gpu -> addUI(ui);
-  UI_console *c = new UI_console();
+  UI_console *c = new UI_console(pl);
   ui -> insert(c);
   BOOST_LOG_TRIVIAL(trace) << "Inserted console";
 }
