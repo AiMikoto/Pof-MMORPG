@@ -12,6 +12,8 @@ public:
   void visit(ctx_t *ctx);
 private:
   void draw(ctx_t *ctx);
+  void draw_game_object(ctx_t *ctx, engine::GameObject *o);
+  void draw_component(ctx_t *ctx, engine::Component *c);
   engine::Scene **s;
 };
 
