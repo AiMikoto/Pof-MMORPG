@@ -24,6 +24,7 @@ void UI_scene_viewer::visit(ctx_t *ctx)
 
 void UI_scene_viewer::draw(ctx_t *ctx)
 {
+  oid_t oid;
   std::string path = uuid;
   if(nk_begin(ctx, "Scene Viewer", nk_rect(20, 30, 150, 600), NK_WINDOW_BORDER | NK_WINDOW_TITLE | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE))
   {
@@ -37,8 +38,10 @@ void UI_scene_viewer::draw(ctx_t *ctx)
     {
       for(auto it : scene -> children)
       {
+        oid.at(it.first);
         std::string oopath = opath + std::to_string(it.first);
-        draw_game_object(ctx, it.second, oopath);
+        draw_game_object(ctx, it.second, oopath, oid);
+        oid.pop();
       }
       nk_tree_pop(ctx);
     }
@@ -47,9 +50,9 @@ void UI_scene_viewer::draw(ctx_t *ctx)
   nk_end(ctx);
 }
 
-void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path)
+void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t& oid)
 {
-  std::string oname = "Object";
+  std::string oname = "Object " + oid.serialise();
   if(nk_tree_push_hashed(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED, H_GET(path)))
   {
     std::string tpath = path + "t";
@@ -69,8 +72,10 @@ void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o, std::s
     {
       for(auto it : o -> children)
       {
+        oid.at(it.first);
         std::string oopath = path + std::to_string(it.first);
-        draw_game_object(ctx, it.second, opath);
+        draw_game_object(ctx, it.second, opath, oid);
+        oid.pop();
       }
       nk_tree_pop(ctx);
     }

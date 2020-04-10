@@ -5,6 +5,7 @@
 #include "scene/scene.h"
 #include <glm/glm.hpp>
 #include <string>
+#include "scene/oid.h"
 
 class UI_scene_viewer : public UI_element
 {
@@ -14,7 +15,7 @@ public:
   void visit(ctx_t *ctx);
 private:
   void draw(ctx_t *ctx);
-  void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path);
+  void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t& oid);
   void draw_component(ctx_t *ctx, engine::Component *c, std::string path);
   void draw_transform(ctx_t *ctx, engine::Transform t, std::string path);
   void draw_dvec(ctx_t *ctx, glm::dvec3 v);
