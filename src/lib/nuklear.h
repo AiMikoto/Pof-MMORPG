@@ -13,16 +13,16 @@
 #include <stdarg.h>
 
 #include "include/nuklear.h"
-
+/*
 #ifdef __cplusplus
 extern "C"
 {
 #endif // __cplusplus
-
+*/
 #include "include/nuklear_glfw_gl4.h"
-
+/*
 #ifdef __cplusplus
 }
 #endif // __cplusplus
-
+*/
 #endif // LIB_NUKLEAR_H

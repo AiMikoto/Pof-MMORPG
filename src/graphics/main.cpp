@@ -10,11 +10,6 @@
 #include "components/meshFilter.h"
 #include "lib/nuklear.h"
 
-void uiworks()
-{
-  engine::gpu -> initializeGUI();
-}
-
 int main() {
 	log_init("graphics");
 	BOOST_LOG_TRIVIAL(trace) << "Initializing GPU context";
@@ -48,7 +43,6 @@ int main() {
 	BOOST_LOG_TRIVIAL(trace) << scene->gameObjects.size();
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
 	glfwSwapInterval(0);
-	uiworks();
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!engine::gpu->glContext->quit) {
 		engine::gpu->update();

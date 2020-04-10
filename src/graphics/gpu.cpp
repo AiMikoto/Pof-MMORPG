@@ -3,12 +3,16 @@
 #include "lib/log.h"
 #include "core/time_values.h"
 #include <boost/property_tree/json_parser.hpp>
-#include "lib/nuklear.h"
 
-engine::GPU::GPU() {}
+engine::GPU::GPU() {
+}
 
 engine::GPU::~GPU() {
 	BOOST_LOG_TRIVIAL(trace) << "Cleaning up";
+	nk_glfw3_shutdown();
+	if (ui) {
+		delete ui;
+	}
 	for (auto t : textures) {
 		delete t.second;
 	}
@@ -52,16 +56,31 @@ void engine::GPU::initializeContext() {
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
 	modelLoader = new ModelLoader();
+	initializeGUI();
 }
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
 void engine::GPU::initializeGUI() {
-	struct nk_context *ctx;
+	if (ctx) {
+		return;
+	}
 	BOOST_LOG_TRIVIAL(trace) << "Attempting to initialise nuklear context";
-	// ctx = nk_glfw3_init(glContext -> window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
-	BOOST_LOG_TRIVIAL(trace) << "nuklear context initialised";
+	ctx = nk_glfw3_init(glContext -> window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+	BOOST_LOG_TRIVIAL(trace) << "Loading font";
+	{
+		struct nk_font_atlas *atlas;
+		nk_glfw3_font_stash_begin(&atlas);
+		nk_glfw3_font_stash_end();
+	}
+}
+
+void engine::GPU::addUI(UI_master *ui) {
+	if (this -> ui) {
+		delete this -> ui;
+	}
+	this -> ui = ui;
 }
 
 void engine::GPU::draw() {
@@ -82,10 +101,20 @@ void engine::GPU::drawScene() {
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
-
 }
 
 void engine::GPU::drawUI() {
+	if (ui) {
+		ui -> init(ctx);
+	}
+	nk_glfw3_new_frame();
+	if (ui) {
+		ui -> visit(ctx);
+	}
+	nk_glfw3_render(NK_ANTI_ALIASING_ON);
+	if (ui) {
+		ui -> cleanup(ctx);
+	}
 	glDisable(GL_DEPTH_TEST);
 }
 

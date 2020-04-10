@@ -10,11 +10,11 @@ void send_message(user_card& uc, call c)
   chat_target target = static_cast<chat_target>(c.tree().get<int>("payload.target"));
   BOOST_LOG_TRIVIAL(trace) << "considering whether to send message to user";
   bool approve = false;
-  if(target == local)
+  if(target == ct_local)
   {
     approve = true;
   }
-  if(target == world)
+  if(target == ct_world)
   {
     approve = true;
   }

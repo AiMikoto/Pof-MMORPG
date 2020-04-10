@@ -1,25 +1,21 @@
 #include "lib/chat.h"
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 #include "lib/log.h"
 
 #define CHAT_LIMIT 1000
 
-boost::uuids::random_generator msg_generator;
-
 message::message(chat_target target, std::string payload)
 {
   this -> target = target;
   this -> payload = payload;
-  this -> uuid = boost::lexical_cast<std::string>(msg_generator());
+  this -> uuid = get_uuid();
 }
 
 message::message(boost::property_tree::ptree tree)
 {
   this -> target = static_cast<chat_target>(tree.get<int>("target"));
   this -> payload = tree.get<std::string>("payload");
+  this -> uuid = tree.get<std::string>("uuid");
 }
 
 boost::property_tree::ptree message::encode()
@@ -27,6 +23,7 @@ boost::property_tree::ptree message::encode()
   boost::property_tree::ptree t;
   t.put("target", target);
   t.put("payload", payload);
+  t.put("uuid", uuid);
   return t;
 }
 
@@ -34,17 +31,25 @@ void chat_log::add(message m)
 {
   if(!uuid_trie.has(m.uuid))
   {
-    chat.push(m);
+    chat.push_front(m);
     uuid_trie.add(m.uuid);
+    dirty = true;
   }
   if(chat.size() > CHAT_LIMIT)
   {
     uuid_trie.remove(chat.front().uuid);
-    chat.pop();
+    chat.pop_back();
   }
 }
 
-std::queue<message> chat_log::get()
+std::deque<message> chat_log::get()
 {
   return chat;
+}
+
+bool chat_log::flush()
+{
+  bool ret = dirty;
+  dirty = false;
+  return ret;
 }
