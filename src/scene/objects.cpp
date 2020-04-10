@@ -71,8 +71,12 @@ engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> compo
 	this->components = components;
 }
 
-engine::GameObject engine::GameObject::at(ullong index) {
-	return children[index];
+engine::GameObject *engine::GameObject::at(ullong index) {
+	auto it = children.find(index);
+	if(it != children.end()) { // new object takes priority
+		return it -> second;
+	}
+	throw std::logic_error("GameObject doesn't exist");
 }
 
 void engine::GameObject::update() {

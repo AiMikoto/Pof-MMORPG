@@ -27,7 +27,7 @@ namespace engine {
 		GameObject(GameObject* parent);
 		GameObject(std::vector<Component*> components);
 		GameObject(GameObject* parent, std::vector<Component*> components);
-		GameObject at(ullong index);
+		GameObject *at(ullong index);
 		void update();
 		ullong addGameObject(GameObject* child);
 		ullong addGameObject(ullong id, GameObject* child);
