@@ -81,7 +81,7 @@ void engine::Scene::regenerateCtree() {
 boost::property_tree::ptree engine::Scene::serialize() {
 	boost::property_tree::ptree node, scene;
 	for (auto g : gameObjects) {
-		scene.add_child("GameObject", g.second->serialize());
+		scene.add_child(std::to_string(g.first), g.second->serialize());
 	}
 	node.add_child("Scene", scene);
 	node.put("generation", generation);
@@ -125,6 +125,6 @@ void engine::Scene::deserialize(boost::property_tree::ptree node) {
 		tag = "";
 	}
 	for (auto go : node.get_child("Scene")) {
-		addGameObject(new GameObject(go.second));
+		addGameObject(std::stoi(go.first), new GameObject(go.second));
 	}
 }

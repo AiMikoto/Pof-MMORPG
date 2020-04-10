@@ -34,6 +34,7 @@ namespace engine {
 		GameObject at(ullong index);
 		virtual void update();
 		void addChild(GameObject* child);
+		void addChild(ullong id, GameObject* child);
 		void addChildren(std::map<ullong, GameObject*> children);
 		boost::property_tree::ptree serialize();
 		template<typename T> bool hasComponent() {

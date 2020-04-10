@@ -7,6 +7,7 @@
 #include "components/meshRenderer.h"
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
+#include "core/utils.h"
 #include "lib/log.h"
 
 engine::GameObject::GameObject() {
@@ -54,7 +55,7 @@ engine::GameObject::GameObject(boost::property_tree::ptree node) {
 	}
 	transform = Transform(node.get_child("Transform"));
 	for (auto c : node.get_child("Children")) {
-		addChild(new GameObject(c.second));
+		addChild(std::stoi(c.first), new GameObject(c.second));
 	}
 }
 
@@ -101,6 +102,11 @@ void engine::GameObject::update() {
 }
 
 void engine::GameObject::addChild(GameObject* child) {
+	ullong id = getFirstAvailableMapIndex(this -> children);
+	addChild(id, child);
+}
+
+void engine::GameObject::addChild(ullong id, GameObject* child) {
 	bool found = false;
 	for (auto it : this->children) {
 		if (it.second == child) {
@@ -109,7 +115,6 @@ void engine::GameObject::addChild(GameObject* child) {
 		}
 	}
 	if (!found) {
-		ullong id = getFirstAvailableMapIndex(this -> children);
 		this->children[id] = child;
 		child->parent = this;
 	}
@@ -131,7 +136,7 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	}
 	for (auto it : children) {
 		engine::GameObject *c = it.second;
-		childrenNode.add_child("GameObject", c->serialize());
+		childrenNode.add_child(std::to_string(it.first), c->serialize());
 	}	
 	node.add_child("Transform", transform.serialize());
 	node.add_child("Components", componentsNode);

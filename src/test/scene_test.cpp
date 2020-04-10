@@ -83,7 +83,7 @@ void test_serialisation()
   s1 = new engine::Scene();
   o = new engine::GameObject();
   o -> tag = "asd";
-  s1 -> addGameObject(o);
+  s1 -> gameObjects[7] = o;
   s2 = new engine::Scene(s1 -> serialize());
   T_EQ(s1, s2);
   delete s1;
