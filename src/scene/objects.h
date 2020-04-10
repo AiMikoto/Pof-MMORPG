@@ -14,7 +14,7 @@ namespace engine {
 	class GameObject {
 	public:
 		std::string name, tag;
-		GameObject* parent;
+		GameObject* parent = NULL;
 		std::map<ullong, GameObject*> children;
 		std::vector<Component*> components;
 		Transform transform;
@@ -28,10 +28,11 @@ namespace engine {
 		GameObject(std::vector<Component*> components);
 		GameObject(GameObject* parent, std::vector<Component*> components);
 		GameObject at(ullong index);
-		virtual void update();
-		void addChild(GameObject* child);
-		void addChild(ullong id, GameObject* child);
-		void addChildren(std::map<ullong, GameObject*> children);
+		void update();
+		ullong addGameObject(GameObject* child);
+		ullong addGameObject(ullong id, GameObject* child);
+		ullong addGameObject(ullong id, boost::property_tree::ptree node);
+		void deleteGameObject(ullong id);
 		boost::property_tree::ptree serialize();
 		template<typename T> bool hasComponent() {
 			for (auto c : this->components) {

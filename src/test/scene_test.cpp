@@ -52,8 +52,8 @@ bool obj_eq(engine::GameObject *o1, engine::GameObject *o2)
 bool scene_eq(engine::Scene *s1, engine::Scene *s2)
 {
   bool assume = true;
-  for (auto g : s1 -> gameObjects) {
-    assume = assume && s2 -> gameObjects.find(g.first) != s2 -> gameObjects.end() && obj_eq(g.second, s2 -> gameObjects[g.first]);
+  for (auto g : s1 -> children) {
+    assume = assume && s2 -> children.find(g.first) != s2 -> children.end() && obj_eq(g.second, s2 -> children[g.first]);
   }
   return assume;
 }
@@ -83,7 +83,7 @@ void test_serialisation()
   s1 = new engine::Scene();
   o = new engine::GameObject();
   o -> tag = "asd";
-  s1 -> gameObjects[7] = o;
+  s1 -> children[7] = o;
   s2 = new engine::Scene(s1 -> serialize());
   T_EQ(s1, s2);
   delete s1;

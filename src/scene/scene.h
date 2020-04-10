@@ -9,9 +9,8 @@
 #include "include/maps.h"
 
 namespace engine {
-	class Scene {
+	class Scene : public GameObject{
 	public:
-		std::map<ullong, GameObject*> gameObjects;
 		octree ctree;
 		long long generation;
 		// tag is unique and not saved
@@ -22,13 +21,7 @@ namespace engine {
 		Scene();
 		Scene(boost::property_tree::ptree node);
 		~Scene();
-		GameObject at(ullong index);
-		ullong addGameObject(GameObject* go);
-		ullong addGameObject(ullong id, GameObject *go);
-		ullong addGameObject(boost::property_tree::ptree node);
-		void deleteGameObject(ullong id);
 		void regenerateCtree();
-		void update();
 		void sceneToJSON(std::string path);
 		void sceneFromJSON(std::string data);
 		boost::property_tree::ptree serialize();

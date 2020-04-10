@@ -7,65 +7,19 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 
-engine::Scene::Scene() : ctree(root_aabb()) {
+engine::Scene::Scene() : GameObject(), ctree(root_aabb()) {
 	generation = 0;
 }
 
-engine::Scene::Scene(boost::property_tree::ptree node) : ctree(root_aabb()) {
+engine::Scene::Scene(boost::property_tree::ptree node) : GameObject(), ctree(root_aabb()) {
 	deserialize(node);
 }
 
-engine::GameObject engine::Scene::at(ullong index) {
-	return gameObjects[index];
-}
-
 engine::Scene::~Scene() {
-	for (auto g : gameObjects) {
-		delete g.second;
-	}
-	gameObjects.clear();
-}
-
-void engine::Scene::update() {
-	for (auto g : gameObjects) {
-		g.second->update();
-	}
-}
-
-ullong engine::Scene::addGameObject(GameObject *go) {
-	ullong id = getFirstAvailableMapIndex(gameObjects);
-	return addGameObject(id, go);
-}
-
-ullong engine::Scene::addGameObject(ullong id, GameObject *go) {
-	auto it = gameObjects.find(id);
-	if(it != gameObjects.end()) { // new object takes priority
-		delete it -> second;
-	}
-	gameObjects[id] = go;
-	collider* phys = go->getComponent<physical_collider>();
-	if (phys && !go->hasComponent<solid_object>()) {
-		aabb caabb = phys->to_aabb();
-		ctree.insert(id, caabb);
-	}
-	return id;
-}
-
-ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {
-	return addGameObject(new GameObject(node.get_child("Game Object")));
-}
-
-void engine::Scene::deleteGameObject(ullong id) {	
-	auto it = gameObjects.find(id);
-	if(it != gameObjects.end()) {
-		delete it -> second;
-		gameObjects.erase(id);
-		ctree.erase(id);
-	}
 }
 
 void engine::Scene::regenerateCtree() {
-	for (auto g : gameObjects) {
+	for (auto g : children) {
 		GameObject *go = g.second;
 		collider* phys = go->getComponent<physical_collider>();
 		if (phys) {
@@ -80,7 +34,7 @@ void engine::Scene::regenerateCtree() {
 
 boost::property_tree::ptree engine::Scene::serialize() {
 	boost::property_tree::ptree node, scene;
-	for (auto g : gameObjects) {
+	for (auto g : children) {
 		scene.add_child(std::to_string(g.first), g.second->serialize());
 	}
 	node.add_child("Scene", scene);

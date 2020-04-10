@@ -29,7 +29,7 @@ void UI_scene_viewer::draw(ctx_t *ctx)
     }
     if(nk_tree_push(ctx, NK_TREE_TAB, "Objects", NK_MINIMIZED))
     {
-      for(auto it : scene -> gameObjects)
+      for(auto it : scene -> children)
       {
         draw_game_object(ctx, it.second);
       }
