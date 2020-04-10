@@ -4,6 +4,8 @@
 #include "components/solid_object.h"
 #include "components/phys_collider.h"
 
+#define H_GET(x) x.c_str(), x.size(), 1
+
 UI_scene_viewer::UI_scene_viewer(engine::Scene **s)
 {
   this -> s = s;
@@ -31,7 +33,7 @@ void UI_scene_viewer::draw(ctx_t *ctx)
     {
       for(auto it : scene -> children)
       {
-        draw_game_object(ctx, it.second);
+        draw_game_object(ctx, it.second, std::to_string(it.first));
       }
       nk_tree_pop(ctx);
     }
@@ -40,21 +42,22 @@ void UI_scene_viewer::draw(ctx_t *ctx)
   nk_end(ctx);
 }
 
-void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o)
+void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path)
 {
   std::string oname = "Object";
   if(nk_tree_push(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED))
   {
-    draw_transform(ctx, o -> transform);
+    std::string tpath = path + "t";
+    draw_transform(ctx, o -> transform, path);
     for(auto c : o -> components)
     {
-      draw_component(ctx, c);
+      draw_component(ctx, c, path);
     }
     nk_tree_pop(ctx);
   }
 }
 
-void UI_scene_viewer::draw_component(ctx_t *ctx, engine::Component *c)
+void UI_scene_viewer::draw_component(ctx_t *ctx, engine::Component *c, std::string path)
 {
   if(c -> name == "MeshFilter")
   {
@@ -123,21 +126,24 @@ void UI_scene_viewer::draw_component(ctx_t *ctx, engine::Component *c)
   }
 }
 
-void UI_scene_viewer::draw_transform(ctx_t *ctx, engine::Transform t)
+void UI_scene_viewer::draw_transform(ctx_t *ctx, engine::Transform t, std::string path)
 {
-  if(nk_tree_push(ctx, NK_TREE_NODE, "Transform", NK_MINIMIZED))
+  if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Transform", NK_MINIMIZED, H_GET(path)))
   {
-    if(nk_tree_push(ctx, NK_TREE_NODE, "Position", NK_MINIMIZED))
+    std::string ppath = path + "pos";
+    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Position", NK_MINIMIZED, H_GET(ppath)))
     {
       draw_dvec(ctx, t.position);
       nk_tree_pop(ctx);
     }
-    if(nk_tree_push(ctx, NK_TREE_NODE, "Rotation", NK_MINIMIZED))
+    std::string rpath = path + "pos";
+    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Rotation", NK_MINIMIZED, H_GET(rpath)))
     {
       draw_dvec(ctx, t.rotation);
       nk_tree_pop(ctx);
     }
-    if(nk_tree_push(ctx, NK_TREE_NODE, "Scale", NK_MINIMIZED))
+    std::string spath = path + "pos";
+    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Scale", NK_MINIMIZED, H_GET(spath)))
     {
       draw_dvec(ctx, t.scale);
       nk_tree_pop(ctx);
