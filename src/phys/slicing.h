@@ -56,7 +56,7 @@ void slicer_scale(unsigned long long id, glm::dvec3 scale);
 
 void slicer_rotate(unsigned long long id, glm::dvec3 rotation);
 
-void slicer_inject_object(engine::GameObject *go);
+void slicer_inject_object(unsigned long long id, engine::GameObject *go);
 
 void slicer_inject_component(unsigned long long id, engine::Component *c);
 

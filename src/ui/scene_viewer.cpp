@@ -29,7 +29,7 @@ void UI_scene_viewer::draw(ctx_t *ctx)
     }
     if(nk_tree_push(ctx, NK_TREE_TAB, "Objects", NK_MINIMIZED))
     {
-      for(auto it : scene -> gameObjects)
+      for(auto it : scene -> children)
       {
         draw_game_object(ctx, it.second);
       }
@@ -42,7 +42,7 @@ void UI_scene_viewer::draw(ctx_t *ctx)
 
 void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o)
 {
-  std::string oname = "Object " + std::to_string(o -> id);
+  std::string oname = "Object";
   if(nk_tree_push(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED))
   {
     draw_transform(ctx, o -> transform);

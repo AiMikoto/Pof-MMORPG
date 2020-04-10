@@ -185,7 +185,7 @@ slice_t slice(engine::Scene *e)
     slicer_lock.unlock();
     return ret;
   }
-  for(auto it : e -> gameObjects)
+  for(auto it : e -> children)
   {
     engine::GameObject *go = it.second;
     solid_object *gop = go -> getComponent<solid_object>();
@@ -217,7 +217,7 @@ slice_t slice(engine::Scene *e)
       {
         glm::dvec3 axis;
         double offset;
-        physical_collider *phys = e -> gameObjects[collision] -> getComponent<physical_collider>();
+        physical_collider *phys = e -> children[collision] -> getComponent<physical_collider>();
         if(!phys)
         {
           continue;
@@ -283,32 +283,32 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
   }
   for(auto it : slice.components)
   {
-    e -> gameObjects[it.first] -> constructComponent(it.second);
+    e -> children[it.first] -> constructComponent(it.second);
   }
   for(auto it : slice.pos_delta)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = e -> children[it.first];
     go -> transform.position += it.second;
   }
   for(auto it : slice.vel_delta)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = e -> children[it.first];
     solid_object *gop = go -> getComponent<solid_object>();
     gop -> velocity += it.second;
   }
   for(auto it : slice.shift)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = e -> children[it.first];
     go -> transform.position = it.second;
   }
   for(auto it : slice.scale)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = e -> children[it.first];
     go -> transform.scale = it.second;
   }
   for(auto it : slice.rotation)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = e -> children[it.first];
     go -> transform.rotateTo(it.second);
   }
   for(auto it : slice.ejections)
@@ -351,9 +351,9 @@ void slicer_rotate(unsigned long long id, glm::dvec3 rotation)
   slicer_injection_rotation[id] = rotation;
 }
 
-void slicer_inject_object(engine::GameObject *go)
+void slicer_inject_object(ullong id, engine::GameObject *go)
 {
-  slicer_injection_objects[go -> id] = go;
+  slicer_injection_objects[id] = go;
 }
 
 void slicer_inject_component(unsigned long long id, engine::Component *c)
