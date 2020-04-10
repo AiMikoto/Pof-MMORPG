@@ -279,7 +279,7 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
   for(auto it : slice.objects)
   {
     engine::GameObject *go = new engine::GameObject(it.second);
-    e -> addGameObject(go);
+    e -> addGameObject(it.first, go);
   }
   for(auto it : slice.components)
   {

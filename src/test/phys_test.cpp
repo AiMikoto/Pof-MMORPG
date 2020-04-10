@@ -989,6 +989,44 @@ void test_slicing()
   delete e;
 }
 
+void test_injector()
+{
+  int ticks;
+  TEST("TESTING OBJECT INJECTION");
+  engine::Scene *e = new engine::Scene();
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  engine::GameObject *o = new engine::GameObject();
+  slicer_inject_object(1, o);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  PASS;
+  TEST("TESTING OBJECT INJECTION OVERWRITING ANOTHER OBJECT");
+  o = new engine::GameObject();
+  slicer_inject_object(1, o);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  PASS;
+  TEST("TESTING OBJECT INJECTION ONTO THE SAME OBJECT");
+  o = new engine::GameObject();
+  slicer_inject_object(e -> addGameObject(o), o);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  PASS;
+}
+
 int main()
 {
   log_test();
@@ -996,6 +1034,7 @@ int main()
   test_aabb();
   test_collisions();
   test_slicing();
+  test_injector();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
 }

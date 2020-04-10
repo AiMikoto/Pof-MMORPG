@@ -101,7 +101,7 @@ ullong engine::GameObject::addGameObject(ullong id, GameObject* child) {
 }
 
 ullong engine::GameObject::addGameObject(ullong id, boost::property_tree::ptree node) {
-	return addGameObject(new engine::GameObject(node.get_child("Game Object")));
+	return addGameObject(id, new engine::GameObject(node.get_child("Game Object")));
 }
 
 void engine::GameObject::deleteGameObject(ullong id) {

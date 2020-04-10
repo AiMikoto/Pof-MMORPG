@@ -68,12 +68,10 @@ bool is_loaded()
 unsigned long long game_inject_object()
 {
   engine::GameObject *go = new engine::GameObject();
-  BOOST_LOG_TRIVIAL(trace) << "creating new game object";
   slicer_acquire();
   unsigned long long pos = current -> addGameObject(go);
-  slicer_inject_object(pos, go);
+  slicer_inject_object(pos, new engine::GameObject());
   slicer_release();
-  BOOST_LOG_TRIVIAL(trace) << "created new game object";
   return pos;
 }
 
