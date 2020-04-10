@@ -45,6 +45,7 @@ void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o)
   std::string oname = "Object " + std::to_string(o -> id);
   if(nk_tree_push(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED))
   {
+    draw_transform(ctx, o -> transform);
     for(auto c : o -> components)
     {
       draw_component(ctx, c);
@@ -90,6 +91,16 @@ void UI_scene_viewer::draw_component(ctx_t *ctx, engine::Component *c)
       nk_label(ctx, std::to_string(so -> m).c_str(), NK_TEXT_LEFT);
       nk_label(ctx, "Inverse Mass", NK_TEXT_LEFT);
       nk_label(ctx, std::to_string(so -> im).c_str(), NK_TEXT_LEFT);
+      if(nk_tree_push(ctx, NK_TREE_NODE, "Accumulated force", NK_MINIMIZED))
+      {
+        draw_dvec(ctx, so -> force_acc);
+        nk_tree_pop(ctx);
+      }
+      if(nk_tree_push(ctx, NK_TREE_NODE, "Velocity", NK_MINIMIZED))
+      {
+        draw_dvec(ctx, so -> velocity);
+        nk_tree_pop(ctx);
+      }
       nk_tree_pop(ctx);
     }
   }
@@ -102,7 +113,72 @@ void UI_scene_viewer::draw_component(ctx_t *ctx, engine::Component *c)
       nk_layout_row_dynamic(ctx, 20, 2);
       nk_label(ctx, "Type", NK_TEXT_LEFT);
       nk_label(ctx, "box", NK_TEXT_LEFT);
+      if(nk_tree_push(ctx, NK_TREE_NODE, "Size", NK_MINIMIZED))
+      {
+        draw_dvec(ctx, pc -> size);
+        nk_tree_pop(ctx);
+      }
       nk_tree_pop(ctx);
     }
   }
+}
+
+void UI_scene_viewer::draw_transform(ctx_t *ctx, engine::Transform t)
+{
+  if(nk_tree_push(ctx, NK_TREE_NODE, "Transform", NK_MINIMIZED))
+  {
+    if(nk_tree_push(ctx, NK_TREE_NODE, "Position", NK_MINIMIZED))
+    {
+      draw_dvec(ctx, t.position);
+      nk_tree_pop(ctx);
+    }
+    if(nk_tree_push(ctx, NK_TREE_NODE, "Rotation", NK_MINIMIZED))
+    {
+      draw_dvec(ctx, t.rotation);
+      nk_tree_pop(ctx);
+    }
+    if(nk_tree_push(ctx, NK_TREE_NODE, "Scale", NK_MINIMIZED))
+    {
+      draw_dvec(ctx, t.scale);
+      nk_tree_pop(ctx);
+    }
+    nk_tree_pop(ctx);
+  }
+}
+
+void UI_scene_viewer::draw_dvec(ctx_t *ctx, glm::dvec3 v)
+{ 
+  nk_layout_row_dynamic(ctx, 20, 2);
+  nk_label(ctx, "x", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.x).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "y", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.y).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "z", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.z).c_str(), NK_TEXT_LEFT);
+}
+
+void UI_scene_viewer::draw_dvec(ctx_t *ctx, glm::dvec4 v)
+{
+  nk_layout_row_dynamic(ctx, 20, 2);
+  nk_label(ctx, "w", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.w).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "x", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.x).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "y", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.y).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "z", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.z).c_str(), NK_TEXT_LEFT);
+}
+
+void UI_scene_viewer::draw_dvec(ctx_t *ctx, glm::dquat v)
+{
+  nk_layout_row_dynamic(ctx, 20, 2);
+  nk_label(ctx, "w", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.w).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "x", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.x).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "y", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.y).c_str(), NK_TEXT_LEFT);
+  nk_label(ctx, "z", NK_TEXT_LEFT);
+  nk_label(ctx, std::to_string(v.z).c_str(), NK_TEXT_LEFT);
 }
