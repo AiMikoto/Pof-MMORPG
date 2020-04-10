@@ -124,7 +124,7 @@ bool editor::try_add(std::string line)
     man -> comp_add(id, recipe);
     return true;
   }
-  if(sscanf(line.c_str(), "add phys_collider to %llu", &id) == 1)
+  if(sscanf(line.c_str(), "add phys_collider sphere to %llu", &id) == 1)
   {
     recipe.put("type", "physical_collider");
     recipe.put("shape", "sphere");
