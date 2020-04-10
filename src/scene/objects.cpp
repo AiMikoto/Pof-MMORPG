@@ -91,6 +91,10 @@ engine::GameObject::GameObject(GameObject* parent, std::map<ullong, GameObject*>
 	this->components = components;
 }
 
+engine::GameObject engine::GameObject::at(ullong index) {
+	return children[index];
+}
+
 void engine::GameObject::update() {
 	for (auto it : children)
 		it.second->update();

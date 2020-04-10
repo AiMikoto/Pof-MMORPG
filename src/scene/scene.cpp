@@ -15,6 +15,10 @@ engine::Scene::Scene(boost::property_tree::ptree node) : ctree(root_aabb()) {
 	deserialize(node);
 }
 
+engine::GameObject engine::Scene::at(ullong index) {
+	return gameObjects[index];
+}
+
 engine::Scene::~Scene() {
 	for (auto g : gameObjects) {
 		delete g.second;

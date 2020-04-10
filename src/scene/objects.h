@@ -31,6 +31,7 @@ namespace engine {
 		GameObject(GameObject* parent, std::map<ullong, Component*> components);
 		GameObject(std::map<ullong, GameObject*> children, std::map<ullong, Component*> components);
 		GameObject(GameObject* parent, std::map<ullong, GameObject*> children, std::map<ullong, Component*> components);
+		GameObject at(ullong index);
 		virtual void update();
 		void addChild(GameObject* child);
 		void addChildren(std::map<ullong, GameObject*> children);
