@@ -15,7 +15,7 @@ engine::GameObject::GameObject() {
 
 engine::GameObject::~GameObject() {
 	for (auto c : components) {
-		delete c.second;
+		delete c;
 	}
 	components.clear();
 	for (auto c : children) {
@@ -27,8 +27,7 @@ engine::GameObject::~GameObject() {
 engine::GameObject::GameObject(const GameObject& gameObject) {
 	this->parent = NULL;
 	this->transform = gameObject.transform;
-	for (auto it : gameObject.components) {
-		engine::Component *c = it.second;
+	for (auto c : gameObject.components) {
 		if (c->type == typeid(Camera).name())
 			this->addComponent(new Camera(*static_cast<Camera*>(c)));
 		//if (c->type == typeid(Light).name())
@@ -63,32 +62,12 @@ engine::GameObject::GameObject(GameObject* parent) {
 	this->parent = parent;
 }
 
-engine::GameObject::GameObject(std::map<ullong, GameObject*> children) {
-	this->children = children;
-}
-
-engine::GameObject::GameObject(std::map<ullong, Component*> components) {
+engine::GameObject::GameObject(std::vector<Component*> components) {
 	this->components = components;
 }
 
-engine::GameObject::GameObject(GameObject* parent, std::map<ullong, GameObject*> children) {
+engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> components) {
 	this->parent = parent;
-	this->children = children;
-}
-
-engine::GameObject::GameObject(GameObject* parent, std::map<ullong, Component*> components) {
-	this->parent = parent;
-	this->components = components;
-}
-
-engine::GameObject::GameObject(std::map<ullong, GameObject*> children, std::map<ullong, Component*> components) {
-	this->children = children;
-	this->components = components;
-}
-
-engine::GameObject::GameObject(GameObject* parent, std::map<ullong, GameObject*> children, std::map<ullong, Component*> components) {
-	this->parent = parent;
-	this->children = children;
 	this->components = components;
 }
 
@@ -130,8 +109,7 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	boost::property_tree::ptree node, componentsNode, childrenNode;
 	node.put("name", name);
 	node.put("tag", tag);
-	for (auto it : components) {
-		engine::Component *c = it.second;
+	for (auto c : components) {
 		componentsNode.add_child(c->name, c->serialize());
 	}
 	for (auto it : children) {

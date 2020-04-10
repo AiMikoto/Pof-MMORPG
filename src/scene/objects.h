@@ -16,7 +16,7 @@ namespace engine {
 		std::string name, tag;
 		GameObject* parent;
 		std::map<ullong, GameObject*> children;
-		std::map<ullong, Component*> components;
+		std::vector<Component*> components;
 		Transform transform;
 		bool isStatic;
 
@@ -25,12 +25,8 @@ namespace engine {
 		GameObject(const GameObject& gameObject);
 		GameObject(boost::property_tree::ptree node);
 		GameObject(GameObject* parent);
-		GameObject(std::map<ullong, GameObject*> children);
-		GameObject(std::map<ullong, Component*> components);
-		GameObject(GameObject* parent, std::map<ullong, GameObject*> children);
-		GameObject(GameObject* parent, std::map<ullong, Component*> components);
-		GameObject(std::map<ullong, GameObject*> children, std::map<ullong, Component*> components);
-		GameObject(GameObject* parent, std::map<ullong, GameObject*> children, std::map<ullong, Component*> components);
+		GameObject(std::vector<Component*> components);
+		GameObject(GameObject* parent, std::vector<Component*> components);
 		GameObject at(ullong index);
 		virtual void update();
 		void addChild(GameObject* child);
@@ -38,16 +34,14 @@ namespace engine {
 		void addChildren(std::map<ullong, GameObject*> children);
 		boost::property_tree::ptree serialize();
 		template<typename T> bool hasComponent() {
-			for (auto it : this->components) {
-				engine::Component *c = it.second;
+			for (auto c : this->components) {
 				if (typeid(T).name() == c->type)
 					return true;
 			}
 			return false;
 		}
 		template<typename T> T* getComponent() {
-			for (auto it : this->components) {
-				engine::Component *c = it.second;
+			for (auto c : this->components) {
 				if (typeid(T).name() == c->type) {
 					return static_cast<T*>(c);
 				}
@@ -56,8 +50,7 @@ namespace engine {
 		}
 		template<typename T> T* getComponentInParents() {
 			if (parent != NULL) {
-				for (auto it : parent->components) {
-					engine::Component *c = it.second;
+				for (auto c : parent->components) {
 					if (typeid(T).name() == c->type) {
 						return static_cast<T*>(c);
 					}
@@ -69,8 +62,7 @@ namespace engine {
 		template<typename T> T* getComponentInChildren() {
 			for(auto cit : children) {
 				engine::GameObject *child = cit.second;
-				for (auto it : child->components) {
-					engine::Component *c = it.second;
+				for (auto c : child->components) {
 					if (typeid(T).name() == c->type) {
 						return static_cast<T*>(c);
 					}
@@ -79,12 +71,11 @@ namespace engine {
 			}
 			return NULL;
 		}
-		template<typename T> std::map<ullong, T*> getComponents() {
-			std::map<ullong, T*> components;
-			for (auto it : this->components) {
-				engine::Component *c = it.second;
+		template<typename T> std::vector<T*> getComponents() {
+			std::vector<T*> components;
+			for (auto c : this->components) {
 				if (typeid(T).name() == c->type)
-					components[it.first] = (static_cast<T*>(c));
+					components.push_back(static_cast<T*>(c));
 			}
 			return components;
 		}
@@ -94,8 +85,7 @@ namespace engine {
 				delete component;
 				return false;
 			}
-			ullong id = getFirstAvailableMapIndex(this -> components);
-			this->components[id] = component;
+			this->components.push_back(component);
 			component->gameObject = this;
 			component->setup();
 			return true;
@@ -104,12 +94,11 @@ namespace engine {
 		//don't call a component destructor separate from the functions in this file
 		//only call this function if you know for sure the component is unique
 		template<typename T> void removeComponent() {
-			for (auto it : components) {
-				ullong i = it;
+			for (int i = 0; i < int(components.size()); i++) {
 				if (components[i]->type == typeid(T).name()) {
 					T* component = static_cast<T*>(components[i]);
 					delete component;
-					components.erase(i);
+					components.erase(components.begin() + i);
 					break;
 				}
 			}
