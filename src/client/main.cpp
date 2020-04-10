@@ -76,7 +76,8 @@ int main(int argc, char **argv)
   if(!current_instance -> authenticate(username, password))
   {
     BOOST_LOG_TRIVIAL(error) << "authentication refused by login server.";
-    goto cleanup;
+    boost::thread t([](){shutdown();});
+    goto finish;
   }
   while(!ucl.contains(username))
   {
@@ -84,9 +85,9 @@ int main(int argc, char **argv)
     boost::this_thread::sleep(boost::posix_time::seconds(1));
   }
   BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
+finish:
   init_l.unlock();
   main_barrier.wait();
-cleanup:
   BOOST_LOG_TRIVIAL(error) << "shutdown initiated";
   BOOST_LOG_TRIVIAL(error) << "deleting connection";
   delete current_instance;
