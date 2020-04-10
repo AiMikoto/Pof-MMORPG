@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <map>
 #include <string>
 #include "scene/transform.h"
 #include <boost/property_tree/ptree.hpp>
@@ -15,36 +15,37 @@ namespace engine {
 	public:
 		std::string name, tag;
 		GameObject* parent;
-		std::vector<GameObject*> children;
-		std::vector<Component*> components;
+		std::map<ullong, GameObject*> children;
+		std::map<ullong, Component*> components;
 		Transform transform;
 		bool isStatic;
-		ullong id = 0;
 
 		GameObject();
 		~GameObject();
 		GameObject(const GameObject& gameObject);
 		GameObject(boost::property_tree::ptree node);
 		GameObject(GameObject* parent);
-		GameObject(std::vector<GameObject*> children);
-		GameObject(std::vector<Component*> components);
-		GameObject(GameObject* parent, std::vector<GameObject*> children);
-		GameObject(GameObject* parent, std::vector<Component*> components);
-		GameObject(std::vector<GameObject*> children, std::vector<Component*> components);
-		GameObject(GameObject* parent, std::vector<GameObject*> children, std::vector<Component*> components);
+		GameObject(std::map<ullong, GameObject*> children);
+		GameObject(std::map<ullong, Component*> components);
+		GameObject(GameObject* parent, std::map<ullong, GameObject*> children);
+		GameObject(GameObject* parent, std::map<ullong, Component*> components);
+		GameObject(std::map<ullong, GameObject*> children, std::map<ullong, Component*> components);
+		GameObject(GameObject* parent, std::map<ullong, GameObject*> children, std::map<ullong, Component*> components);
 		virtual void update();
 		void addChild(GameObject* child);
-		void addChildren(std::vector<GameObject*> children);
+		void addChildren(std::map<ullong, GameObject*> children);
 		boost::property_tree::ptree serialize();
 		template<typename T> bool hasComponent() {
-			for (auto c : components) {
+			for (auto it : this->components) {
+				engine::Component *c = it.second;
 				if (typeid(T).name() == c->type)
 					return true;
 			}
 			return false;
 		}
 		template<typename T> T* getComponent() {
-			for (auto c : components) {
+			for (auto it : this->components) {
+				engine::Component *c = it.second;
 				if (typeid(T).name() == c->type) {
 					return static_cast<T*>(c);
 				}
@@ -53,7 +54,8 @@ namespace engine {
 		}
 		template<typename T> T* getComponentInParents() {
 			if (parent != NULL) {
-				for (auto c : parent->components) {
+				for (auto it : parent->components) {
+					engine::Component *c = it.second;
 					if (typeid(T).name() == c->type) {
 						return static_cast<T*>(c);
 					}
@@ -63,8 +65,10 @@ namespace engine {
 			return NULL;
 		}
 		template<typename T> T* getComponentInChildren() {
-			for(auto child : children) {
-				for (auto c : child->components) {
+			for(auto cit : children) {
+				engine::GameObject *child = cit.second;
+				for (auto it : child->components) {
+					engine::Component *c = it.second;
 					if (typeid(T).name() == c->type) {
 						return static_cast<T*>(c);
 					}
@@ -73,11 +77,12 @@ namespace engine {
 			}
 			return NULL;
 		}
-		template<typename T> std::vector<T*> getComponents() {
-			std::vector<T*> components;
-			for (auto c : this->components) {
+		template<typename T> std::map<ullong, T*> getComponents() {
+			std::map<ullong, T*> components;
+			for (auto it : this->components) {
+				engine::Component *c = it.second;
 				if (typeid(T).name() == c->type)
-					components.push_back(static_cast<T*>(c));
+					components[it.first] = (static_cast<T*>(c));
 			}
 			return components;
 		}
@@ -87,7 +92,8 @@ namespace engine {
 				delete component;
 				return false;
 			}
-			this->components.push_back(component);		
+			ullong id = getFirstAvailableMapIndex(this -> components);
+			this->components[id] = component;
 			component->gameObject = this;
 			component->setup();
 			return true;
@@ -96,11 +102,12 @@ namespace engine {
 		//don't call a component destructor separate from the functions in this file
 		//only call this function if you know for sure the component is unique
 		template<typename T> void removeComponent() {
-			for (int i = 0; i < int(components.size()); i++) {
+			for (auto it : components) {
+				ullong i = it;
 				if (components[i]->type == typeid(T).name()) {
 					T* component = static_cast<T*>(components[i]);
 					delete component;
-					components.erase(components.begin() + i);
+					components.erase(i);
 					break;
 				}
 			}

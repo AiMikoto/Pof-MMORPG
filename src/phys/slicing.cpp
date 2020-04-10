@@ -351,9 +351,9 @@ void slicer_rotate(unsigned long long id, glm::dvec3 rotation)
   slicer_injection_rotation[id] = rotation;
 }
 
-void slicer_inject_object(engine::GameObject *go)
+void slicer_inject_object(ullong id, engine::GameObject *go)
 {
-  slicer_injection_objects[go -> id] = go;
+  slicer_injection_objects[id] = go;
 }
 
 void slicer_inject_component(unsigned long long id, engine::Component *c)

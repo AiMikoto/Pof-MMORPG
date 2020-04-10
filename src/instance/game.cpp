@@ -71,8 +71,7 @@ unsigned long long game_inject_object()
   engine::GameObject *go = new engine::GameObject();
   slicer_acquire();
   unsigned long long pos = current -> addGameObject(aux);
-  go -> id = pos;
-  slicer_inject_object(go);
+  slicer_inject_object(pos, go);
   slicer_release();
   return pos;
 }

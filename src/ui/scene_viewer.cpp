@@ -42,12 +42,13 @@ void UI_scene_viewer::draw(ctx_t *ctx)
 
 void UI_scene_viewer::draw_game_object(ctx_t *ctx, engine::GameObject *o)
 {
-  std::string oname = "Object " + std::to_string(o -> id);
+  std::string oname = "Object";
   if(nk_tree_push(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED))
   {
     draw_transform(ctx, o -> transform);
-    for(auto c : o -> components)
+    for(auto it : o -> components)
     {
+      engine::Component *c = it.second;
       draw_component(ctx, c);
     }
     nk_tree_pop(ctx);

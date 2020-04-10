@@ -28,22 +28,23 @@ void engine::Scene::update() {
 	}
 }
 
-ullong engine::Scene::addGameObject(GameObject* go) {
-	if(go->id == 0) {
-		ullong id = getFirstAvailableMapIndex(gameObjects);
-		go->id = id;
-	}
-	auto it = gameObjects.find(go->id);
+ullong engine::Scene::addGameObject(GameObject *go) {
+	ullong id = getFirstAvailableMapIndex(gameObjects);
+	return addGameObject(id, go);
+}
+
+ullong engine::Scene::addGameObject(ullong id, GameObject *go) {
+	auto it = gameObjects.find(id);
 	if(it != gameObjects.end()) { // new object takes priority
 		delete it -> second;
 	}
-	gameObjects[go->id] = go;
+	gameObjects[id] = go;
 	collider* phys = go->getComponent<physical_collider>();
 	if (phys && !go->hasComponent<solid_object>()) {
 		aabb caabb = phys->to_aabb();
-		ctree.insert(go->id, caabb);
+		ctree.insert(id, caabb);
 	}
-	return go->id;
+	return id;
 }
 
 ullong engine::Scene::addGameObject(boost::property_tree::ptree node) {

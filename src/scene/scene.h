@@ -23,6 +23,7 @@ namespace engine {
 		Scene(boost::property_tree::ptree node);
 		~Scene();
 		ullong addGameObject(GameObject* go);
+		ullong addGameObject(ullong id, GameObject *go);
 		ullong addGameObject(boost::property_tree::ptree node);
 		void deleteGameObject(ullong id);
 		void regenerateCtree();

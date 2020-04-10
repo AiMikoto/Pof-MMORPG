@@ -44,7 +44,6 @@ bool obj_eq(engine::GameObject *o1, engine::GameObject *o2)
   assume = assume && o1 -> transform.position == o2 -> transform.position;
   assume = assume && o1 -> transform.rotation == o2 -> transform.rotation;
   assume = assume && o1 -> transform.scale    == o2 -> transform.scale;
-  assume = assume && o1 -> id                 == o2 -> id;
   assume = assume && col_eq(o1 -> getComponent<physical_collider>(), o2 -> getComponent<physical_collider>());
   assume = assume && so_eq (o1 -> getComponent<solid_object>(), o2 -> getComponent<solid_object>());
   return assume;
@@ -83,7 +82,6 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> id = 7;
   o -> tag = "asd";
   s1 -> addGameObject(o);
   s2 = new engine::Scene(s1 -> serialize());
@@ -93,7 +91,6 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT VIA JSON")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> id = 7;
   o -> tag = "asd";
   s1 -> addGameObject(o);
   s2 = new engine::Scene();
@@ -104,7 +101,6 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT VIA FILE")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> id = 7;
   o -> tag = "asd";
   s1 -> addGameObject(o);
   s2 = new engine::Scene();
@@ -116,7 +112,6 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OBJECT WITH COMPONENTS")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> id = 7;
   o -> tag = "asd";
   c = new physical_collider({1, 1, 1}, caps);
   o -> addComponent(c);
