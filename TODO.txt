@@ -3,3 +3,5 @@ server:
 instance:
 
 client:
+
+detect when UI is focused and disable camera movement accordingly

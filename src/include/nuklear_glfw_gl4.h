@@ -1,3 +1,5 @@
+#include "controls/mouse.h"
+
 /*
  * Nuklear - 1.32.0 - public domain
  * no warrenty implied; use at your own risk.
@@ -467,6 +469,7 @@ nk_glfw3_char_callback(GLFWwindow *win, unsigned int codepoint)
 NK_API void
 nk_gflw3_scroll_callback(GLFWwindow *win, double xoff, double yoff)
 {
+    engine::scrollCallback(win, xoff, yoff);
     (void)win; (void)xoff;
     glfw.scroll.x += (float)xoff;
     glfw.scroll.y += (float)yoff;
@@ -475,6 +478,7 @@ nk_gflw3_scroll_callback(GLFWwindow *win, double xoff, double yoff)
 NK_API void
 nk_glfw3_mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+    engine::mouseButtonCallback(window, button, action, mods);
     double x, y;
     if (button != GLFW_MOUSE_BUTTON_LEFT) return;
     glfwGetCursorPos(window, &x, &y);

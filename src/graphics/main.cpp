@@ -10,11 +10,6 @@
 #include "components/meshFilter.h"
 #include "lib/nuklear.h"
 
-void uiworks()
-{
-  engine::gpu -> initializeGUI();
-}
-
 int main() {
 	log_init("graphics");
 	BOOST_LOG_TRIVIAL(trace) << "Initializing GPU context";

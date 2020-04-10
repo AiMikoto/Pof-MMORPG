@@ -230,17 +230,17 @@ void client::handle_irc_request(call c)
 {
   chat_target target = static_cast<chat_target>(c.tree().get<int>("payload.target"));
   bool super = false;
-  if(target == world)
+  if(target == ct_world)
   {
     super = true;
     c.tree().put("meta.target", "w_world");
   }
-  if(target == party)
+  if(target == ct_party)
   {
     super = true;
     c.tree().put("meta.target", "replace me");
   }
-  if(target == guild)
+  if(target == ct_guild)
   {
     super = true;
     c.tree().put("meta.target", "replace me");

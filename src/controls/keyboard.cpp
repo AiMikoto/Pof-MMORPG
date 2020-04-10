@@ -4,6 +4,9 @@
 #include "graphics/gpu.h"
 
 void engine::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (glfwGetInputMode(window, GLFW_CURSOR) != GLFW_CURSOR_HIDDEN) {
+		return;
+	}
 	bool pressOrRepeat = (action == GLFW_PRESS || action == GLFW_REPEAT);
 	switch (key)
 	{

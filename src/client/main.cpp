@@ -67,6 +67,8 @@ int main(int argc, char **argv)
   init_l.lock();
   BOOST_LOG_TRIVIAL(trace) << "initialising graphics";
   gfx_init();
+  BOOST_LOG_TRIVIAL(trace) << "initialising game";
+  game_init();
   // artificially create a new game
   BOOST_LOG_TRIVIAL(trace) << "attempting to connect to login server";
   current_instance = instance_builder(host, port);
@@ -74,6 +76,8 @@ int main(int argc, char **argv)
   if(!current_instance -> authenticate(username, password))
   {
     BOOST_LOG_TRIVIAL(error) << "authentication refused by login server.";
+    boost::thread t([](){shutdown();});
+    goto finish;
   }
   while(!ucl.contains(username))
   {
@@ -81,17 +85,14 @@ int main(int argc, char **argv)
     boost::this_thread::sleep(boost::posix_time::seconds(1));
   }
   BOOST_LOG_TRIVIAL(trace) << "client finished initialisation";
+finish:
   init_l.unlock();
-  boost::this_thread::sleep(boost::posix_time::seconds(5));
-  BOOST_LOG_TRIVIAL(trace) << "client changing map ARTIFICIALLY";
-  current_instance -> change_map(MAP_FLATLANDS, REG_EU);
-  boost::this_thread::sleep(boost::posix_time::seconds(5));
-  send_message(world, "fluffy kittens");
-  BOOST_LOG_TRIVIAL(error) << "client finished successfully";
   main_barrier.wait();
   BOOST_LOG_TRIVIAL(error) << "shutdown initiated";
   BOOST_LOG_TRIVIAL(error) << "deleting connection";
   delete current_instance;
+  BOOST_LOG_TRIVIAL(trace) << "destroying game";
+  game_destroy();
   BOOST_LOG_TRIVIAL(error) << "destroying gfx";
   gfx_destroy();
   BOOST_LOG_TRIVIAL(error) << "deleting keys";
