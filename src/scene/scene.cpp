@@ -79,6 +79,6 @@ void engine::Scene::deserialize(boost::property_tree::ptree node) {
 		tag = "";
 	}
 	for (auto go : node.get_child("Scene")) {
-		addGameObject(std::stoi(go.first), new GameObject(go.second));
+		addGameObject(std::stoull(go.first), new GameObject(go.second));
 	}
 }

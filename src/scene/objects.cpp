@@ -54,7 +54,7 @@ engine::GameObject::GameObject(boost::property_tree::ptree node) {
 	}
 	transform = Transform(node.get_child("Transform"));
 	for (auto c : node.get_child("Children")) {
-		addGameObject(std::stoi(c.first), new GameObject(c.second));
+		addGameObject(std::stoull(c.first), new GameObject(c.second));
 	}
 }
 
