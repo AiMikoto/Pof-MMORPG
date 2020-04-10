@@ -73,7 +73,7 @@ engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> compo
 
 engine::GameObject *engine::GameObject::at(ullong index) {
 	auto it = children.find(index);
-	if(it != children.end()) { // new object takes priority
+	if(it != children.end()) {
 		return it -> second;
 	}
 	throw std::logic_error("GameObject doesn't exist");
