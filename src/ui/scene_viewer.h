@@ -4,6 +4,7 @@
 #include "ui/ui.h"
 #include "scene/scene.h"
 #include <glm/glm.hpp>
+#include <string>
 
 class UI_scene_viewer : public UI_element
 {
@@ -20,6 +21,7 @@ private:
   void draw_dvec(ctx_t *ctx, glm::dvec4 v);
   void draw_dvec(ctx_t *ctx, glm::dquat v);
   engine::Scene **s;
+  std::string uuid;
 };
 
 #endif // UI_SCENE_VIEWER_H
