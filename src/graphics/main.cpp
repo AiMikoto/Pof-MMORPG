@@ -48,7 +48,6 @@ int main() {
 	BOOST_LOG_TRIVIAL(trace) << scene->gameObjects.size();
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
 	glfwSwapInterval(0);
-	uiworks();
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!engine::gpu->glContext->quit) {
 		engine::gpu->update();
