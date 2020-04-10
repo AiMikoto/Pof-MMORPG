@@ -7,11 +7,11 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <sstream>
 
-engine::Scene::Scene() : GameObject(), ctree(root_aabb()) {
+engine::Scene::Scene() : ctree(root_aabb()) {
 	generation = 0;
 }
 
-engine::Scene::Scene(boost::property_tree::ptree node) : GameObject(), ctree(root_aabb()) {
+engine::Scene::Scene(boost::property_tree::ptree node) : ctree(root_aabb()) {
 	deserialize(node);
 }
 
