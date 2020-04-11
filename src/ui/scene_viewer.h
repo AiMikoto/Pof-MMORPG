@@ -2,10 +2,20 @@
 #define UI_SCENE_VIEWER_H
 
 #include "ui/ui.h"
-#include "scene/scene.h"
-#include <glm/glm.hpp>
-#include <string>
-#include "scene/oid.h"
+#include "ui/utils.h"
+
+class UI_object_viewer : public UI_element
+{
+public:
+  UI_object_viewer(engine::Scene **s, oid_t oid);
+  void init(ctx_t *ctx);
+  void visit(ctx_t *ctx);
+private:
+  void draw(ctx_t *ctx);
+  engine::Scene **s;
+  oid_t oid;
+  std::string uuid;
+};
 
 class UI_scene_viewer : public UI_element
 {
@@ -15,12 +25,6 @@ public:
   void visit(ctx_t *ctx);
 private:
   void draw(ctx_t *ctx);
-  void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t& oid);
-  void draw_component(ctx_t *ctx, engine::Component *c, std::string path);
-  void draw_transform(ctx_t *ctx, engine::Transform t, std::string path);
-  void draw_dvec(ctx_t *ctx, glm::dvec3 v);
-  void draw_dvec(ctx_t *ctx, glm::dvec4 v);
-  void draw_dvec(ctx_t *ctx, glm::dquat v);
   engine::Scene **s;
   std::string uuid;
 };
