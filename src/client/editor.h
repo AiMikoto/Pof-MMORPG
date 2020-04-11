@@ -20,6 +20,7 @@ protected:
   bool try_spawn(std::string line);
   bool try_delete(std::string line);
   bool try_add(std::string line);
+  bool try_attach(std::string line);
 private:
   manipulator *man;
 };

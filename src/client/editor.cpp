@@ -188,6 +188,20 @@ bool editor::try_add(std::string line)
   return false;
 }
 
+bool editor::try_attach(std::string line)
+{
+  char from[256], to[256];
+  if(sscanf(line.c_str(), "attach %s to %s", from, to) == 2)
+  {
+    oid_t oid_from, oid_to;
+    GET_OID(oid_from, from);
+    GET_OID(oid_to, to);
+    man -> obj_attach(oid_from, oid_to);
+    return true;
+  }
+  return false;
+}
+
 editor::editor(std::string hostname, int port, std::string tok)
 {
   man = new manipulator(hostname, port, tok);
@@ -200,5 +214,5 @@ editor::~editor()
 
 bool editor::try_handle(std::string line)
 {
-  return try_rotate(line) || try_scale(line) || try_add(line) || try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line);
+  return try_rotate(line) || try_scale(line) || try_add(line) || try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || try_attach(line);
 }

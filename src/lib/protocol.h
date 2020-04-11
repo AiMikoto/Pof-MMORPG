@@ -40,6 +40,7 @@
 #define OP_EDIT_ADD_OBJ "e_obj+"
 #define OP_EDIT_DELETE_OBJ "e_obj-"
 #define OP_EDIT_ADD_COMP "e_com+"
+#define OP_EDIT_ATTACH_OBJ "e_att"
 
 class protocol
 {

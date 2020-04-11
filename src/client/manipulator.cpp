@@ -130,6 +130,23 @@ void manipulator::obj_delete(oid_t &id)
   bar.wait();
 }
 
+void obj_attach_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::obj_attach(oid_t &from, oid_t &to)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_attach_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_ATTACH_OBJ);
+  c.tree().put_child("from", from.encode());
+  c.tree().put_child("to", to.encode());
+  proto -> safe_write(c);
+  bar.wait();
+}
+
 void comp_add_cb(boost::barrier *bar, call c)
 {
   bar -> wait();
