@@ -28,7 +28,7 @@ void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t
       {
         oid.at(it.first);
         std::string oopath = path + std::to_string(it.first);
-        draw_game_object(ctx, it.second, opath, oid);
+        draw_game_object(ctx, it.second, oopath, oid);
         oid.pop();
       }
       nk_tree_pop(ctx);

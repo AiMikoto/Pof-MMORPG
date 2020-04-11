@@ -10,6 +10,7 @@
 #include <boost/thread/barrier.hpp>
 #include "client/shutdown.h"
 #include "client/crypto.h"
+#include "client/system.h"
 
 #ifdef __linux__
 #include <csignal>
@@ -79,7 +80,7 @@ int main(int argc, char **argv)
     boost::thread t([](){shutdown();});
     goto finish;
   }
-  while(!ucl.contains(username))
+  while(!csm -> ucl.contains(username))
   {
     BOOST_LOG_TRIVIAL(trace) << "waiting for user card";
     boost::this_thread::sleep(boost::posix_time::seconds(1));

@@ -6,6 +6,9 @@
 #include <glm/glm.hpp>
 #include <string>
 #include "scene/oid.h"
+#include <boost/function.hpp>
+
+typedef boost::function<void(std::string)> UI_linear_callback;
 
 #define H_GET(x) x.c_str(), x.size(), 1
 

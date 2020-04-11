@@ -12,6 +12,7 @@ UI_object_viewer::UI_object_viewer(engine::Scene **s, oid_t oid)
 {
   this -> s = s;
   this -> uuid = get_uuid();
+  this -> oid = oid;
 }
 
 void UI_object_viewer::init(ctx_t *ctx)
@@ -43,6 +44,8 @@ void UI_object_viewer::draw(ctx_t *ctx)
     std::string opath = path + "o";
     draw_game_object(ctx, object, opath, oid);
   }
+  suicide = suicide | nk_window_is_hidden(ctx, path.c_str());
+  printf("suicide is %d\n", suicide);
   UI_object_viewer_draw_end:
   nk_end(ctx);
 }
