@@ -69,10 +69,10 @@ oid_t game_inject_object()
 {
   engine::GameObject *go = new engine::GameObject();
   slicer_acquire();
-  unsigned long long pos = current -> addGameObject(go);
   oid_t oid;
-  oid.at(pos);
-  slicer_inject_object(oid, new engine::GameObject());
+  oid.at(oid.add(current, go));
+  slicer_inject_object(oid, go);
+  // go will get deleted when the slice is applied to the scene
   slicer_release();
   return oid;
 }
@@ -82,6 +82,22 @@ void game_delete_object(oid_t id)
   slicer_acquire();
   slicer_eject_object(id);
   slicer_release();
+}
+
+oid_t game_attach_object(oid_t from, oid_t to)
+{
+  if(to.is_in(from))
+  { // you shouldn't be able to attach a parent to one of its offsprings
+    return oid_t();
+  }
+  slicer_acquire();
+  engine::GameObject *go = from.get(current);
+  slicer_eject_object(from);
+  to.at(to.add(current, new engine::GameObject()));
+  slicer_inject_object(to, go);
+  // both gos will get deleted when the slice is applied to the scene
+  slicer_release();
+  return to;
 }
 
 void slicer()
@@ -94,6 +110,7 @@ void slicer()
     last = boost::chrono::system_clock::now();
     BOOST_LOG_TRIVIAL(trace) << "computing new scene";
     slice_t next_slice = slice(current);
+    BOOST_LOG_TRIVIAL(trace) << "applying new slice locally";
     apply_slice(current, next_slice);
     call c;
     c.tree().put(OPCODE, OP_SLICE);

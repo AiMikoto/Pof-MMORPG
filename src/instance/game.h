@@ -27,6 +27,8 @@ oid_t game_inject_object();
 
 void game_delete_object(oid_t id);
 
+oid_t game_attach_object(oid_t from, oid_t to);
+
 void slicer();
 
 #endif // INSTANCE_GAME_H

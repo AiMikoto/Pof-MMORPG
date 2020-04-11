@@ -62,6 +62,24 @@ oid_t *oid_t::pop()
   return this;
 }
 
+bool oid_t::is_in(const oid_t &other) const
+{ // check if this is a subpath of other
+  // for example, 1.2.3 is a subpath of 1.2.3.4.5
+  // but 1.2.4 is not a subpath of 1.2.3.4.5
+  if(other._access_order.size() < this -> _access_order.size())
+  {
+    return false;
+  }
+  for(int i = 0; i < this -> _access_order.size(); i++)
+  {
+    if(this -> _access_order[i] != other._access_order[i])
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 engine::GameObject *oid_t::get(engine::GameObject *o) const
 {
   engine::GameObject *node = o;

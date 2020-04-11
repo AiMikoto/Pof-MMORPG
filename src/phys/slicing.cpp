@@ -137,11 +137,9 @@ glm::dvec3 gravity_vector = {0, -2, 0};
 std::map <oid_t, glm::dvec3> slicer_injection_shift;
 std::map <oid_t, glm::dvec3> slicer_injection_scale;
 std::map <oid_t, glm::dvec3> slicer_injection_rotation;
-// note on injection_objects - allocated memory is created by the caller of
-// inject_object, but memory is deleted by slicer.
-std::map <oid_t, engine::GameObject *> slicer_injection_objects;
+std::map <oid_t, boost::property_tree::ptree> slicer_injection_objects;
 std::vector <oid_t> slicer_ejection_objects;
-std::map <oid_t, engine::Component *> slicer_injection_components;
+std::map <oid_t, boost::property_tree::ptree> slicer_injection_components;
 
 // slicing constants
 
@@ -166,17 +164,9 @@ slice_t slice(engine::Scene *e)
   slicer_injection_scale.clear();
   ret.rotation = slicer_injection_rotation;
   slicer_injection_rotation.clear();
-  for(auto it : slicer_injection_objects)
-  {
-    ret.objects[it.first] = it.second -> serialize();
-    delete it.second;
-  }
+  ret.objects = slicer_injection_objects;
   slicer_injection_objects.clear();
-  for(auto it : slicer_injection_components)
-  {
-    ret.components[it.first].put_child(it.second -> name, it.second -> serialize());
-    delete it.second;
-  }
+  ret.components = slicer_injection_components;
   slicer_injection_components.clear();
   ret.ejections = slicer_ejection_objects;
   slicer_ejection_objects.clear();
@@ -278,16 +268,6 @@ slice_t slice(engine::Scene *e)
 engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
 {
   e -> generation = slice.target_generation;
-  for(auto it : slice.objects)
-  {
-    engine::GameObject *go = new engine::GameObject(it.second);
-    it.first.put(e, go);
-  }
-  for(auto it : slice.components)
-  {
-    engine::GameObject *go = it.first.get(e);
-    go -> constructComponent(it.second);
-  }
   for(auto it : slice.pos_delta)
   {
     engine::GameObject *go = it.first.get(e);
@@ -313,6 +293,16 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
   {
     engine::GameObject *go = it.first.get(e);
     go -> transform.rotateTo(it.second);
+  }
+  for(auto it : slice.objects)
+  {
+    engine::GameObject *go = new engine::GameObject(it.second);
+    it.first.put(e, go);
+  }
+  for(auto it : slice.components)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> constructComponent(it.second);
   }
   for(auto it : slice.ejections)
   {
@@ -356,12 +346,14 @@ void slicer_rotate(oid_t &id, glm::dvec3 rotation)
 
 void slicer_inject_object(oid_t &id, engine::GameObject *go)
 {
-  slicer_injection_objects[id] = go;
+  slicer_injection_objects[id] = go -> serialize();
 }
 
 void slicer_inject_component(oid_t &id, engine::Component *c)
 {
-  slicer_injection_components[id] = c;
+  boost::property_tree::ptree node;
+  node.put_child(c -> name, c -> serialize());
+  slicer_injection_components[id] = node;
 }
 
 void slicer_eject_object(oid_t &id)
