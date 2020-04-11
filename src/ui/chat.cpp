@@ -22,6 +22,14 @@ void UI_chat::visit(ctx_t *ctx)
   draw(ctx);
 }
 
+void UI_chat::destroy(ctx_t *ctx)
+{
+  if(suicide)
+  {
+    nk_window_close(ctx, "Chat");
+  }
+}
+
 void UI_chat::render_message(ctx_t *ctx, message m)
 {
   nk_labelf(ctx, NK_TEXT_LEFT, "[%s]%s", chat_target_as_string.at(m.target).c_str(), m.payload.c_str());

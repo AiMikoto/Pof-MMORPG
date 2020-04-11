@@ -12,6 +12,7 @@ class UI_element
 public:
   virtual void init(ctx_t *ctx) = 0;
   virtual void visit(ctx_t *ctx) = 0;
+  virtual void destroy(ctx_t *ctx) = 0;
   bool suicide = false;
 };
 

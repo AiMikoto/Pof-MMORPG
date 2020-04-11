@@ -24,6 +24,14 @@ void UI_object_viewer::visit(ctx_t *ctx)
   draw(ctx);
 }
 
+void UI_object_viewer::destroy(ctx_t *ctx)
+{
+  if(suicide)
+  {
+    nk_window_close(ctx, uuid.c_str());
+  }
+}
+
 void UI_object_viewer::draw(ctx_t *ctx)
 { 
   std::string path = uuid;
@@ -45,7 +53,6 @@ void UI_object_viewer::draw(ctx_t *ctx)
     draw_game_object(ctx, object, opath, oid);
   }
   suicide = suicide | nk_window_is_hidden(ctx, path.c_str());
-  printf("suicide is %d\n", suicide);
   UI_object_viewer_draw_end:
   nk_end(ctx);
 }
@@ -63,6 +70,14 @@ void UI_scene_viewer::init(ctx_t *ctx)
 void UI_scene_viewer::visit(ctx_t *ctx)
 {
   draw(ctx);
+}
+
+void UI_scene_viewer::destroy(ctx_t *ctx)
+{
+  if(suicide)
+  {
+    nk_window_close(ctx, uuid.c_str());
+  }
 }
 
 void UI_scene_viewer::draw(ctx_t *ctx)

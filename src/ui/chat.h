@@ -15,6 +15,7 @@ public:
   UI_chat(chat_log *cl, UI_linear_callback);
   void init(ctx_t *ctx);
   void visit(ctx_t *ctx);
+  void destroy(ctx_t *ctx);
 private:
   void render_message(ctx_t *ctx, message m);
   void draw(ctx_t *ctx);

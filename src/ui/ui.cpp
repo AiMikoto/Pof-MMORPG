@@ -24,8 +24,7 @@ void UI_master::insert(UI_element *e)
 void UI_master::erase(UI_element *e)
 {
   lock.lock();
-  active_elements.erase(e);
-  initialisation_queue.erase(e);
+  e -> suicide = true;
   lock.unlock();
 }
 
@@ -62,7 +61,12 @@ void UI_master::cleanup(ctx_t *ctx)
   {
     if(elem -> suicide)
     {
-      erase(elem);
+      lock.lock();
+      active_elements.erase(elem);
+      initialisation_queue.erase(elem);
+      lock.unlock();
+      elem -> destroy(ctx);
+      delete elem;
     }
   }
 }
