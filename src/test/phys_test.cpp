@@ -1000,7 +1000,9 @@ void test_injector()
     tick(e);
   }
   engine::GameObject *o = new engine::GameObject();
-  slicer_inject_object(1, o);
+  oid_t oid;
+  oid.at(1);
+  slicer_inject_object(oid, o);
   ticks = 1000;
   while(ticks--)
   {
@@ -1009,7 +1011,7 @@ void test_injector()
   PASS;
   TEST("TESTING OBJECT INJECTION OVERWRITING ANOTHER OBJECT");
   o = new engine::GameObject();
-  slicer_inject_object(1, o);
+  slicer_inject_object(oid, o);
   ticks = 1000;
   while(ticks--)
   {
@@ -1018,7 +1020,9 @@ void test_injector()
   PASS;
   TEST("TESTING OBJECT INJECTION ONTO THE SAME OBJECT");
   o = new engine::GameObject();
-  slicer_inject_object(e -> addGameObject(o), o);
+  oid.pop();
+  oid.at(e -> addGameObject(o));
+  slicer_inject_object(oid, o);
   ticks = 1000;
   while(ticks--)
   {

@@ -2,6 +2,8 @@
 #include "client/game.h"
 #include <boost/format.hpp>
 
+#define GET_OID(oid, x) try {oid = oid_t(std::string(x));} catch(std::exception &e) {csm -> say("unparsable id " + std::string(x)); return true;}
+
 bool editor::try_ss(std::string line)
 {
   if(line == "set slicer on")
@@ -30,11 +32,13 @@ bool editor::try_sps(std::string line)
 
 bool editor::try_move(std::string line)
 {
-  unsigned long long id;
   glm::dvec3 pos;
-  if(sscanf(line.c_str(), "move %llu {%lf, %lf, %lf}", &id, &pos.x, &pos.y, &pos.z) == 4)
+  char id[256];
+  if(sscanf(line.c_str(), "move %s {%lf, %lf, %lf}", id, &pos.x, &pos.y, &pos.z) == 4)
   {
-    man -> obj_move(id, pos);
+    oid_t oid;
+    GET_OID(oid, id);
+    man -> obj_move(oid, pos);
     return true;
   }
   return false;
@@ -42,11 +46,13 @@ bool editor::try_move(std::string line)
 
 bool editor::try_scale(std::string line)
 {
-  unsigned long long id;
   glm::dvec3 scale;
-  if(sscanf(line.c_str(), "scale %llu {%lf, %lf, %lf}", &id, &scale.x, &scale.y, &scale.z) == 4)
+  char id[256];
+  if(sscanf(line.c_str(), "scale %s {%lf, %lf, %lf}", id, &scale.x, &scale.y, &scale.z) == 4)
   {
-    man -> obj_scale(id, scale);
+    oid_t oid;
+    GET_OID(oid, id);
+    man -> obj_scale(oid, scale);
     return true;
   }
   return false;
@@ -54,24 +60,30 @@ bool editor::try_scale(std::string line)
 
 bool editor::try_rotate(std::string line)
 {
-  unsigned long long id;
   glm::dvec3 rotation;
-  if(sscanf(line.c_str(), "rotate %llu {%lf, %lf, %lf}", &id, &rotation.x, &rotation.y, &rotation.z) == 4)
+  char id[256];
+  if(sscanf(line.c_str(), "rotate %s {%lf, %lf, %lf}", id, &rotation.x, &rotation.y, &rotation.z) == 4)
   {
-    man -> obj_rotate(id, rotation);
+    oid_t oid;
+    GET_OID(oid, id);
+    man -> obj_rotate(oid, rotation);
     return true;
   }
-  if(sscanf(line.c_str(), "rotate %llu rad {%lf, %lf, %lf}", &id, &rotation.x, &rotation.y, &rotation.z) == 4)
+  if(sscanf(line.c_str(), "rotate %s rad {%lf, %lf, %lf}", id, &rotation.x, &rotation.y, &rotation.z) == 4)
   {
-    man -> obj_rotate(id, rotation);
+    oid_t oid;
+    GET_OID(oid, id);
+    man -> obj_rotate(oid, rotation);
     return true;
   }
-  if(sscanf(line.c_str(), "rotate %llu deg {%lf, %lf, %lf}", &id, &rotation.x, &rotation.y, &rotation.z) == 4)
+  if(sscanf(line.c_str(), "rotate %s deg {%lf, %lf, %lf}", id, &rotation.x, &rotation.y, &rotation.z) == 4)
   {
+    oid_t oid;
+    GET_OID(oid, id);
     rotation.x = rotation.x * M_PI / 180;
     rotation.y = rotation.y * M_PI / 180;
     rotation.z = rotation.z * M_PI / 180;
-    man -> obj_rotate(id, rotation);
+    man -> obj_rotate(oid, rotation);
     return true;
   }
   return false;
@@ -97,7 +109,7 @@ bool editor::try_spawn(std::string line)
 {
   if(line == "spawn")
   {
-    csm -> say((boost::format("spawned [%llu]") % man -> spawn()).str());
+    csm -> say("spawned [" + man -> spawn().serialise() + "]");
     return true;
   }
   return false;
@@ -105,10 +117,12 @@ bool editor::try_spawn(std::string line)
 
 bool editor::try_delete(std::string line)
 {
-  unsigned long long id;
-  if(sscanf(line.c_str(), "delete %llu", &id) == 1)
+  char id[256];
+  if(sscanf(line.c_str(), "delete %s", id) == 1)
   {
-    man -> obj_delete(id);
+    oid_t oid;
+    GET_OID(oid, id);
+    man -> obj_delete(oid);
     return true;
   }
   return false;
@@ -116,47 +130,59 @@ bool editor::try_delete(std::string line)
 
 bool editor::try_add(std::string line)
 {
-  unsigned long long id;
   boost::property_tree::ptree recipe;
-  if(sscanf(line.c_str(), "add solid_object to %llu", &id) == 1)
+  char id[256];
+  if(sscanf(line.c_str(), "add solid_object to %s", id) == 1)
   {
+    oid_t oid;
+    GET_OID(oid, id);
     recipe.put("type", "solid_object");
-    man -> comp_add(id, recipe);
+    man -> comp_add(oid, recipe);
     return true;
   }
-  if(sscanf(line.c_str(), "add phys_collider sphere to %llu", &id) == 1)
+  if(sscanf(line.c_str(), "add phys_collider sphere to %s", id) == 1)
   {
+    oid_t oid;
+    GET_OID(oid, id);
     recipe.put("type", "physical_collider");
     recipe.put("shape", "sphere");
-    man -> comp_add(id, recipe);
+    man -> comp_add(oid, recipe);
     return true;
   }
-  if(sscanf(line.c_str(), "add phys_collider box to %llu", &id) == 1)
+  if(sscanf(line.c_str(), "add phys_collider box to %s", id) == 1)
   {
+    oid_t oid;
+    GET_OID(oid, id);
     recipe.put("type", "physical_collider");
     recipe.put("shape", "box");
-    man -> comp_add(id, recipe);
+    man -> comp_add(oid, recipe);
     return true;
   }
-  if(sscanf(line.c_str(), "add phys_collider caps to %llu", &id) == 1)
+  if(sscanf(line.c_str(), "add phys_collider caps to %s", id) == 1)
   {
+    oid_t oid;
+    GET_OID(oid, id);
     recipe.put("type", "physical_collider");
     recipe.put("shape", "caps");
-    man -> comp_add(id, recipe);
+    man -> comp_add(oid, recipe);
     return true;
   }
   char path[256];
-  if(sscanf(line.c_str(), "add mesh_filter %s to %llu", path, &id) == 2)
+  if(sscanf(line.c_str(), "add mesh_filter %s to %s", path, id) == 2)
   {
+    oid_t oid;
+    GET_OID(oid, id);
     recipe.put("type", "mesh_filter");
     recipe.put("path", std::string(path));
-    man -> comp_add(id, recipe);
+    man -> comp_add(oid, recipe);
     return true;
   }
-  if(sscanf(line.c_str(), "add mesh_renderer to %llu", &id) == 1)
+  if(sscanf(line.c_str(), "add mesh_renderer to %s", id) == 1)
   {
+    oid_t oid;
+    GET_OID(oid, id);
     recipe.put("type", "mesh_renderer");
-    man -> comp_add(id, recipe);
+    man -> comp_add(oid, recipe);
     return true;
   }
   return false;

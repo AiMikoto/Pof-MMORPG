@@ -283,7 +283,7 @@ void client::set_sps(call c)
 
 void client::obj_move(call c)
 {
-  unsigned long long id = c.tree().get<unsigned long long>("id");
+  oid_t id = oid_t(c.tree().get_child("id"));
   glm::dvec3 pos = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("pos"));
   slicer_acquire();
   slicer_move(id, pos);
@@ -294,7 +294,7 @@ void client::obj_move(call c)
 
 void client::obj_scale(call c)
 {
-  unsigned long long id = c.tree().get<unsigned long long>("id");
+  oid_t id = oid_t(c.tree().get_child("id"));
   glm::dvec3 scale = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("scale"));
   slicer_acquire();
   slicer_scale(id, scale);
@@ -305,7 +305,7 @@ void client::obj_scale(call c)
 
 void client::obj_rotate(call c)
 {
-  unsigned long long id = c.tree().get<unsigned long long>("id");
+  oid_t id = oid_t(c.tree().get_child("id"));
   glm::dvec3 rotation = engine::vecDeserializer<glm::dvec3, double>(c.tree().get_child("rotation"));
   slicer_acquire();
   slicer_rotate(id, rotation);
@@ -332,14 +332,14 @@ void client::map_save(call c)
 void client::add_obj(call c)
 {
   c.tree().put(OPCODE, OP_EDIT_CB);
-  c.tree().put("id", game_inject_object());
+  c.tree().put_child("id", game_inject_object().encode());
   safe_write(c);
 }
 
 void client::add_comp(call c)
 {
   engine::Component *comp = NULL;
-  unsigned long long id = c.tree().get<unsigned long long>("target");
+  oid_t id = oid_t(c.tree().get_child("target"));
   std::string comp_type = c.tree().get<std::string>("recipe.type");
   if(comp_type == "solid_object")
   {
@@ -381,7 +381,7 @@ void client::add_comp(call c)
 
 void client::remove_obj(call c)
 {
-  unsigned long long id = c.tree().get<unsigned long long>("id");
+  oid_t id = oid_t(c.tree().get_child("id"));
   game_delete_object(id);
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);

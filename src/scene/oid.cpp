@@ -23,7 +23,7 @@ oid_t::oid_t(std::string serial)
   }
 }
 
-boost::property_tree::ptree oid_t::encode()
+boost::property_tree::ptree oid_t::encode() const
 {
   boost::property_tree::ptree node;
   for(auto i : _access_order)
@@ -33,7 +33,7 @@ boost::property_tree::ptree oid_t::encode()
   return node;
 }
 
-std::string oid_t::serialise()
+std::string oid_t::serialise() const
 {
   std::string serial = "";
   for(auto i : _access_order)
@@ -62,7 +62,7 @@ oid_t *oid_t::pop()
   return this;
 }
 
-engine::GameObject *oid_t::get(engine::GameObject *o)
+engine::GameObject *oid_t::get(engine::GameObject *o) const
 {
   engine::GameObject *node = o;
   try
@@ -79,7 +79,7 @@ engine::GameObject *oid_t::get(engine::GameObject *o)
   return node;
 }
 
-unsigned long long oid_t::put(engine::GameObject *o, engine::GameObject *target)
+unsigned long long oid_t::put(engine::GameObject *o, engine::GameObject *target) const
 {
   if(_access_order.size() == 0)
   { // use add instead?
@@ -101,7 +101,7 @@ unsigned long long oid_t::put(engine::GameObject *o, engine::GameObject *target)
   }
 }
 
-unsigned long long oid_t::add(engine::GameObject *o, engine::GameObject *target)
+unsigned long long oid_t::add(engine::GameObject *o, engine::GameObject *target) const
 {
   engine::GameObject *node = o;
   try
@@ -118,7 +118,35 @@ unsigned long long oid_t::add(engine::GameObject *o, engine::GameObject *target)
   }
 }
 
-bool oid_t::operator== (const oid_t &other)
+unsigned long long oid_t::destroy(engine::GameObject *o) const
+{
+  if(_access_order.size() == 0)
+  { // how is this gonna work?
+    return 0;
+  }
+  engine::GameObject *node = o;
+  try
+  {
+    for(int i = 0; i < _access_order.size() - 1; i++)
+    {
+      node = node -> at(_access_order[i]);
+    }
+    // place at exact id
+    node -> deleteGameObject(_access_order[_access_order.size() - 1]);
+    return 1;
+  }
+  catch(std::exception &e)
+  {
+    return 0;
+  }
+}
+
+bool oid_t::operator== (const oid_t &other) const
 {
   return this -> _access_order == other._access_order;
+}
+
+bool oid_t::operator< (const oid_t &other) const
+{
+  return this -> serialise() < other.serialise();
 }

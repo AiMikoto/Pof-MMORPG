@@ -65,17 +65,19 @@ bool is_loaded()
   return loaded;
 }
 
-unsigned long long game_inject_object()
+oid_t game_inject_object()
 {
   engine::GameObject *go = new engine::GameObject();
   slicer_acquire();
   unsigned long long pos = current -> addGameObject(go);
-  slicer_inject_object(pos, new engine::GameObject());
+  oid_t oid;
+  oid.at(pos);
+  slicer_inject_object(oid, new engine::GameObject());
   slicer_release();
-  return pos;
+  return oid;
 }
 
-void game_delete_object(unsigned long long id)
+void game_delete_object(oid_t id)
 {
   slicer_acquire();
   slicer_eject_object(id);

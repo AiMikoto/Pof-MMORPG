@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
+#include "scene/oid.h"
 
 enum collision_handling_model_t
 {
@@ -19,14 +20,14 @@ class slice_t
 public:
   slice_t();
   slice_t(boost::property_tree::ptree tree);
-  std::map<unsigned long long, glm::dvec3> pos_delta;
-  std::map<unsigned long long, glm::dvec3> vel_delta;
-  std::map<unsigned long long, glm::dvec3> shift;
-  std::map<unsigned long long, glm::dvec3> scale;
-  std::map<unsigned long long, glm::dvec3> rotation;
-  std::map<unsigned long long, boost::property_tree::ptree> objects;
-  std::map<unsigned long long, boost::property_tree::ptree> components;
-  std::vector <unsigned long long> ejections;
+  std::map<oid_t, glm::dvec3> pos_delta;
+  std::map<oid_t, glm::dvec3> vel_delta;
+  std::map<oid_t, glm::dvec3> shift;
+  std::map<oid_t, glm::dvec3> scale;
+  std::map<oid_t, glm::dvec3> rotation;
+  std::map<oid_t, boost::property_tree::ptree> objects;
+  std::map<oid_t, boost::property_tree::ptree> components;
+  std::vector <oid_t> ejections;
   boost::property_tree::ptree encode();
   long long origin_generation;
   long long target_generation;
@@ -50,17 +51,17 @@ void slicer_set_status(bool status);
 
 void slicer_set_sps(double val);
 
-void slicer_move(unsigned long long id, glm::dvec3 pos);
+void slicer_move(oid_t &id, glm::dvec3 pos);
 
-void slicer_scale(unsigned long long id, glm::dvec3 scale);
+void slicer_scale(oid_t &id, glm::dvec3 scale);
 
-void slicer_rotate(unsigned long long id, glm::dvec3 rotation);
+void slicer_rotate(oid_t &id, glm::dvec3 rotation);
 
-void slicer_inject_object(unsigned long long id, engine::GameObject *go);
+void slicer_inject_object(oid_t &id, engine::GameObject *go);
 
-void slicer_inject_component(unsigned long long id, engine::Component *c);
+void slicer_inject_component(oid_t &id, engine::Component *c);
 
-void slicer_eject_object(unsigned long long id);
+void slicer_eject_object(oid_t &id);
 
 void slicer_acquire();
 
