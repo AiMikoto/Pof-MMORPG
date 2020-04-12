@@ -15,7 +15,16 @@ oid_t::oid_t(boost::property_tree::ptree node)
 
 oid_t::oid_t(std::string serial)
 {
-  boost::char_separator<char> sep(".");
+  if(serial == "")
+  {
+    return;
+  }
+  char separator = '.'; // use dot by default
+  if(serial[0] < '0' || serial[0] > '9')
+  {
+    separator = serial[0]; // use the first character as a separator
+  }
+  boost::char_separator<char> sep(std::string(1, separator).c_str());
   boost::tokenizer<boost::char_separator<char>> tokens(serial, sep);
   for(auto t : tokens)
   {
@@ -35,10 +44,15 @@ boost::property_tree::ptree oid_t::encode() const
 
 std::string oid_t::serialise() const
 {
-  std::string serial = "";
+  return serialise('.').erase(0, 1);
+}
+
+std::string oid_t::serialise(char separator) const
+{
+  std::string serial = std::string(1, separator);
   for(auto i : _access_order)
   {
-    serial = serial + std::to_string(i) + '.';
+    serial = serial + std::to_string(i) + separator;
   }
   if(serial.size() > 0)
   {

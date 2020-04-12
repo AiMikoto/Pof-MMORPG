@@ -16,6 +16,7 @@ public:
   oid_t(std::string serial);
   boost::property_tree::ptree encode() const;
   std::string serialise() const;
+  std::string serialise(char separator) const;
   oid_t *at(unsigned long long id);
   oid_t *pop();
   bool is_in(const oid_t &other) const;

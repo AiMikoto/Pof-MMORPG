@@ -87,35 +87,35 @@ boost::property_tree::ptree slice_t::encode()
   boost::property_tree::ptree ret, pos_node, vel_node, shift_node, scale_node, rotation_node, object_node, component_node, eject_node;
   for(auto it : this -> pos_delta)
   {
-    pos_node.put_child(it.first.serialise(), encode_dvec3(it.second));
+    pos_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> vel_delta)
   {
-    vel_node.put_child(it.first.serialise(), encode_dvec3(it.second));
+    vel_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> shift)
   {
-    shift_node.put_child(it.first.serialise(), encode_dvec3(it.second));
+    shift_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> scale)
   {
-    scale_node.put_child(it.first.serialise(), encode_dvec3(it.second));
+    scale_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> rotation)
   {
-    rotation_node.put_child(it.first.serialise(), encode_dvec3(it.second));
+    rotation_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> objects)
   {
-    object_node.put_child(it.first.serialise(), it.second);
+    object_node.put_child(it.first.serialise('+'), it.second);
   }
   for(auto it : this -> components)
   {
-    component_node.put_child(it.first.serialise(), it.second);
+    component_node.put_child(it.first.serialise('+'), it.second);
   }
   for(auto it : this -> ejections)
   {
-    eject_node.put(it.serialise(), it.serialise());
+    eject_node.put(it.serialise('+'), it.serialise('+'));
   }
   ret.put_child("pos", pos_node);
   ret.put_child("vel", vel_node);
@@ -294,6 +294,10 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
     engine::GameObject *go = it.first.get(e);
     go -> transform.rotateTo(it.second);
   }
+  for(auto it : slice.ejections)
+  {
+    it.destroy(e);
+  }
   for(auto it : slice.objects)
   {
     engine::GameObject *go = new engine::GameObject(it.second);
@@ -303,10 +307,6 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
   {
     engine::GameObject *go = it.first.get(e);
     go -> constructComponent(it.second);
-  }
-  for(auto it : slice.ejections)
-  {
-    it.destroy(e);
   }
   e -> regenerateCtree();
   return e;
