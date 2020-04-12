@@ -9,8 +9,18 @@ void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t
   std::string oname = "Object " + oid.serialise();
   if(nk_tree_push_hashed(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED, H_GET(path)))
   {
-    std::string tpath = path + "t";
-    draw_transform(ctx, o -> transform, tpath);
+    std::string ltpath = path + "lt";
+    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Local Transform", NK_MINIMIZED, H_GET(ltpath)))
+    {
+      draw_transform(ctx, o -> transform, ltpath);
+      nk_tree_pop(ctx);
+    }
+    std::string gtpath = path + "gt";
+    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Global Transform", NK_MINIMIZED, H_GET(gtpath)))
+    {
+      draw_transform(ctx, o -> transformLocalToGlobal(), gtpath);
+      nk_tree_pop(ctx);
+    }
     std::string cpath = path + "c";
     if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Components", NK_MINIMIZED, H_GET(cpath)))
     {
@@ -111,26 +121,22 @@ void draw_component(ctx_t *ctx, engine::Component *c, std::string path)
 
 void draw_transform(ctx_t *ctx, engine::Transform t, std::string path)
 {
-  if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Transform", NK_MINIMIZED, H_GET(path)))
+  std::string ppath = path + "pos";
+  if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Position", NK_MINIMIZED, H_GET(ppath)))
   {
-    std::string ppath = path + "pos";
-    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Position", NK_MINIMIZED, H_GET(ppath)))
-    {
-      draw_dvec(ctx, t.position);
-      nk_tree_pop(ctx);
-    }
-    std::string rpath = path + "rot";
-    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Rotation", NK_MINIMIZED, H_GET(rpath)))
-    {
-      draw_dvec(ctx, t.rotation);
-      nk_tree_pop(ctx);
-    }
-    std::string spath = path + "sca";
-    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Scale", NK_MINIMIZED, H_GET(spath)))
-    {
-      draw_dvec(ctx, t.scale);
-      nk_tree_pop(ctx);
-    }
+    draw_dvec(ctx, t.position);
+    nk_tree_pop(ctx);
+  }
+  std::string rpath = path + "rot";
+  if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Rotation", NK_MINIMIZED, H_GET(rpath)))
+  {
+    draw_dvec(ctx, t.rotation);
+    nk_tree_pop(ctx);
+  }
+  std::string spath = path + "sca";
+  if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Scale", NK_MINIMIZED, H_GET(spath)))
+  {
+    draw_dvec(ctx, t.scale);
     nk_tree_pop(ctx);
   }
 }

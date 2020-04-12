@@ -29,6 +29,7 @@ namespace engine {
 		GameObject(GameObject* parent, std::vector<Component*> components);
 		GameObject *at(ullong index);
 		void update();
+		Transform transformLocalToGlobal();
 		ullong addGameObject(GameObject* child);
 		ullong addGameObject(ullong id, GameObject* child);
 		ullong addGameObject(ullong id, boost::property_tree::ptree node);

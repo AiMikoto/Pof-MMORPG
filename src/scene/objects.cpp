@@ -71,6 +71,18 @@ engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> compo
 	this->components = components;
 }
 
+engine::Transform engine::GameObject::transformLocalToGlobal() {
+	if(parent) {
+		engine::Transform t = this->transform;
+		engine::Transform pt = parent->transformLocalToGlobal();
+		t.position += pt.position;
+		t.rotation *= pt.rotation;
+		t.scale *= pt.scale;
+		return t;
+	}
+	return this->transform;
+}
+
 engine::GameObject *engine::GameObject::at(ullong index) {
 	auto it = children.find(index);
 	if(it != children.end()) {
