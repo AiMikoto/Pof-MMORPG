@@ -58,4 +58,5 @@ namespace engine {
 		}
 		return T(toCheck.rbegin()->first + 1);
 	}
+	glm::dvec3 computeSize(std::vector<glm::dvec3> verticesPositions);
 }

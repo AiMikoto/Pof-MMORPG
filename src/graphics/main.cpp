@@ -9,6 +9,9 @@
 #include "components/meshRenderer.h"
 #include "components/meshFilter.h"
 #include "lib/nuklear.h"
+#include "ui/scene_viewer.h"
+#include "ui/ui.h"
+#include "graphics/culling/frustrumCulling.h"
 
 int main() {
 	log_init("graphics");
@@ -35,14 +38,25 @@ int main() {
 			model->transform.scale = glm::dvec3(1, 1, 1);
 			model->addComponent(new engine::MeshFilter(modelPath));
 			model->addComponent(new engine::MeshRenderer());
-			
+			model->isStatic = true;
 			scene->addGameObject(model);
 		}
 	}
 	// scene->readFromFile("../src/graphics/assets/scenes/test.json");
 	BOOST_LOG_TRIVIAL(trace) << scene->gameObjects.size();
 	BOOST_LOG_TRIVIAL(trace) << glfwGetTime();
+	engine::ViewFrustrum vf;
+	vf.computePoints(engine::gpu->glContext->window, engine::gpu->editorCamera);
+	vf.computeNormals(engine::gpu->editorCamera);
+	glm::dvec3 testPoint = engine::gpu->editorCamera->gameObject->transform.position +
+		engine::gpu->editorCamera->forward() * double(engine::gpu->editorCamera->nearClipDistance);
+	testPoint += 2.0 * engine::gpu->editorCamera->forward();
+	BOOST_LOG_TRIVIAL(trace) << vf.pointInsideFrustrum(testPoint);
+	BOOST_LOG_TRIVIAL(trace) << vf.pointInsideFrustrum(testPoint - 5.0 * engine::gpu->editorCamera->forward());
 	glfwSwapInterval(0);
+	UI_master *ui = new UI_master();
+	engine::gpu->addUI(ui);
+	ui->insert(new UI_scene_viewer(&scene));
 	BOOST_LOG_TRIVIAL(trace) << "Starting renderer";
 	while (!engine::gpu->glContext->quit) {
 		engine::gpu->update();

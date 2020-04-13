@@ -17,15 +17,9 @@ engine::Mesh::~Mesh() {
 }
 
 void engine::Mesh::computeScale(){
-	glm::dvec3 min = vertices[0].position;
-	glm::dvec3 max = vertices[0].position;
+	std::vector<glm::dvec3> points;
 	for (auto v : vertices) {
-		min.x = glm::min(min.x, double(v.position.x));
-		min.y = glm::min(min.y, double(v.position.y));
-		min.z = glm::min(min.z, double(v.position.z));
-		max.x = glm::max(max.x, double(v.position.x));
-		max.y = glm::max(max.y, double(v.position.y));
-		max.z = glm::max(max.z, double(v.position.z));
+		points.push_back(v.position);
 	}
-	meshScale = max - min;
+	meshScale = computeSize(points);
 }

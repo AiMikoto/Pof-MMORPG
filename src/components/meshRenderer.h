@@ -12,6 +12,7 @@ namespace engine {
 		std::string defaultMaterialPath;
 		std::vector<std::string> materialsPaths;
 		std::vector<std::pair<std::string, std::string>> renderLayers;
+		bool inView;
 
 		MeshRenderer();
 		MeshRenderer(const MeshRenderer& renderer);

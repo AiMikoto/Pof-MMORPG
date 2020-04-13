@@ -76,15 +76,15 @@ engine::Camera::Camera(boost::property_tree::ptree node) {
 }
 
 void engine::Camera::setup() {
-	moveSpeed = 50.0f;
+	moveSpeed = 10.0f;
 	rotationSpeed = 1;
-	fieldOfView = 45.0f;
+	fieldOfView = 90.0f;
 	nearClipDistance = 0.1f;
 	farClipDistance = 400.0f;
 	isPerspective = true;
 	isFixed = false;
 	pitch = 0;
-	yaw = pi;
+	yaw = 0;
 	for (int i = 0; i < cam::movements; i++) {
 		moveBuffer[i] = false;
 	}
@@ -124,15 +124,12 @@ void engine::Camera::rotateCamera(GLFWwindow* window) {
 	glfwGetWindowSize(window, &width, &height);
 
 	yaw += rotationSpeed * Time::deltaTime * (width / 2 - xpos);
+	pitch += rotationSpeed * Time::deltaTime * (height / 2 - ypos);
+	pitch = glm::clamp(pitch, -glm::radians(85.0), glm::radians(85.0));
 	if (yaw > 2 * pi)
 		yaw -= 2 * pi;
 	else if (yaw < 0)
 		yaw += 2 * pi;
-	pitch += rotationSpeed * Time::deltaTime * (height / 2 - ypos);
-	if (pitch > 2 * pi)
-		pitch -=  2 * pi;
-	else if (pitch < 0)
-		pitch += 2* pi;
 	updateRotation();
 	rotate = false;
 	cursorToMiddle(window);

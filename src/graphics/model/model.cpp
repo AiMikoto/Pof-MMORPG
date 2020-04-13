@@ -10,6 +10,7 @@
 engine::Model::Model(std::string path) {
 	this->path = path;
 	this->name = path.substr(path.find_last_of('/') + 1, path.size() - 1);
+	this->sizeComputed = false;
 	BOOST_LOG_TRIVIAL(trace) << this->name;
 }
 
@@ -19,6 +20,26 @@ engine::Model::~Model() {
 	}
 	meshes.clear();
 	gpu->removeModel(path);
+}
+
+glm::dvec3 engine::Model::modelSize() {
+	if (sizeComputed)
+		return size;
+	else return computeSize();
+}
+
+glm::dvec3 engine::Model::computeSize() {
+	if (sizeComputed)
+		return size;
+	std::vector<glm::dvec3> verticesPositions;
+	for (auto mesh : meshes) {
+		for (auto v : mesh->vertices) {
+			verticesPositions.push_back(v.position);
+		}
+	}
+	size = engine::computeSize(verticesPositions);
+	sizeComputed = true;
+	return size;
 }
 
 engine::ModelLoader::ModelLoader() {}
@@ -37,6 +58,7 @@ void engine::ModelLoader::loadModel(std::string path, bool gammaCorrection) {
 		throw assimp_error(importer.GetErrorString());
 	Model* model = new Model(path);
 	processNode(scene->mRootNode, scene, model);
+	model->computeSize();
 	gpu->models[path] = model;
 }
 
