@@ -63,6 +63,12 @@ void slicer_inject_component(oid_t &id, engine::Component *c);
 
 void slicer_eject_object(oid_t &id);
 
+void slicer_rename_object(oid_t &id, std::string name);
+
+void slicer_add_tag_object(oid_t &id, std::string tag);
+
+void slicer_remove_tag_object(oid_t &id, std::string tag);
+
 void slicer_acquire();
 
 void slicer_release();

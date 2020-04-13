@@ -4,6 +4,8 @@
 #include "ui/ui.h"
 #include "ui/utils.h"
 
+#define UI_SCENE_VIEWER_BUF_SIZE 256
+
 class UI_object_viewer : public UI_element
 {
 public:
@@ -29,6 +31,9 @@ private:
   void draw(ctx_t *ctx);
   engine::Scene **s;
   std::string uuid;
+  char buf[UI_SCENE_VIEWER_BUF_SIZE];
+  int len;
+  std::string filter;
 };
 
 #endif // UI_SCENE_VIEWER_H

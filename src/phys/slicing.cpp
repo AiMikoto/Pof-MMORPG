@@ -140,6 +140,9 @@ std::map <oid_t, glm::dvec3> slicer_injection_rotation;
 std::map <oid_t, boost::property_tree::ptree> slicer_injection_objects;
 std::vector <oid_t> slicer_ejection_objects;
 std::map <oid_t, boost::property_tree::ptree> slicer_injection_components;
+std::map <oid_t, std::string> slicer_inject_name;
+std::map <oid_t, std::string> slicer_inject_tag;
+std::map <oid_t, std::string> slicer_eject_tag;
 
 // slicing constants
 
@@ -359,6 +362,21 @@ void slicer_inject_component(oid_t &id, engine::Component *c)
 void slicer_eject_object(oid_t &id)
 {
   slicer_ejection_objects.push_back(id);
+}
+
+void slicer_rename_object(oid_t &id, std::string name)
+{
+  slicer_inject_name[id] = name;
+}
+
+void slicer_add_tag_object(oid_t &id, std::string tag)
+{
+  slicer_inject_tag[id] = tag;
+}
+
+void slicer_remove_tag_object(oid_t &id, std::string tag)
+{
+  slicer_eject_tag[id] = tag;
 }
 
 // lock functions - use these to control the slicing process, the functions above are only thread safe in the context of slicer_lock manipulation
