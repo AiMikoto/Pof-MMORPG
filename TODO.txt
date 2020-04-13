@@ -4,7 +4,6 @@ instance:
 
 client:
 
-1. refactor scene/object viewer into 1 common class
 2. filter bar for scene/object viewer
 3. add flags to scene/object viewer
 4. interpret flags accordingly
