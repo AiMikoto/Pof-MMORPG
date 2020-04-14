@@ -9,6 +9,7 @@
 #include "components/solid_object.h"
 #include "core/utils.h"
 #include "lib/log.h"
+#include "scene/oid.h"
 
 engine::GameObject::GameObject() {
 }
@@ -152,6 +153,34 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	node.add_child("Children", childrenNode);
 	node.add_child("Tags", tagNode);
 	return node;
+}
+
+std::map<oid_t, engine::GameObject*> engine::GameObject::getSurfaceChildren() {
+	std::map<oid_t, engine::GameObject*> ret;
+	oid_t oid;
+	for (auto it : this->children) {
+		oid.at(it.first);
+		ret[oid] = it.second;
+		oid.pop();
+	}
+	return ret;
+}
+
+std::map<oid_t, engine::GameObject*> engine::GameObject::getDeepChildren() {
+	std::map<oid_t, engine::GameObject*> ret, recursed;
+	oid_t oid;
+	for (auto it : this->children) {
+		oid.at(it.first);
+		ret[oid] = it.second;
+		recursed = it.second -> getDeepChildren();
+		for (auto it : recursed) {
+			oid_t oid_r = oid;
+			oid_r.at(it.first);
+			ret[oid_r] = it.second;
+		}
+		oid.pop();
+	}
+	return ret;
 }
 
 bool engine::GameObject::constructComponent(boost::property_tree::ptree node) {

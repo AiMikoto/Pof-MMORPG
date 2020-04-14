@@ -34,6 +34,7 @@ private:
   char buf[UI_SCENE_VIEWER_BUF_SIZE];
   int len = 0;
   std::string filter;
+  bool exhaustive_display;
 };
 
 #endif // UI_SCENE_VIEWER_H
