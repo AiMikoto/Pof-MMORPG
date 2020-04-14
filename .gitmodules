@@ -10,3 +10,6 @@
 [submodule "dep/libpqxx"]
 	path = dep/libpqxx
 	url = https://github.com/jtv/libpqxx.git
+[submodule "dep/sol2"]
+	path = dep/sol2
+	url = https://github.com/ThePhD/sol2.git
