@@ -77,8 +77,8 @@ void engine::RenderLayer::cleanup() {
 std::vector<glm::mat4> engine::RenderLayer::getModelMatrices() {
 	std::vector<glm::mat4> modelMatrices;
 	for (auto r : renderers) {
-		if(r->inView)
-			modelMatrices.push_back(r->gameObject->transform.model());
+    if(r->inView)
+		  modelMatrices.push_back(r->gameObject->transformLocalToGlobal().model());
 	}
 	return modelMatrices;
 }

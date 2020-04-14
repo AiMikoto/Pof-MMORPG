@@ -8,22 +8,13 @@
 #include "scene/scene.h"
 #include "client/system.h"
 
-extern user_card_library ucl;
-
 extern engine::Scene *current;
 
 extern std::mutex scene_lock;
 
-extern chat_log cl;
-
 extern std::mutex init_l;
 
 extern std::string username;
-
-extern client_system_manager *csm;
-
-
-void handle_linear_input(std::string s);
 
 void game_init();
 

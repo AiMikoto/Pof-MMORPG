@@ -13,17 +13,17 @@ manipulator::manipulator(std::string hostname, int port, std::string tok):rcon(h
   proto -> safe_write(init);
 }
 
-void spawn_cb(boost::barrier *bar, unsigned long long *ret, call c)
+void spawn_cb(boost::barrier *bar, oid_t *ret, call c)
 {
-  *ret = c.tree().get<unsigned long long>("id");
+  *ret = oid_t(c.tree().get<std::string>("id"));
   bar -> wait();
 }
 
-unsigned long long manipulator::spawn()
+oid_t manipulator::spawn()
 {
   boost::barrier bar(2);
   call c;
-  unsigned long long ret;
+  oid_t ret;
   proto -> ept.add(OP_EDIT_CB, boost::bind(spawn_cb, &bar, &ret, _1));
   c.tree().put(OPCODE, OP_EDIT_ADD_OBJ);
   proto -> safe_write(c);
@@ -68,13 +68,13 @@ void obj_move_cb(boost::barrier *bar, call c)
   bar -> wait();
 }
 
-void manipulator::obj_move(unsigned long long id, glm::dvec3 pos)
+void manipulator::obj_move(oid_t &id, glm::dvec3 pos)
 {
   boost::barrier bar(2);
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_move_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_MOVE_OBJECT);
-  c.tree().put("id", id);
+  c.tree().put_child("id", id.encode());
   c.tree().put_child("pos", engine::vecSerializer(pos));
   proto -> safe_write(c);
   bar.wait();
@@ -85,13 +85,13 @@ void obj_scale_cb(boost::barrier *bar, call c)
   bar -> wait();
 }
 
-void manipulator::obj_scale(unsigned long long id, glm::dvec3 scale)
+void manipulator::obj_scale(oid_t &id, glm::dvec3 scale)
 {
   boost::barrier bar(2);
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_scale_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_SCALE_OBJECT);
-  c.tree().put("id", id);
+  c.tree().put_child("id", id.encode());
   c.tree().put_child("scale", engine::vecSerializer(scale));
   proto -> safe_write(c);
   bar.wait();
@@ -102,13 +102,13 @@ void obj_rotate_cb(boost::barrier *bar, call c)
   bar -> wait();
 }
 
-void manipulator::obj_rotate(unsigned long long id, glm::dvec3 rotation)
+void manipulator::obj_rotate(oid_t &id, glm::dvec3 rotation)
 {
   boost::barrier bar(2);
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_rotate_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_ROTATE_OBJECT);
-  c.tree().put("id", id);
+  c.tree().put_child("id", id.encode());
   c.tree().put_child("rotation", engine::vecSerializer(rotation));
   proto -> safe_write(c);
   bar.wait();
@@ -119,13 +119,30 @@ void obj_delete_cb(boost::barrier *bar, call c)
   bar -> wait();
 }
 
-void manipulator::obj_delete(unsigned long long id)
+void manipulator::obj_delete(oid_t &id)
 {
   boost::barrier bar(2);
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_delete_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_DELETE_OBJ);
-  c.tree().put("id", id);
+  c.tree().put_child("id", id.encode());
+  proto -> safe_write(c);
+  bar.wait();
+}
+
+void obj_attach_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::obj_attach(oid_t &from, oid_t &to)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_attach_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_ATTACH_OBJ);
+  c.tree().put_child("from", from.encode());
+  c.tree().put_child("to", to.encode());
   proto -> safe_write(c);
   bar.wait();
 }
@@ -135,13 +152,13 @@ void comp_add_cb(boost::barrier *bar, call c)
   bar -> wait();
 }
 
-void manipulator::comp_add(unsigned long long target, boost::property_tree::ptree recipe)
+void manipulator::comp_add(oid_t &target, boost::property_tree::ptree recipe)
 {
   boost::barrier bar(2);
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(comp_add_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_ADD_COMP);
-  c.tree().put("target", target);
+  c.tree().put_child("target", target.encode());
   c.tree().put_child("recipe", recipe);
   proto -> safe_write(c);
   bar.wait();

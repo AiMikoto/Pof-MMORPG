@@ -7,6 +7,7 @@
 #include "components/meshRenderer.h"
 #include "components/phys_collider.h"
 #include "components/solid_object.h"
+#include "core/utils.h"
 #include "lib/log.h"
 
 engine::GameObject::GameObject() {
@@ -18,7 +19,7 @@ engine::GameObject::~GameObject() {
 	}
 	components.clear();
 	for (auto c : children) {
-		delete c;
+		delete c.second;
 	}
 	children.clear();
 }
@@ -36,20 +37,14 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 		if (c->type == typeid(MeshRenderer).name())
 			this->addComponent(new MeshRenderer(*static_cast<MeshRenderer*>(c)));
 	}
-	for (auto c : gameObject.children) {
-		this->addChild(new GameObject(*c));
+	for (auto it : gameObject.children) {
+		this->addGameObject(new GameObject(*it.second));
 	}
-	id = gameObject.id;
 	name = gameObject.name;
 	tag = gameObject.tag;
 }
 
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
-	try{
-		id = node.get<int>("id");
-	} catch (std::exception &e) {
-		id = 0;
-	}
 	name = node.get<std::string>("name");
 	tag = node.get<std::string>("tag");
 	id = node.get<ullong>("id");
@@ -60,7 +55,7 @@ engine::GameObject::GameObject(boost::property_tree::ptree node) {
 	}
 	transform = Transform(node.get_child("Transform"));
 	for (auto c : node.get_child("Children")) {
-		addChild(new GameObject(c.second));
+		addGameObject(std::stoull(c.first), new GameObject(c.second));
 	}
 }
 
@@ -68,17 +63,8 @@ engine::GameObject::GameObject(GameObject* parent) {
 	this->parent = parent;
 }
 
-engine::GameObject::GameObject(std::vector<GameObject*> children) {
-	this->children = children;
-}
-
 engine::GameObject::GameObject(std::vector<Component*> components) {
 	this->components = components;
-}
-
-engine::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> children) {
-	this->parent = parent;
-	this->children = children;
 }
 
 engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> components) {
@@ -86,39 +72,56 @@ engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> compo
 	this->components = components;
 }
 
-engine::GameObject::GameObject(std::vector<GameObject*> children, std::vector<Component*> components) {
-	this->children = children;
-	this->components = components;
+engine::Transform engine::GameObject::transformLocalToGlobal() {
+	if(parent) {
+		engine::Transform t = this->transform;
+		engine::Transform pt = parent->transformLocalToGlobal();
+		t.position += pt.position;
+		t.rotation *= pt.rotation;
+		t.scale *= pt.scale;
+		return t;
+	}
+	return this->transform;
 }
 
-engine::GameObject::GameObject(GameObject* parent, std::vector<GameObject*> children, std::vector<Component*> components) {
-	this->parent = parent;
-	this->children = children;
-	this->components = components;
+engine::GameObject *engine::GameObject::at(ullong index) {
+	auto it = children.find(index);
+	if(it != children.end()) {
+		return it -> second;
+	}
+	throw std::logic_error("GameObject doesn't exist");
 }
 
 void engine::GameObject::update() {
-	for (auto c : children)
-		c->update();
+	for (auto it : children)
+		it.second->update();
 }
 
-void engine::GameObject::addChild(GameObject* child) {
-	bool found = false;
-	for (auto i : this->children) {
-		if (i == child) {
-			found = true;
-			break;
-		}
-	}
-	if (!found) {
-		this->children.push_back(child);
-		child->parent = this;
-	}
+ullong engine::GameObject::addGameObject(GameObject* child) {
+	ullong id = getFirstAvailableMapIndex(this -> children);
+	return addGameObject(id, child);
 }
 
-void engine::GameObject::addChildren(std::vector<GameObject*> children) {
-	for (auto i : children) {
-		this->addChild(i);
+ullong engine::GameObject::addGameObject(ullong id, GameObject* child) {
+	auto it = children.find(id);
+	if(it != children.end()) { // new object takes priority
+		delete it->second;
+	}
+	
+	this->children[id] = child;
+	child->parent = this;
+	return id;
+}
+
+ullong engine::GameObject::addGameObject(ullong id, boost::property_tree::ptree node) {
+	return addGameObject(id, new engine::GameObject(node.get_child("Game Object")));
+}
+
+void engine::GameObject::deleteGameObject(ullong id) {
+	auto it = children.find(id);
+	if(it != children.end()) {
+		delete it -> second;
+		children.erase(id);
 	}
 }
 
@@ -127,12 +130,12 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	node.put("name", name);
 	node.put("id", id);
 	node.put("tag", tag);
-	node.put("id", id);
 	for (auto c : components) {
 		componentsNode.add_child(c->name, c->serialize());
 	}
-	for (auto c : children) {
-		childrenNode.add_child("GameObject", c->serialize());
+	for (auto it : children) {
+		engine::GameObject *c = it.second;
+		childrenNode.add_child(std::to_string(it.first), c->serialize());
 	}	
 	node.add_child("Transform", transform.serialize());
 	node.add_child("Components", componentsNode);

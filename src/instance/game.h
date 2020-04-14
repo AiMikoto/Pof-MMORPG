@@ -23,9 +23,11 @@ void load(map_t map);
 
 bool is_loaded();
 
-unsigned long long game_inject_object();
+oid_t game_inject_object();
 
-void game_delete_object(unsigned long long id);
+void game_delete_object(oid_t id);
+
+oid_t game_attach_object(oid_t from, oid_t to);
 
 void slicer();
 

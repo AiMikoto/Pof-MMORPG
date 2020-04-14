@@ -989,6 +989,392 @@ void test_slicing()
   delete e;
 }
 
+void test_injector()
+{
+  int ticks;
+  engine::Scene *e = new engine::Scene();
+  oid_t oid;
+  engine::GameObject *o;
+  TEST("TESTING OBJECT INJECTION");
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  oid.at(1);
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  PASS;
+  TEST("TESTING OBJECT INJECTION OVERWRITING ANOTHER OBJECT");
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  PASS;
+  TEST("TESTING OBJECT INJECTION ONTO THE SAME OBJECT");
+  o = new engine::GameObject();
+  oid.pop();
+  oid.at(oid.add(e, o));
+  slicer_inject_object(oid, o);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  PASS;
+  TEST("TESTING INJECTED SCENE DELETION");
+  delete e;
+  PASS;
+  TEST("TESTING DOUBLE OBJECT INJECTION");
+  e = new engine::Scene();
+  oid = oid_t();
+  oid.at(1); // [1]
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  oid.pop();
+  oid.at(2); // [2]
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  PASS;
+  /*    e
+   *   /|
+   *  1 2
+   */
+  TEST("TESTING CHILD OBJECT INJECTION");
+  oid.at(1); // [2, 1]
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  if(oid.get(e) != NULL)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  /*    e
+   *   /|
+   *  1 2
+   *    |
+   *    1
+   */
+  boost::property_tree::ptree sast = e -> serialize();
+  TEST("TESTING CHILD MOVEMENT OVERWRITE");
+  oid_t from, to;
+  from = oid; // [2, 1]
+  to.at(1); // [1]
+  engine::GameObject *go = from.get(e);
+  slicer_eject_object(from);
+  slicer_inject_object(to, go);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  if((from.get(e) == NULL) && (to.get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  /* yes, [1] gets overwritten by [2, 1]
+   *    e
+   *   /|
+   *  1 2
+   */
+  TEST("TESTING CHILD MOVEMENT OVERWRITE 2");
+  from.pop(); // [2]
+  go = from.get(e);
+  slicer_eject_object(from);
+  slicer_inject_object(to, go);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  if((from.get(e) == NULL) && (to.get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  delete e;
+  TEST("TESTING CHILD NORMAL MOVEMENT");
+  e = new engine::Scene(sast);
+  /*    e
+   *   /|
+   *  1 2
+   *    |
+   *    1
+   */
+  from.at(1); // [2, 1]
+  go = from.get(e);
+  slicer_eject_object(from);
+  to.at(to.add(e, new engine::GameObject())); // [1, 1]
+  // new object will be deleted by slicer;
+  slicer_inject_object(to, go);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  if((from.get(e) == NULL) && (to.get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  delete e;
+  TEST("TESTING CHILD DELETION");
+  e = new engine::Scene(sast);
+  /*    e
+   *   /|
+   *  1 2
+   *    |
+   *    1
+   */
+  oid = oid_t();
+  oid.at(2); // [2]
+  oid.at(1); // [2, 1]
+  slicer_eject_object(oid);
+  ticks = 1000;
+  while(ticks--)
+  {
+    tick(e);
+  }
+  if((oid.get(e) == NULL) && (oid.pop() -> get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  delete e;
+}
+
+void test_slice_serialisation()
+{
+  int ticks;
+  engine::Scene *e = new engine::Scene();
+  oid_t oid;
+  engine::GameObject *o;
+  TEST("TESTING OBJECT INJECTION - SERIAL");
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  oid.at(1);
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  PASS;
+  TEST("TESTING OBJECT INJECTION OVERWRITING ANOTHER OBJECT - SERIAL");
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  PASS;
+  TEST("TESTING OBJECT INJECTION ONTO THE SAME OBJECT - SERIAL");
+  o = new engine::GameObject();
+  oid.pop();
+  oid.at(oid.add(e, o));
+  slicer_inject_object(oid, o);
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  PASS;
+  TEST("TESTING INJECTED SCENE DELETION - SERIAL");
+  delete e;
+  PASS;
+  TEST("TESTING DOUBLE OBJECT INJECTION - SERIAL");
+  e = new engine::Scene();
+  oid = oid_t();
+  oid.at(1); // [1]
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  oid.pop();
+  oid.at(2); // [2]
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  PASS;
+  /*    e
+   *   /|
+   *  1 2
+   */
+  TEST("TESTING CHILD OBJECT INJECTION - SERIAL");
+  oid.at(1); // [2, 1]
+  o = new engine::GameObject();
+  slicer_inject_object(oid, o);
+  delete o;
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  if(oid.get(e) != NULL)
+  {
+    PASS;
+  }
+  else
+  {
+    FAIL;
+  }
+  /*    e
+   *   /|
+   *  1 2
+   *    |
+   *    1
+   */
+  boost::property_tree::ptree sast = e -> serialize();
+  TEST("TESTING CHILD MOVEMENT OVERWRITE - SERIAL");
+  oid_t from, to;
+  from = oid; // [2, 1]
+  to.at(1); // [1]
+  engine::GameObject *go = from.get(e);
+  slicer_eject_object(from);
+  slicer_inject_object(to, go);
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  if((from.get(e) == NULL) && (to.get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  /* yes, [1] gets overwritten by [2, 1]
+   *    e
+   *   /|
+   *  1 2
+   */
+  TEST("TESTING CHILD MOVEMENT OVERWRITE 2 - SERIAL");
+  from.pop(); // [2]
+  go = from.get(e);
+  slicer_eject_object(from);
+  slicer_inject_object(to, go);
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  if((from.get(e) == NULL) && (to.get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  delete e;
+  TEST("TESTING CHILD NORMAL MOVEMENT - SERIAL");
+  e = new engine::Scene(sast);
+  /*    e
+   *   /|
+   *  1 2
+   *    |
+   *    1
+   */
+  from.at(1); // [2, 1]
+  go = from.get(e);
+  slicer_eject_object(from);
+  to.at(to.add(e, new engine::GameObject())); // [1, 1]
+  // new object will be deleted by slicer;
+  slicer_inject_object(to, go);
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  if((from.get(e) == NULL) && (to.get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  delete e;
+  TEST("TESTING CHILD DELETION - SERIAL");
+  e = new engine::Scene(sast);
+  /*    e
+   *   /|
+   *  1 2
+   *    |
+   *    1
+   */
+  oid = oid_t();
+  oid.at(2); // [2]
+  oid.at(1); // [2, 1]
+  slicer_eject_object(oid);
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+  }
+  if((oid.get(e) == NULL) && (oid.pop() -> get(e) != NULL))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  delete e;
+}
+
 int main()
 {
   log_test();
@@ -996,6 +1382,8 @@ int main()
   test_aabb();
   test_collisions();
   test_slicing();
+  test_injector();
+  test_slice_serialisation();
   printf("PASSED %d/%d TESTS!\n", tests - failures, tests);
   return failures;
 }

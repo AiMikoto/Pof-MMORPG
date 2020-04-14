@@ -4,19 +4,21 @@
 #include "lib/rcon.h"
 #include <glm/glm.hpp>
 #include "include/maps.h"
+#include "scene/oid.h"
 
 class manipulator:public rcon
 {
 public:
   manipulator(std::string hostname, int port, std::string tok);
-  unsigned long long spawn();
+  oid_t spawn();
   void set_slicer(bool mode);
   void set_sps(double sps);
-  void obj_move(unsigned long long id, glm::dvec3 pos);
-  void obj_scale(unsigned long long id, glm::dvec3 scale);
-  void obj_rotate(unsigned long long id, glm::dvec3 rotation);
-  void obj_delete(unsigned long long id);
-  void comp_add(unsigned long long target, boost::property_tree::ptree recipe);
+  void obj_move(oid_t &id, glm::dvec3 pos);
+  void obj_scale(oid_t &id, glm::dvec3 scale);
+  void obj_rotate(oid_t &id, glm::dvec3 rotation);
+  void obj_delete(oid_t &id);
+  void comp_add(oid_t &target, boost::property_tree::ptree recipe);
+  void obj_attach(oid_t &from, oid_t &to);
   void save();
   void save(map_t map);
 };
