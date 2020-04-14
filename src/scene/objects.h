@@ -8,12 +8,14 @@
 #include "core/utils.h"
 #include "core/constants.h"
 #include "components/component.h"
+#include <set>
 
 namespace engine {
 
 	class GameObject {
 	public:
-		std::string name, tag;
+		std::string name;
+		std::set<std::string> tag;
 		GameObject* parent = NULL;
 		std::map<ullong, GameObject*> children;
 		std::vector<Component*> components;

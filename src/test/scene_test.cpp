@@ -83,7 +83,7 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> tag = "asd";
+  o -> tag.insert("asd");
   s1 -> children[7] = o;
   s2 = new engine::Scene(s1 -> serialize());
   T_EQ(s1, s2);
@@ -92,7 +92,7 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT VIA JSON")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> tag = "asd";
+  o -> tag.insert("asd");
   s1 -> addGameObject(o);
   s2 = new engine::Scene();
   s2 -> fromJSON(s1 -> toJSON());
@@ -102,7 +102,7 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OFFSET OBJECT VIA FILE")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> tag = "asd";
+  o -> tag.insert("asd");
   s1 -> addGameObject(o);
   s2 = new engine::Scene();
   s1 -> writeToFile("test.json");
@@ -113,7 +113,7 @@ void test_serialisation()
   TEST("TESTING SCENE EQUALITY OF ONE OBJECT WITH COMPONENTS")
   s1 = new engine::Scene();
   o = new engine::GameObject();
-  o -> tag = "asd";
+  o -> tag.insert("asd");
   c = new physical_collider({1, 1, 1}, caps);
   o -> addComponent(c);
   c = new solid_object();

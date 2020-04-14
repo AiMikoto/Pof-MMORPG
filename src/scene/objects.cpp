@@ -45,8 +45,17 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 }
 
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
-	name = node.get<std::string>("name");
-	tag = node.get<std::string>("tag");
+	try {
+		name = node.get<std::string>("name");
+	} catch (std::exception &e) {
+		name = "";
+	}
+	try {
+		for (auto it : node.get_child("Tags")) {
+			this -> tag.insert(it.second.get<std::string>(""));
+		} 
+	} catch (std::exception &e) {
+	}
 	for (auto c : node.get_child("Components")) {
 		boost::property_tree::ptree t;
 		t.put_child(c.first, c.second);
@@ -125,9 +134,12 @@ void engine::GameObject::deleteGameObject(ullong id) {
 }
 
 boost::property_tree::ptree engine::GameObject::serialize() {
-	boost::property_tree::ptree node, componentsNode, childrenNode;
+	boost::property_tree::ptree node, componentsNode, childrenNode, tagNode;
 	node.put("name", name);
-	node.put("tag", tag);
+	for (auto t : tag) {
+		tagNode.add("t", t);
+	}
+	node.put_child("tag", tagNode);
 	for (auto c : components) {
 		componentsNode.add_child(c->name, c->serialize());
 	}
@@ -138,6 +150,7 @@ boost::property_tree::ptree engine::GameObject::serialize() {
 	node.add_child("Transform", transform.serialize());
 	node.add_child("Components", componentsNode);
 	node.add_child("Children", childrenNode);
+	node.add_child("Tags", tagNode);
 	return node;
 }
 

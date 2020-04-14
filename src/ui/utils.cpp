@@ -9,6 +9,19 @@ void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t
   std::string oname = "Object " + oid.serialise();
   if(nk_tree_push_hashed(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED, H_GET(path)))
   {
+    nk_layout_row_dynamic(ctx, 20, 2);
+    nk_label(ctx, "Name", NK_TEXT_LEFT);
+    nk_label(ctx, o -> name.c_str(), NK_TEXT_LEFT);
+    std::string tpath = path + "t";
+    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Tags", NK_MINIMIZED, H_GET(tpath)))
+    {
+      for(auto t : o -> tag)
+      {
+        nk_layout_row_dynamic(ctx, 20, 2);
+        nk_label(ctx, "Tag", NK_TEXT_LEFT);
+        nk_label(ctx, t.c_str(), NK_TEXT_LEFT);
+      }
+    }
     std::string ltpath = path + "lt";
     if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Local Transform", NK_MINIMIZED, H_GET(ltpath)))
     {

@@ -114,7 +114,13 @@ void UI_scene_viewer::draw(ctx_t *ctx)
       for(auto it : scene -> children)
       {
         oid.at(it.first);
-        if(match(it.second -> name, filter) || match(it.second -> tag, filter))
+        bool matches = false;
+        matches = matches || match(it.second -> name, filter);
+        for(auto tag : it.second -> tag)
+        {
+          matches = matches || match(tag, filter);
+        }
+        if(matches)
         {
           std::string oopath = opath + std::to_string(it.first);
           draw_game_object(ctx, it.second, oopath, oid);

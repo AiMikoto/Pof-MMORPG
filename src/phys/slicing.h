@@ -28,6 +28,9 @@ public:
   std::map<oid_t, boost::property_tree::ptree> objects;
   std::map<oid_t, boost::property_tree::ptree> components;
   std::vector <oid_t> ejections;
+  std::map <oid_t, std::string> renames;
+  std::map <oid_t, std::string> tags;
+  std::map <oid_t, std::string> untags;
   boost::property_tree::ptree encode();
   long long origin_generation;
   long long target_generation;
