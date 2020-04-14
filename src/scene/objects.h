@@ -8,12 +8,16 @@
 #include "core/utils.h"
 #include "core/constants.h"
 #include "components/component.h"
+#include <set>
+
+class oid_t;
 
 namespace engine {
 
 	class GameObject {
 	public:
-		std::string name, tag;
+		std::string name;
+		std::set<std::string> tag;
 		GameObject* parent = NULL;
 		std::map<ullong, GameObject*> children;
 		std::vector<Component*> components;
@@ -35,6 +39,8 @@ namespace engine {
 		ullong addGameObject(ullong id, boost::property_tree::ptree node);
 		void deleteGameObject(ullong id);
 		boost::property_tree::ptree serialize();
+		std::map<oid_t, GameObject*> getSurfaceChildren();
+		std::map<oid_t, GameObject*> getDeepChildren();
 		template<typename T> bool hasComponent() {
 			for (auto c : this->components) {
 				if (typeid(T).name() == c->type)
@@ -62,7 +68,7 @@ namespace engine {
 			return NULL;
 		}
 		template<typename T> T* getComponentInChildren() {
-			for(auto cit : children) {
+			for (auto cit : children) {
 				engine::GameObject *child = cit.second;
 				for (auto c : child->components) {
 					if (typeid(T).name() == c->type) {

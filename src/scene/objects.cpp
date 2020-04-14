@@ -9,6 +9,7 @@
 #include "components/solid_object.h"
 #include "core/utils.h"
 #include "lib/log.h"
+#include "scene/oid.h"
 
 engine::GameObject::GameObject() {
 }
@@ -45,9 +46,19 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 }
 
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
-	name = node.get<std::string>("name");
-	tag = node.get<std::string>("tag");
-	id = node.get<ullong>("id");
+	try {
+		name = node.get<std::string>("name");
+	}
+	catch (std::exception &e) {
+		name = "";
+	}
+	try {
+		for (auto it : node.get_child("Tags")) {
+			this->tag.insert(it.second.get<std::string>(""));
+		}
+	}
+	catch (std::exception &e) {
+	}
 	for (auto c : node.get_child("Components")) {
 		boost::property_tree::ptree t;
 		t.put_child(c.first, c.second);
@@ -73,7 +84,7 @@ engine::GameObject::GameObject(GameObject* parent, std::vector<Component*> compo
 }
 
 engine::Transform engine::GameObject::transformLocalToGlobal() {
-	if(parent) {
+	if (parent) {
 		engine::Transform t = this->transform;
 		engine::Transform pt = parent->transformLocalToGlobal();
 		t.position += pt.position;
@@ -86,8 +97,8 @@ engine::Transform engine::GameObject::transformLocalToGlobal() {
 
 engine::GameObject *engine::GameObject::at(ullong index) {
 	auto it = children.find(index);
-	if(it != children.end()) {
-		return it -> second;
+	if (it != children.end()) {
+		return it->second;
 	}
 	throw std::logic_error("GameObject doesn't exist");
 }
@@ -98,16 +109,16 @@ void engine::GameObject::update() {
 }
 
 ullong engine::GameObject::addGameObject(GameObject* child) {
-	ullong id = getFirstAvailableMapIndex(this -> children);
+	ullong id = getFirstAvailableMapIndex(this->children);
 	return addGameObject(id, child);
 }
 
 ullong engine::GameObject::addGameObject(ullong id, GameObject* child) {
 	auto it = children.find(id);
-	if(it != children.end()) { // new object takes priority
+	if (it != children.end()) { // new object takes priority
 		delete it->second;
 	}
-	
+
 	this->children[id] = child;
 	child->parent = this;
 	return id;
@@ -119,28 +130,59 @@ ullong engine::GameObject::addGameObject(ullong id, boost::property_tree::ptree 
 
 void engine::GameObject::deleteGameObject(ullong id) {
 	auto it = children.find(id);
-	if(it != children.end()) {
-		delete it -> second;
+	if (it != children.end()) {
+		delete it->second;
 		children.erase(id);
 	}
 }
 
 boost::property_tree::ptree engine::GameObject::serialize() {
-	boost::property_tree::ptree node, componentsNode, childrenNode;
+	boost::property_tree::ptree node, componentsNode, childrenNode, tagNode;
 	node.put("name", name);
-	node.put("id", id);
-	node.put("tag", tag);
+	for (auto t : tag) {
+		tagNode.add("t", t);
+	}
+	node.put_child("tag", tagNode);
 	for (auto c : components) {
 		componentsNode.add_child(c->name, c->serialize());
 	}
 	for (auto it : children) {
 		engine::GameObject *c = it.second;
 		childrenNode.add_child(std::to_string(it.first), c->serialize());
-	}	
+	}
 	node.add_child("Transform", transform.serialize());
 	node.add_child("Components", componentsNode);
 	node.add_child("Children", childrenNode);
+	node.add_child("Tags", tagNode);
 	return node;
+}
+
+std::map<oid_t, engine::GameObject*> engine::GameObject::getSurfaceChildren() {
+	std::map<oid_t, engine::GameObject*> ret;
+	oid_t oid;
+	for (auto it : this->children) {
+		oid.at(it.first);
+		ret[oid] = it.second;
+		oid.pop();
+	}
+	return ret;
+}
+
+std::map<oid_t, engine::GameObject*> engine::GameObject::getDeepChildren() {
+	std::map<oid_t, engine::GameObject*> ret, recursed;
+	oid_t oid;
+	for (auto it : this->children) {
+		oid.at(it.first);
+		ret[oid] = it.second;
+		recursed = it.second->getDeepChildren();
+		for (auto it : recursed) {
+			oid_t oid_r = oid;
+			oid_r.at(it.first);
+			ret[oid_r] = it.second;
+		}
+		oid.pop();
+	}
+	return ret;
 }
 
 bool engine::GameObject::constructComponent(boost::property_tree::ptree node) {
