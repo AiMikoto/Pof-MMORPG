@@ -21,6 +21,7 @@ void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t
         nk_label(ctx, "Tag", NK_TEXT_LEFT);
         nk_label(ctx, t.c_str(), NK_TEXT_LEFT);
       }
+      nk_tree_pop(ctx);
     }
     std::string ltpath = path + "lt";
     if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Local Transform", NK_MINIMIZED, H_GET(ltpath)))

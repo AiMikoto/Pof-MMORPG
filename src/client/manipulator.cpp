@@ -175,7 +175,7 @@ void manipulator::obj_rename(oid_t &target, std::string name)
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_meta_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_META_OBJ);
-  c.tree().put_child("target", target.encode());
+  c.tree().put_child("id", target.encode());
   c.tree().put("meta.name", name);
   proto -> safe_write(c);
   bar.wait();
@@ -187,7 +187,7 @@ void manipulator::obj_tag(oid_t &target, std::string tag)
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_meta_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_META_OBJ);
-  c.tree().put_child("target", target.encode());
+  c.tree().put_child("id", target.encode());
   c.tree().put("meta.tag+", tag);
   proto -> safe_write(c);
   bar.wait();
@@ -199,7 +199,7 @@ void manipulator::obj_untag(oid_t &target, std::string tag)
   call c;
   proto -> ept.add(OP_EDIT_CB, boost::bind(obj_meta_cb, &bar, _1));
   c.tree().put(OPCODE, OP_EDIT_META_OBJ);
-  c.tree().put_child("target", target.encode());
+  c.tree().put_child("id", target.encode());
   c.tree().put("meta.tag-", tag);
   proto -> safe_write(c);
   bar.wait();

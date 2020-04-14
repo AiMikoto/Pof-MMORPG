@@ -222,7 +222,7 @@ void client::handle_cmd(call c)
     ept.add(OP_EDIT_ADD_COMP, boost::bind(&client::add_comp, this, _1));
     ept.add(OP_EDIT_DELETE_OBJ, boost::bind(&client::remove_obj, this, _1));
     ept.add(OP_EDIT_ATTACH_OBJ, boost::bind(&client::attach_obj, this, _1));
-    ept.add(OP_EDIT_META_OBJ, boost::bind(&client::attach_obj, this, _1));
+    ept.add(OP_EDIT_META_OBJ, boost::bind(&client::meta_obj, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;

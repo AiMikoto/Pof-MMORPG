@@ -32,7 +32,7 @@ private:
   engine::Scene **s;
   std::string uuid;
   char buf[UI_SCENE_VIEWER_BUF_SIZE];
-  int len;
+  int len = 0;
   std::string filter;
 };
 

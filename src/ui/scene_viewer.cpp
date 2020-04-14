@@ -6,11 +6,16 @@
 #include "lib/uuid.h"
 #include "ui/utils.h"
 #include <boost/algorithm/searching/knuth_morris_pratt.hpp>
+#include "lib/log.h"
 
 #define H_GET(x) x.c_str(), x.size(), 1
 
 bool match(std::string str, std::string substr)
 { // match is true if substr is in str
+  if(substr == "")
+  {
+    return true;
+  }
   return boost::algorithm::knuth_morris_pratt_search(str.begin(), str.end(), substr.begin(), substr.end()).first != str.end();
 }
 
@@ -68,6 +73,7 @@ UI_scene_viewer::UI_scene_viewer(engine::Scene **s)
   this -> s = s;
   this -> uuid = get_uuid();
   this -> filter = "";
+  memset(this -> buf, 0, UI_SCENE_VIEWER_BUF_SIZE);
 }
 
 void UI_scene_viewer::init(ctx_t *ctx)
@@ -101,7 +107,8 @@ void UI_scene_viewer::draw(ctx_t *ctx)
     }
     if(nk_button_label(ctx, "Reset filter"))
     {
-      filter == "";
+      BOOST_LOG_TRIVIAL(trace) << "Filter reset";
+      filter = "";
     }
     engine::Scene *scene = *s;
     if(scene == NULL)
