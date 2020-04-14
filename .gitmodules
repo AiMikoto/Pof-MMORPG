@@ -10,6 +10,3 @@
 [submodule "dep/libpqxx"]
 	path = dep/libpqxx
 	url = https://github.com/jtv/libpqxx.git
-[submodule "dep/ChaiScript"]
-	path = dep/ChaiScript
-	url = https://github.com/ChaiScript/ChaiScript.git
