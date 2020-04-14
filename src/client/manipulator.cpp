@@ -164,6 +164,47 @@ void manipulator::comp_add(oid_t &target, boost::property_tree::ptree recipe)
   bar.wait();
 }
 
+void obj_meta_cb(boost::barrier *bar, call c)
+{
+  bar -> wait();
+}
+
+void manipulator::obj_rename(oid_t &target, std::string name)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_meta_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_META_OBJ);
+  c.tree().put_child("id", target.encode());
+  c.tree().put("meta.name", name);
+  proto -> safe_write(c);
+  bar.wait();
+}
+
+void manipulator::obj_tag(oid_t &target, std::string tag)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_meta_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_META_OBJ);
+  c.tree().put_child("id", target.encode());
+  c.tree().put("meta.tag+", tag);
+  proto -> safe_write(c);
+  bar.wait();
+}
+
+void manipulator::obj_untag(oid_t &target, std::string tag)
+{
+  boost::barrier bar(2);
+  call c;
+  proto -> ept.add(OP_EDIT_CB, boost::bind(obj_meta_cb, &bar, _1));
+  c.tree().put(OPCODE, OP_EDIT_META_OBJ);
+  c.tree().put_child("id", target.encode());
+  c.tree().put("meta.tag-", tag);
+  proto -> safe_write(c);
+  bar.wait();
+}
+
 void save_cb(boost::barrier *bar, call c)
 {
   bar -> wait();

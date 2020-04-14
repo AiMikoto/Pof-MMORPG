@@ -19,6 +19,9 @@ public:
   void obj_delete(oid_t &id);
   void comp_add(oid_t &target, boost::property_tree::ptree recipe);
   void obj_attach(oid_t &from, oid_t &to);
+  void obj_rename(oid_t &target, std::string name);
+  void obj_tag(oid_t &target, std::string tag);
+  void obj_untag(oid_t &target, std::string tag);
   void save();
   void save(map_t map);
 };

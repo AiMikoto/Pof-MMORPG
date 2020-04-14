@@ -67,6 +67,15 @@ oid_t *oid_t::at(unsigned long long id)
   return this;
 }
 
+oid_t *oid_t::at(const oid_t& other)
+{
+  for(auto ao : other._access_order)
+  {
+    this -> _access_order.push_back(ao);
+  }
+  return this;
+}
+
 oid_t *oid_t::pop()
 {
   if(_access_order.size() > 0)

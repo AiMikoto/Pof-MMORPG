@@ -128,6 +128,48 @@ bool editor::try_delete(std::string line)
   return false;
 }
 
+bool editor::try_rename(std::string line)
+{
+  char id[256], c_name[256];
+  if(sscanf(line.c_str(), "rename %s %s", id, c_name) == 2)
+  {
+    oid_t oid;
+    GET_OID(oid, id);
+    std::string name = std::string(c_name);
+    man -> obj_rename(oid, name);
+    return true;
+  }
+  return false;
+}
+
+bool editor::try_tag(std::string line)
+{
+  char id[256], c_tag[256];
+  if(sscanf(line.c_str(), "tag %s %s", id, c_tag) == 2)
+  {
+    oid_t oid;
+    GET_OID(oid, id);
+    std::string tag = std::string(c_tag);
+    man -> obj_tag(oid, tag);
+    return true;
+  }
+  return false;
+}
+
+bool editor::try_untag(std::string line)
+{
+  char id[256], c_tag[256];
+  if(sscanf(line.c_str(), "untag %s %s", id, c_tag) == 2)
+  {
+    oid_t oid;
+    GET_OID(oid, id);
+    std::string tag = std::string(c_tag);
+    man -> obj_untag(oid, tag);
+    return true;
+  }
+  return false;
+}
+
 bool editor::try_add(std::string line)
 {
   boost::property_tree::ptree recipe;
@@ -214,5 +256,5 @@ editor::~editor()
 
 bool editor::try_handle(std::string line)
 {
-  return try_rotate(line) || try_scale(line) || try_add(line) || try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || try_attach(line);
+  return try_rotate(line) || try_scale(line) || try_add(line) || try_delete(line) || try_spawn(line) || try_save(line) || try_ss(line) || try_sps(line) || try_move(line) || try_attach(line) || try_rename(line) || try_tag(line) || try_untag(line);
 }

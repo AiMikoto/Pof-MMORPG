@@ -45,6 +45,9 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   boost::property_tree::ptree object_node = tree.get_child("obj");
   boost::property_tree::ptree component_node = tree.get_child("comp");
   boost::property_tree::ptree eject_node = tree.get_child("eje");
+  boost::property_tree::ptree renames_node = tree.get_child("renames");
+  boost::property_tree::ptree tags_node = tree.get_child("tags");
+  boost::property_tree::ptree untags_node = tree.get_child("untags");
   for(auto it : pos_node)
   {
     this -> pos_delta[oid_t(it.first)] = decode_dvec3(it.second);
@@ -77,6 +80,18 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   {
     this -> ejections.push_back(oid_t(it.first));
   }
+  for(auto it : renames_node)
+  {
+    this -> renames[oid_t(it.first)] = it.second.get<std::string>("");
+  }
+  for(auto it : tags_node)
+  {
+    this -> tags[oid_t(it.first)] = it.second.get<std::string>("");
+  }
+  for(auto it : untags_node)
+  {
+    this -> untags[oid_t(it.first)] = it.second.get<std::string>("");
+  }
   this -> origin_generation = tree.get<long long>("og");
   this -> target_generation = tree.get<long long>("tg");
   this -> tag = tree.get<std::string>("tag");
@@ -84,7 +99,7 @@ slice_t::slice_t(boost::property_tree::ptree tree)
 
 boost::property_tree::ptree slice_t::encode()
 {
-  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, scale_node, rotation_node, object_node, component_node, eject_node;
+  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, scale_node, rotation_node, object_node, component_node, eject_node, renames_node, tags_node, untags_node;
   for(auto it : this -> pos_delta)
   {
     pos_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
@@ -117,6 +132,18 @@ boost::property_tree::ptree slice_t::encode()
   {
     eject_node.put(it.serialise('+'), it.serialise('+'));
   }
+  for(auto it : this -> renames)
+  {
+    renames_node.put(it.first.serialise('+'), it.second);
+  }
+  for(auto it : this -> tags)
+  {
+    tags_node.put(it.first.serialise('+'), it.second);
+  }
+  for(auto it : this -> untags)
+  {
+    untags_node.put(it.first.serialise('+'), it.second);
+  }
   ret.put_child("pos", pos_node);
   ret.put_child("vel", vel_node);
   ret.put_child("shift", shift_node);
@@ -125,6 +152,9 @@ boost::property_tree::ptree slice_t::encode()
   ret.put_child("obj", object_node);
   ret.put_child("comp", component_node);
   ret.put_child("eje", eject_node);
+  ret.put_child("renames", renames_node);
+  ret.put_child("tags", tags_node);
+  ret.put_child("untags", untags_node);
   ret.put("og", this -> origin_generation);
   ret.put("tg", this -> target_generation);
   ret.put("tag", this -> tag);
@@ -140,6 +170,9 @@ std::map <oid_t, glm::dvec3> slicer_injection_rotation;
 std::map <oid_t, boost::property_tree::ptree> slicer_injection_objects;
 std::vector <oid_t> slicer_ejection_objects;
 std::map <oid_t, boost::property_tree::ptree> slicer_injection_components;
+std::map <oid_t, std::string> slicer_inject_name;
+std::map <oid_t, std::string> slicer_inject_tag;
+std::map <oid_t, std::string> slicer_eject_tag;
 
 // slicing constants
 
@@ -170,6 +203,12 @@ slice_t slice(engine::Scene *e)
   slicer_injection_components.clear();
   ret.ejections = slicer_ejection_objects;
   slicer_ejection_objects.clear();
+  ret.renames = slicer_inject_name;
+  slicer_inject_name.clear();
+  ret.tags = slicer_inject_tag;
+  slicer_inject_tag.clear();
+  ret.untags = slicer_eject_tag;
+  slicer_eject_tag.clear();
   if(!slicer_active)
   {
     slicer_lock.unlock();
@@ -308,6 +347,21 @@ engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
     engine::GameObject *go = it.first.get(e);
     go -> constructComponent(it.second);
   }
+  for(auto it : slice.renames)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> name = it.second;
+  }
+  for(auto it : slice.tags)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> tag.insert(it.second);
+  }
+  for(auto it : slice.untags)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> tag.erase(it.second);
+  }
   e -> regenerateCtree();
   return e;
 }
@@ -359,6 +413,21 @@ void slicer_inject_component(oid_t &id, engine::Component *c)
 void slicer_eject_object(oid_t &id)
 {
   slicer_ejection_objects.push_back(id);
+}
+
+void slicer_rename_object(oid_t &id, std::string name)
+{
+  slicer_inject_name[id] = name;
+}
+
+void slicer_add_tag_object(oid_t &id, std::string tag)
+{
+  slicer_inject_tag[id] = tag;
+}
+
+void slicer_remove_tag_object(oid_t &id, std::string tag)
+{
+  slicer_eject_tag[id] = tag;
 }
 
 // lock functions - use these to control the slicing process, the functions above are only thread safe in the context of slicer_lock manipulation

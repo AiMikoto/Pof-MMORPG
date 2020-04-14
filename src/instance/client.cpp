@@ -222,6 +222,7 @@ void client::handle_cmd(call c)
     ept.add(OP_EDIT_ADD_COMP, boost::bind(&client::add_comp, this, _1));
     ept.add(OP_EDIT_DELETE_OBJ, boost::bind(&client::remove_obj, this, _1));
     ept.add(OP_EDIT_ATTACH_OBJ, boost::bind(&client::attach_obj, this, _1));
+    ept.add(OP_EDIT_META_OBJ, boost::bind(&client::meta_obj, this, _1));
     return;
   }
   BOOST_LOG_TRIVIAL(warning) << "unknown command - " << command;
@@ -394,6 +395,43 @@ void client::attach_obj(call c)
   oid_t to = oid_t(c.tree().get_child("to"));
   oid_t result = game_attach_object(from, to);
   c.tree().put_child("id", result.encode());
+  c.tree().put(OPCODE, OP_EDIT_CB);
+  safe_write(c);
+}
+
+void client::meta_obj(call c)
+{
+  oid_t id = oid_t(c.tree().get_child("id"));
+  try
+  {
+    std::string name = c.tree().get<std::string>("meta.name");
+    slicer_acquire();
+    slicer_rename_object(id, name);
+    slicer_release();
+  }
+  catch(std::exception _e)
+  {
+  }
+  try
+  {
+    std::string tag = c.tree().get<std::string>("meta.tag+");
+    slicer_acquire();
+    slicer_add_tag_object(id, tag);
+    slicer_release();
+  }
+  catch(std::exception _e)
+  {
+  }
+  try
+  {
+    std::string tag = c.tree().get<std::string>("meta.tag-");
+    slicer_acquire();
+    slicer_remove_tag_object(id, tag);
+    slicer_release();
+  }
+  catch(std::exception _e)
+  {
+  }
   c.tree().put(OPCODE, OP_EDIT_CB);
   safe_write(c);
 }

@@ -29,6 +29,7 @@ private:
   void add_comp(call c);
   void remove_obj(call c);
   void attach_obj(call c);
+  void meta_obj(call c);
 };
 
 extern client *master;

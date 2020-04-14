@@ -1373,6 +1373,52 @@ void test_slice_serialisation()
     FAIL
   }
   delete e;
+  TEST("TESTING NAMING AND TAGGING - SERIAL");
+  e = new engine::Scene(sast);
+  /*    e
+   *   /|
+   *  1 2
+   *    |
+   *    1
+   */
+  oid = oid_t();
+  oid.at(2); // [2]
+  oid.at(1); // [2, 1]
+  slicer_rename_object(oid, "Lorem Ipsum");
+  slicer_add_tag_object(oid, "lorem");
+  slicer_add_tag_object(oid, "ipsum");
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+    slicer_add_tag_object(oid, "lorem"); // shouldn't add dublicate
+  }
+  if((oid.get(e) -> name == "Lorem Ipsum") && (oid.get(e) -> tag.size() == 2))
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
+  TEST("TESTING UNTAGGING - SERIAL");
+  slicer_remove_tag_object(oid, "lorem");
+  oid.pop(); // [2]
+  ticks = 1000;
+  while(ticks--)
+  {
+    apply_slice(e, slice_t(slice(e).encode()));
+    slicer_remove_tag_object(oid, "asd"); // shouldn't do anything
+  }
+  oid.at(1); // [2, 1];
+  if(oid.get(e) -> tag.size() == 1)
+  {
+    PASS
+  }
+  else
+  {
+    FAIL
+  }
 }
 
 int main()

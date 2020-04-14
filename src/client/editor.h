@@ -21,6 +21,9 @@ protected:
   bool try_delete(std::string line);
   bool try_add(std::string line);
   bool try_attach(std::string line);
+  bool try_rename(std::string line);
+  bool try_tag(std::string line);
+  bool try_untag(std::string line);
 private:
   manipulator *man;
 };

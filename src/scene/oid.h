@@ -18,6 +18,7 @@ public:
   std::string serialise() const;
   std::string serialise(char separator) const;
   oid_t *at(unsigned long long id);
+  oid_t *at(const oid_t& other);
   oid_t *pop();
   bool is_in(const oid_t &other) const;
   engine::GameObject *get(engine::GameObject *o) const;
