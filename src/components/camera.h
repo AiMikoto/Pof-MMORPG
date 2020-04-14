@@ -22,6 +22,8 @@ namespace engine {
 		boost::property_tree::ptree serialize();
 	};
 
+	struct ViewFrustrum;
+
 	class Camera : public Component {
 	public:
 		bool isFixed, isPerspective;
@@ -31,7 +33,6 @@ namespace engine {
 		bool rotate;
 		double yaw, pitch;
 		CameraViewport viewport;
-		std::vector<ullong> objectsInView;
 
 		Camera();
 		Camera(CameraViewport viewport, bool isPerspective = true, bool isFixed = false);
@@ -48,11 +49,11 @@ namespace engine {
 		boost::property_tree::ptree serialize();
 		void update();
 		void setup();
-	protected:
-		virtual void setType();
 		glm::dvec3 forward();
 		glm::dvec3 right();
 		glm::dvec3 up();
+	protected:
+		virtual void setType();
 		void updateRotation();
 	};
 }

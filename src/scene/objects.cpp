@@ -47,6 +47,7 @@ engine::GameObject::GameObject(const GameObject& gameObject) {
 engine::GameObject::GameObject(boost::property_tree::ptree node) {
 	name = node.get<std::string>("name");
 	tag = node.get<std::string>("tag");
+	id = node.get<ullong>("id");
 	for (auto c : node.get_child("Components")) {
 		boost::property_tree::ptree t;
 		t.put_child(c.first, c.second);
@@ -127,6 +128,7 @@ void engine::GameObject::deleteGameObject(ullong id) {
 boost::property_tree::ptree engine::GameObject::serialize() {
 	boost::property_tree::ptree node, componentsNode, childrenNode;
 	node.put("name", name);
+	node.put("id", id);
 	node.put("tag", tag);
 	for (auto c : components) {
 		componentsNode.add_child(c->name, c->serialize());

@@ -116,6 +116,7 @@ void engine::Material::contextSetup() {
 
 boost::property_tree::ptree engine::Material::serialize() {
 	boost::property_tree::ptree node, texNode;
+	return node;
 }
 
 void engine::Material::writeToFile() {

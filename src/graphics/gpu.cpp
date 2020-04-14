@@ -3,6 +3,7 @@
 #include "lib/log.h"
 #include "core/time_values.h"
 #include <boost/property_tree/json_parser.hpp>
+#include "graphics/culling/frustrumCulling.h"
 
 engine::GPU::GPU() {
 }
@@ -52,7 +53,7 @@ void engine::GPU::initializeContext() {
 	BOOST_LOG_TRIVIAL(trace) << "Creating editor camera";
 	GameObject* editorCamera = new GameObject();
 	editorCamera->addComponent(new Camera());
-	editorCamera->transform.position = glm::dvec3(0, 5, 20);
+	editorCamera->transform.position = glm::dvec3(0, 5, 0);
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
 	modelLoader = new ModelLoader();
@@ -92,15 +93,31 @@ void engine::GPU::drawScene() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	editorCamera->setViewport(glContext->window);
+	ViewFrustrum vf;
+	vf.computePoints(glContext->window, editorCamera);
+	vf.computeNormals(editorCamera);
 	glContext->setBackgroundColor(colors::bgColor);
 	glm::mat4 vp = editorCamera->projection(glContext->window) * editorCamera->view();
 	for (auto modelLayerMap : renderLayers) {
 		for (auto matLayerMap : modelLayerMap.second) {
 			RenderLayer* renderLayer = matLayerMap.second;
+			for (auto renderer : renderLayer->renderers) {
+				MeshFilter* meshFilter = renderer->gameObject->getComponent<MeshFilter>();
+				if (vf.aabbInsideFrustrum(meshFilter->computeAABB()))
+					renderer->inView = true;
+			}
 			renderLayer->draw(vp);
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
+	for (auto modelLayerMap : renderLayers) {
+		for (auto matLayerMap : modelLayerMap.second) {
+			RenderLayer* renderLayer = matLayerMap.second;
+			for (auto renderer : renderLayer->renderers) {
+				renderer->inView = false;
+			}
+		}
+	}
 }
 
 void engine::GPU::drawUI() {
