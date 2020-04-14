@@ -148,7 +148,7 @@ glm::dvec3 engine::Camera::right() {
 }
 
 glm::dvec3 engine::Camera::up() {
-	return glm::dvec3(0, cos(pitch), sin(pitch));
+	return glm::cross(right(), forward());
 }
 
 void engine::Camera::updateRotation() {

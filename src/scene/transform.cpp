@@ -28,7 +28,7 @@ engine::Transform::Transform(boost::property_tree::ptree node) {
 }
 
 glm::dvec3 engine::Transform::forward() {
-	return glm::normalize(rotation * glm::dvec3(0, 0, -1));
+	return glm::normalize(rotation * glm::dvec3(0, 0, 1));
 }
 
 glm::dvec3 engine::Transform::up() {

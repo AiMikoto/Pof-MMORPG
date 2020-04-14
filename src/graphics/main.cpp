@@ -34,7 +34,7 @@ int main() {
 		for (int j = 0; j < 30; j++) {
 			engine::GameObject* model = new engine::GameObject();
 			model->transform.position = glm::dvec3(2 * i - 30, 0, 2 * j - 30);
-			model->transform.rotateTo(glm::dvec3(6 * i, 6 * (i + j), 6 * j));
+			model->transform.rotateBy(glm::dvec3(12 * (i - 15), 12 * (i + j - 30), 12 * (j - 15)));
 			model->transform.scale = glm::dvec3(1, 1, 1);
 			model->addComponent(new engine::MeshFilter(modelPath));
 			model->addComponent(new engine::MeshRenderer());

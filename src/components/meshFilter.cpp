@@ -82,8 +82,7 @@ std::vector<glm::dvec3> engine::MeshFilter::computeAABB() {
 	for (int j = 0; j < 2; j++) {
 		for (int k = 0; k < 2; k++) {
 			for (int l = 0; l < 2; l++) {
-				glm::dvec4 point =
-				{ glm::pow(-1, j) * size.x / 2, glm::pow(-1, k)  * size.y / 2,	glm::pow(-1, l)  * size.z / 2 , 1.0 };
+				glm::dvec4 point = {pow(-1, j) * size.x / 2, pow(-1, k) * size.y / 2, pow(-1, l) * size.z / 2 , 1.0};
 				aabbPoints.push_back(gameObject->transform.model() * point);
 			}
 		}
