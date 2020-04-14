@@ -63,6 +63,6 @@ int main() {
 	}
 	scene->writeToFile("../src/graphics/assets/scenes/test.json");
 	delete engine::gpu;
-	delete scene;
+	//delete scene;
 	return 0;
 }
