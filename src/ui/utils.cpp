@@ -6,6 +6,11 @@
 
 void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t& oid)
 {
+  draw_game_object(ctx, o, path, oid, 0);
+}
+
+void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t& oid, UI_FLAG_T fl)
+{
   std::string oname = "Object " + oid.serialise();
   if(nk_tree_push_hashed(ctx, NK_TREE_NODE, oname.c_str(), NK_MINIMIZED, H_GET(path)))
   {
@@ -45,17 +50,20 @@ void draw_game_object(ctx_t *ctx, engine::GameObject *o, std::string path, oid_t
       }
       nk_tree_pop(ctx);
     }
-    std::string opath = path + "o";
-    if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Children", NK_MINIMIZED, H_GET(opath)))
+    if(!fl & UI_OBJ_NO_CHILD)
     {
-      for(auto it : o -> children)
+      std::string opath = path + "o";
+      if(nk_tree_push_hashed(ctx, NK_TREE_NODE, "Children", NK_MINIMIZED, H_GET(opath)))
       {
-        oid.at(it.first);
-        std::string oopath = path + std::to_string(it.first);
-        draw_game_object(ctx, it.second, oopath, oid);
-        oid.pop();
+        for(auto it : o -> children)
+        {
+          oid.at(it.first);
+          std::string oopath = path + std::to_string(it.first);
+          draw_game_object(ctx, it.second, oopath, oid);
+          oid.pop();
+        }
+        nk_tree_pop(ctx);
       }
-      nk_tree_pop(ctx);
     }
     nk_tree_pop(ctx);
   }

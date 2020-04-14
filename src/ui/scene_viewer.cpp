@@ -74,7 +74,7 @@ UI_scene_viewer::UI_scene_viewer(engine::Scene **s)
   this -> uuid = get_uuid();
   this -> filter = "";
   memset(this -> buf, 0, UI_SCENE_VIEWER_BUF_SIZE);
-  exhaustive_display = true;
+  exhaustive_display = false;
 }
 
 void UI_scene_viewer::init(ctx_t *ctx)
@@ -134,9 +134,11 @@ void UI_scene_viewer::draw(ctx_t *ctx)
     if(nk_tree_push_hashed(ctx, NK_TREE_TAB, "Objects", NK_MINIMIZED, H_GET(opath)))
     {
       std::map<oid_t, engine::GameObject*> objects;
+      UI_FLAG_T fl = 0;
       if(exhaustive_display)
       {
         objects = scene -> getDeepChildren();
+        fl = fl | UI_OBJ_NO_CHILD;
       }
       else
       {
@@ -154,7 +156,7 @@ void UI_scene_viewer::draw(ctx_t *ctx)
         if(matches)
         {
           std::string oopath = opath + it.first.serialise();
-          draw_game_object(ctx, it.second, oopath, oid);
+          draw_game_object(ctx, it.second, oopath, oid, fl);
         }
         oid.pop();
       }
