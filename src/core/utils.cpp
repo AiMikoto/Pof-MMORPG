@@ -34,3 +34,17 @@ double engine::highestCommonDenominator(double a, double b, double eps) {
 	else
 		return highestCommonDenominator(b, a - floor(a / b) * b);
 }
+
+glm::dvec3 engine::computeSize(std::vector<glm::dvec3> verticesPositions) {
+	glm::dvec3 min = verticesPositions[0];
+	glm::dvec3 max = verticesPositions[0];
+	for (size_t i = 1; i < verticesPositions.size(); i++) {
+		min.x = glm::min(min.x, double(verticesPositions[i].x));
+		min.y = glm::min(min.y, double(verticesPositions[i].y));
+		min.z = glm::min(min.z, double(verticesPositions[i].z));
+		max.x = glm::max(max.x, double(verticesPositions[i].x));
+		max.y = glm::max(max.y, double(verticesPositions[i].y));
+		max.z = glm::max(max.z, double(verticesPositions[i].z));
+	}
+	return max - min;
+}

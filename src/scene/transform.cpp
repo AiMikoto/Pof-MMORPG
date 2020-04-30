@@ -28,7 +28,7 @@ engine::Transform::Transform(boost::property_tree::ptree node) {
 }
 
 glm::dvec3 engine::Transform::forward() {
-	return glm::normalize(rotation * glm::dvec3(0, 0, -1));
+	return glm::normalize(rotation * glm::dvec3(0, 0, 1));
 }
 
 glm::dvec3 engine::Transform::up() {
@@ -67,7 +67,6 @@ std::pair<double, glm::dvec3> engine::Transform::anglesToAngleAxis(glm::dvec3 ro
 	angle = highestCommonDenominator(angle, rotationAngles.z);
 	glm::dvec3 axes = (std::abs(angle) < DBL_EPSILON) ? glm::dvec3(1, 1, 1) :
 		glm::dvec3(rotationAngles.x / angle, rotationAngles.y / angle, rotationAngles.z / angle);
-	BOOST_LOG_TRIVIAL(trace) << axes.x;
 	return std::pair<double, glm::dvec3>(angle, axes);
 }
 

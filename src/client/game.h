@@ -6,18 +6,19 @@
 #include <mutex>
 #include "phys/slicing.h"
 #include "scene/scene.h"
-
-extern user_card_library ucl;
+#include "client/system.h"
 
 extern engine::Scene *current;
 
 extern std::mutex scene_lock;
 
-extern chat_log cl;
-
 extern std::mutex init_l;
 
 extern std::string username;
+
+void game_init();
+
+void game_destroy();
 
 void move(std::string host, int port);
 

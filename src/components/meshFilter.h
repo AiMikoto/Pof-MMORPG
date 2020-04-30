@@ -18,10 +18,10 @@ namespace engine {
 		void assertModel();
 		boost::property_tree::ptree serialize();
 		bool hasModel();
-		double modelSize();
-		void computeModelSize();
+		std::vector<glm::dvec3> computeAABB();
 	protected:
-		double size;
+		bool aabbComputed;
+		std::vector<glm::dvec3> aabbPoints;
 		void setType();
 	};
 }

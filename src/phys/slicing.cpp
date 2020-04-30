@@ -45,37 +45,52 @@ slice_t::slice_t(boost::property_tree::ptree tree)
   boost::property_tree::ptree object_node = tree.get_child("obj");
   boost::property_tree::ptree component_node = tree.get_child("comp");
   boost::property_tree::ptree eject_node = tree.get_child("eje");
+  boost::property_tree::ptree renames_node = tree.get_child("renames");
+  boost::property_tree::ptree tags_node = tree.get_child("tags");
+  boost::property_tree::ptree untags_node = tree.get_child("untags");
   for(auto it : pos_node)
   {
-    this -> pos_delta[std::stoi(it.first)] = decode_dvec3(it.second);
+    this -> pos_delta[oid_t(it.first)] = decode_dvec3(it.second);
   }
   for(auto it : vel_node)
   {
-    this -> vel_delta[std::stoi(it.first)] = decode_dvec3(it.second);
+    this -> vel_delta[oid_t(it.first)] = decode_dvec3(it.second);
   }
   for(auto it : shift_node)
   {
-    this -> shift[std::stoi(it.first)] = decode_dvec3(it.second);
+    this -> shift[oid_t(it.first)] = decode_dvec3(it.second);
   }
   for(auto it : scale_node)
   {
-    this -> scale[std::stoi(it.first)] = decode_dvec3(it.second);
+    this -> scale[oid_t(it.first)] = decode_dvec3(it.second);
   }
   for(auto it : rotation_node)
   {
-    this -> rotation[std::stoi(it.first)] = decode_dvec3(it.second);
+    this -> rotation[oid_t(it.first)] = decode_dvec3(it.second);
   }
   for(auto it : object_node)
   {
-    this -> objects[std::stoi(it.first)] = it.second;
+    this -> objects[oid_t(it.first)] = it.second;
   }
   for(auto it : component_node)
   {
-    this -> components[std::stoi(it.first)] = it.second;
+    this -> components[oid_t(it.first)] = it.second;
   }
   for(auto it : eject_node)
   {
-    this -> ejections.push_back(std::stoi(it.first));
+    this -> ejections.push_back(oid_t(it.first));
+  }
+  for(auto it : renames_node)
+  {
+    this -> renames[oid_t(it.first)] = it.second.get<std::string>("");
+  }
+  for(auto it : tags_node)
+  {
+    this -> tags[oid_t(it.first)] = it.second.get<std::string>("");
+  }
+  for(auto it : untags_node)
+  {
+    this -> untags[oid_t(it.first)] = it.second.get<std::string>("");
   }
   this -> origin_generation = tree.get<long long>("og");
   this -> target_generation = tree.get<long long>("tg");
@@ -84,38 +99,50 @@ slice_t::slice_t(boost::property_tree::ptree tree)
 
 boost::property_tree::ptree slice_t::encode()
 {
-  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, scale_node, rotation_node, object_node, component_node, eject_node;
+  boost::property_tree::ptree ret, pos_node, vel_node, shift_node, scale_node, rotation_node, object_node, component_node, eject_node, renames_node, tags_node, untags_node;
   for(auto it : this -> pos_delta)
   {
-    pos_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+    pos_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> vel_delta)
   {
-    vel_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+    vel_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> shift)
   {
-    shift_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+    shift_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> scale)
   {
-    scale_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+    scale_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> rotation)
   {
-    rotation_node.put_child(std::to_string(it.first), encode_dvec3(it.second));
+    rotation_node.put_child(it.first.serialise('+'), encode_dvec3(it.second));
   }
   for(auto it : this -> objects)
   {
-    object_node.put_child(std::to_string(it.first), it.second);
+    object_node.put_child(it.first.serialise('+'), it.second);
   }
   for(auto it : this -> components)
   {
-    component_node.put_child(std::to_string(it.first), it.second);
+    component_node.put_child(it.first.serialise('+'), it.second);
   }
   for(auto it : this -> ejections)
   {
-    eject_node.put(std::to_string(it), it);
+    eject_node.put(it.serialise('+'), it.serialise('+'));
+  }
+  for(auto it : this -> renames)
+  {
+    renames_node.put(it.first.serialise('+'), it.second);
+  }
+  for(auto it : this -> tags)
+  {
+    tags_node.put(it.first.serialise('+'), it.second);
+  }
+  for(auto it : this -> untags)
+  {
+    untags_node.put(it.first.serialise('+'), it.second);
   }
   ret.put_child("pos", pos_node);
   ret.put_child("vel", vel_node);
@@ -125,6 +152,9 @@ boost::property_tree::ptree slice_t::encode()
   ret.put_child("obj", object_node);
   ret.put_child("comp", component_node);
   ret.put_child("eje", eject_node);
+  ret.put_child("renames", renames_node);
+  ret.put_child("tags", tags_node);
+  ret.put_child("untags", untags_node);
   ret.put("og", this -> origin_generation);
   ret.put("tg", this -> target_generation);
   ret.put("tag", this -> tag);
@@ -134,14 +164,15 @@ boost::property_tree::ptree slice_t::encode()
 // slicing interference
 
 glm::dvec3 gravity_vector = {0, -2, 0};
-std::map <unsigned long long, glm::dvec3> slicer_injection_shift;
-std::map <unsigned long long, glm::dvec3> slicer_injection_scale;
-std::map <unsigned long long, glm::dvec3> slicer_injection_rotation;
-// note on injection_objects - allocated memory is created by the caller of
-// inject_object, but memory is deleted by slicer.
-std::map <unsigned long long, engine::GameObject *> slicer_injection_objects;
-std::vector <unsigned long long> slicer_ejection_objects;
-std::map <unsigned long long, engine::Component *> slicer_injection_components;
+std::map <oid_t, glm::dvec3> slicer_injection_shift;
+std::map <oid_t, glm::dvec3> slicer_injection_scale;
+std::map <oid_t, glm::dvec3> slicer_injection_rotation;
+std::map <oid_t, boost::property_tree::ptree> slicer_injection_objects;
+std::vector <oid_t> slicer_ejection_objects;
+std::map <oid_t, boost::property_tree::ptree> slicer_injection_components;
+std::map <oid_t, std::string> slicer_inject_name;
+std::map <oid_t, std::string> slicer_inject_tag;
+std::map <oid_t, std::string> slicer_eject_tag;
 
 // slicing constants
 
@@ -166,27 +197,27 @@ slice_t slice(engine::Scene *e)
   slicer_injection_scale.clear();
   ret.rotation = slicer_injection_rotation;
   slicer_injection_rotation.clear();
-  for(auto it : slicer_injection_objects)
-  {
-    ret.objects[it.first] = it.second -> serialize();
-    delete it.second;
-  }
+  ret.objects = slicer_injection_objects;
   slicer_injection_objects.clear();
-  for(auto it : slicer_injection_components)
-  {
-    ret.components[it.first].put_child(it.second -> name, it.second -> serialize());
-    delete it.second;
-  }
+  ret.components = slicer_injection_components;
   slicer_injection_components.clear();
   ret.ejections = slicer_ejection_objects;
   slicer_ejection_objects.clear();
+  ret.renames = slicer_inject_name;
+  slicer_inject_name.clear();
+  ret.tags = slicer_inject_tag;
+  slicer_inject_tag.clear();
+  ret.untags = slicer_eject_tag;
+  slicer_eject_tag.clear();
   if(!slicer_active)
   {
     slicer_lock.unlock();
     return ret;
   }
-  for(auto it : e -> gameObjects)
+  for(auto it : e -> children)
   {
+    oid_t oid;
+    oid.at(it.first);
     engine::GameObject *go = it.second;
     solid_object *gop = go -> getComponent<solid_object>();
     if(!gop)
@@ -197,16 +228,16 @@ slice_t slice(engine::Scene *e)
     {
       // adding gravity vector
       gop -> force_acc += gravity_vector;
-      ret.vel_delta[it.first] = gop -> im * gop -> force_acc * dt;
+      ret.vel_delta[oid] = gop -> im * gop -> force_acc * dt;
       gop -> force_acc = {0, 0, 0};
-      ret.pos_delta[it.first] = (gop -> velocity + ret.vel_delta[it.first]) * dt;
+      ret.pos_delta[oid] = (gop -> velocity + ret.vel_delta[oid]) * dt;
       collider *c = go -> getComponent<physical_collider>();
       if(!c)
       { // pointless checking for collisions without a collider
         continue;
       }
       // emulating position change for the purpose of collision detection
-      go -> transform.position += ret.pos_delta[it.first];
+      go -> transform.position += ret.pos_delta[oid];
       aabb caabb = c -> to_aabb();
       BOOST_LOG_TRIVIAL(trace) << "Checking for colisions";
       std::set<unsigned long long> collisions;
@@ -217,7 +248,7 @@ slice_t slice(engine::Scene *e)
       {
         glm::dvec3 axis;
         double offset;
-        physical_collider *phys = e -> gameObjects[collision] -> getComponent<physical_collider>();
+        physical_collider *phys = e -> children[collision] -> getComponent<physical_collider>();
         if(!phys)
         {
           continue;
@@ -233,24 +264,24 @@ slice_t slice(engine::Scene *e)
           {
             case CH_SI:
             {
-              double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-(gop -> velocity + ret.vel_delta[it.first]), axis);
+              double bias = -offset * BAUMGARDE_CONSTANT / dt + COEFFICIENT_OF_RESTITUTION * glm::dot(-(gop -> velocity + ret.vel_delta[oid]), axis);
               glm::dvec3 j = axis;
               glm::dmat3 im = {{gop -> im, 0, 0}, {0, gop -> im, 0}, {0, 0, gop -> im}};
-              glm::dvec3 v = (gop -> velocity + ret.vel_delta[it.first]);
+              glm::dvec3 v = (gop -> velocity + ret.vel_delta[oid]);
               double em = glm::dot(j, im * j);
               double lam = (-glm::dot(j, v) + bias) / em;
               glm::dvec3 dv = (im * j) * lam;
-              ret.vel_delta[it.first] += dv;
+              ret.vel_delta[oid] += dv;
               break;
             }
             case CH_SM:
             {
               // stop the object
-              ret.vel_delta[it.first] -= glm::dot(gop -> velocity + ret.vel_delta[it.first], axis) * axis;
+              ret.vel_delta[oid] -= glm::dot(gop -> velocity + ret.vel_delta[oid], axis) * axis;
               // push the object back
-              go -> transform.position -= ret.pos_delta[it.first];
-              ret.pos_delta[it.first] -= (axis * offset);
-              go -> transform.position += ret.pos_delta[it.first];
+              go -> transform.position -= ret.pos_delta[oid];
+              ret.pos_delta[oid] -= (axis * offset);
+              go -> transform.position += ret.pos_delta[oid];
               break;
             }
             default:
@@ -266,7 +297,7 @@ slice_t slice(engine::Scene *e)
         }
       }
       // undo position change emulation
-      go -> transform.position -= ret.pos_delta[it.first];
+      go -> transform.position -= ret.pos_delta[oid];
     }
   }
   slicer_lock.unlock();
@@ -276,44 +307,60 @@ slice_t slice(engine::Scene *e)
 engine::Scene *apply_slice(engine::Scene *e, slice_t slice)
 {
   e -> generation = slice.target_generation;
-  for(auto it : slice.objects)
-  {
-    engine::GameObject *go = new engine::GameObject(it.second);
-    e -> addGameObject(go);
-  }
-  for(auto it : slice.components)
-  {
-    e -> gameObjects[it.first] -> constructComponent(it.second);
-  }
   for(auto it : slice.pos_delta)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = it.first.get(e);
     go -> transform.position += it.second;
   }
   for(auto it : slice.vel_delta)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = it.first.get(e);
     solid_object *gop = go -> getComponent<solid_object>();
     gop -> velocity += it.second;
   }
   for(auto it : slice.shift)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = it.first.get(e);
     go -> transform.position = it.second;
   }
   for(auto it : slice.scale)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = it.first.get(e);
     go -> transform.scale = it.second;
   }
   for(auto it : slice.rotation)
   {
-    engine::GameObject *go = e -> gameObjects[it.first];
+    engine::GameObject *go = it.first.get(e);
     go -> transform.rotateTo(it.second);
   }
   for(auto it : slice.ejections)
   {
-    e -> deleteGameObject(it);
+    it.destroy(e);
+  }
+  for(auto it : slice.objects)
+  {
+    engine::GameObject *go = new engine::GameObject(it.second);
+    it.first.put(e, go);
+  }
+  for(auto it : slice.components)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> constructComponent(it.second);
+  }
+  for(auto it : slice.renames)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> name = it.second;
+  }
+  for(auto it : slice.tags)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> tag.insert(it.second);
+  }
+  for(auto it : slice.untags)
+  {
+    engine::GameObject *go = it.first.get(e);
+    go -> tag.erase(it.second);
   }
   e -> regenerateCtree();
   return e;
@@ -336,34 +383,51 @@ void slicer_set_sps(double val)
   SPS = val;
 }
 
-void slicer_move(unsigned long long id, glm::dvec3 pos)
+void slicer_move(oid_t &id, glm::dvec3 pos)
 {
   slicer_injection_shift[id] = pos;
 }
 
-void slicer_scale(unsigned long long id, glm::dvec3 scale)
+void slicer_scale(oid_t &id, glm::dvec3 scale)
 {
   slicer_injection_scale[id] = scale;
 }
 
-void slicer_rotate(unsigned long long id, glm::dvec3 rotation)
+void slicer_rotate(oid_t &id, glm::dvec3 rotation)
 {
   slicer_injection_rotation[id] = rotation;
 }
 
-void slicer_inject_object(engine::GameObject *go)
+void slicer_inject_object(oid_t &id, engine::GameObject *go)
 {
-  slicer_injection_objects[go -> id] = go;
+  slicer_injection_objects[id] = go -> serialize();
 }
 
-void slicer_inject_component(unsigned long long id, engine::Component *c)
+void slicer_inject_component(oid_t &id, engine::Component *c)
 {
-  slicer_injection_components[id] = c;
+  boost::property_tree::ptree node;
+  node.put_child(c -> name, c -> serialize());
+  slicer_injection_components[id] = node;
 }
 
-void slicer_eject_object(unsigned long long id)
+void slicer_eject_object(oid_t &id)
 {
   slicer_ejection_objects.push_back(id);
+}
+
+void slicer_rename_object(oid_t &id, std::string name)
+{
+  slicer_inject_name[id] = name;
+}
+
+void slicer_add_tag_object(oid_t &id, std::string tag)
+{
+  slicer_inject_tag[id] = tag;
+}
+
+void slicer_remove_tag_object(oid_t &id, std::string tag)
+{
+  slicer_eject_tag[id] = tag;
 }
 
 // lock functions - use these to control the slicing process, the functions above are only thread safe in the context of slicer_lock manipulation

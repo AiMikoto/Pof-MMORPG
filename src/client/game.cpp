@@ -3,12 +3,20 @@
 #include "client/graphics.h"
 #include "lib/log.h"
 
-user_card_library ucl;
 engine::Scene *current = NULL;
 std::mutex scene_lock;
-chat_log cl;
 
 std::map<std::string, std::map<long long, slice_t>> slices;
+
+void game_init()
+{
+  csm = new client_system_manager();
+}
+
+void game_destroy()
+{
+  delete csm;
+}
 
 void move(std::string host, int port)
 {
@@ -25,7 +33,7 @@ void move(std::string host, int port)
   BOOST_LOG_TRIVIAL(trace) << "connecting to new instance";
   current_instance = instance_builder(host, port);
   BOOST_LOG_TRIVIAL(trace) << "attempting to log-in";
-  std::string tok = ucl.get(username).tree().get<std::string>("user.token");
+  std::string tok = csm -> ucl.get(username).tree().get<std::string>("user.token");
   current_instance -> authenticate_token(username, tok);
   BOOST_LOG_TRIVIAL(trace) << "finished instance movement";
 }
@@ -62,6 +70,7 @@ void wipe(std::string tag)
 void send_message(chat_target target, std::string payload)
 {
   message m(target, payload);
+  BOOST_LOG_TRIVIAL(trace) << "issuing message " << m.uuid;
   call c;
   c.tree().put(OPCODE, OP_IRC);
   c.tree().put_child("payload", m.encode());

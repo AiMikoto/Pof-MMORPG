@@ -15,3 +15,5 @@ build
 /Graphics Engine
 /x64
 /.vs
+*.json
+src/graphics/assets/scenes/

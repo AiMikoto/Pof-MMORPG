@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <map>
 #include <string>
 #include "scene/transform.h"
 #include <boost/property_tree/ptree.hpp>
@@ -8,43 +8,48 @@
 #include "core/utils.h"
 #include "core/constants.h"
 #include "components/component.h"
+#include <set>
+
+class oid_t;
 
 namespace engine {
 
 	class GameObject {
 	public:
-		std::string name, tag;
-		GameObject* parent;
-		std::vector<GameObject*> children;
+		std::string name;
+		std::set<std::string> tag;
+		GameObject* parent = NULL;
+		std::map<ullong, GameObject*> children;
 		std::vector<Component*> components;
 		Transform transform;
 		bool isStatic;
-		ullong id = 0;
 
 		GameObject();
 		~GameObject();
 		GameObject(const GameObject& gameObject);
 		GameObject(boost::property_tree::ptree node);
 		GameObject(GameObject* parent);
-		GameObject(std::vector<GameObject*> children);
 		GameObject(std::vector<Component*> components);
-		GameObject(GameObject* parent, std::vector<GameObject*> children);
 		GameObject(GameObject* parent, std::vector<Component*> components);
-		GameObject(std::vector<GameObject*> children, std::vector<Component*> components);
-		GameObject(GameObject* parent, std::vector<GameObject*> children, std::vector<Component*> components);
-		virtual void update();
-		void addChild(GameObject* child);
-		void addChildren(std::vector<GameObject*> children);
+		GameObject *at(ullong index);
+		void update();
+		Transform transformLocalToGlobal();
+		ullong addGameObject(GameObject* child);
+		ullong addGameObject(ullong id, GameObject* child);
+		ullong addGameObject(ullong id, boost::property_tree::ptree node);
+		void deleteGameObject(ullong id);
 		boost::property_tree::ptree serialize();
+		std::map<oid_t, GameObject*> getSurfaceChildren();
+		std::map<oid_t, GameObject*> getDeepChildren();
 		template<typename T> bool hasComponent() {
-			for (auto c : components) {
+			for (auto c : this->components) {
 				if (typeid(T).name() == c->type)
 					return true;
 			}
 			return false;
 		}
 		template<typename T> T* getComponent() {
-			for (auto c : components) {
+			for (auto c : this->components) {
 				if (typeid(T).name() == c->type) {
 					return static_cast<T*>(c);
 				}
@@ -63,7 +68,8 @@ namespace engine {
 			return NULL;
 		}
 		template<typename T> T* getComponentInChildren() {
-			for(auto child : children) {
+			for (auto cit : children) {
+				engine::GameObject *child = cit.second;
 				for (auto c : child->components) {
 					if (typeid(T).name() == c->type) {
 						return static_cast<T*>(c);
@@ -87,7 +93,7 @@ namespace engine {
 				delete component;
 				return false;
 			}
-			this->components.push_back(component);		
+			this->components.push_back(component);
 			component->gameObject = this;
 			component->setup();
 			return true;

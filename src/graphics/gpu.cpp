@@ -3,12 +3,17 @@
 #include "lib/log.h"
 #include "core/time_values.h"
 #include <boost/property_tree/json_parser.hpp>
-#include "lib/nuklear.h"
+#include "graphics/culling/frustrumCulling.h"
 
-engine::GPU::GPU() {}
+engine::GPU::GPU() {
+}
 
 engine::GPU::~GPU() {
 	BOOST_LOG_TRIVIAL(trace) << "Cleaning up";
+	nk_glfw3_shutdown();
+	if (ui) {
+		delete ui;
+	}
 	for (auto t : textures) {
 		delete t.second;
 	}
@@ -48,20 +53,35 @@ void engine::GPU::initializeContext() {
 	BOOST_LOG_TRIVIAL(trace) << "Creating editor camera";
 	GameObject* editorCamera = new GameObject();
 	editorCamera->addComponent(new Camera());
-	editorCamera->transform.position = glm::dvec3(0, 5, 20);
+	editorCamera->transform.position = glm::dvec3(0, 5, 0);
 	this->editorCamera = editorCamera->getComponent<Camera>();
 	cameras.erase(cameras.begin());
 	modelLoader = new ModelLoader();
+	initializeGUI();
 }
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
 void engine::GPU::initializeGUI() {
-	struct nk_context *ctx;
+	if (ctx) {
+		return;
+	}
 	BOOST_LOG_TRIVIAL(trace) << "Attempting to initialise nuklear context";
-	// ctx = nk_glfw3_init(glContext -> window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
-	BOOST_LOG_TRIVIAL(trace) << "nuklear context initialised";
+	ctx = nk_glfw3_init(glContext -> window, NK_GLFW3_INSTALL_CALLBACKS, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+	BOOST_LOG_TRIVIAL(trace) << "Loading font";
+	{
+		struct nk_font_atlas *atlas;
+		nk_glfw3_font_stash_begin(&atlas);
+		nk_glfw3_font_stash_end();
+	}
+}
+
+void engine::GPU::addUI(UI_master *ui) {
+	if (this -> ui) {
+		delete this -> ui;
+	}
+	this -> ui = ui;
 }
 
 void engine::GPU::draw() {
@@ -73,19 +93,45 @@ void engine::GPU::drawScene() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	editorCamera->setViewport(glContext->window);
+	ViewFrustrum vf;
+	vf.computePoints(glContext->window, editorCamera);
+	vf.computeNormals(editorCamera);
 	glContext->setBackgroundColor(colors::bgColor);
 	glm::mat4 vp = editorCamera->projection(glContext->window) * editorCamera->view();
 	for (auto modelLayerMap : renderLayers) {
 		for (auto matLayerMap : modelLayerMap.second) {
 			RenderLayer* renderLayer = matLayerMap.second;
+			for (auto renderer : renderLayer->renderers) {
+				MeshFilter* meshFilter = renderer->gameObject->getComponent<MeshFilter>();
+				if (vf.aabbInsideFrustrum(meshFilter->computeAABB()))
+					renderer->inView = true;
+			}
 			renderLayer->draw(vp);
 		}
 	}
 	glActiveTexture(GL_TEXTURE0);
-
+	for (auto modelLayerMap : renderLayers) {
+		for (auto matLayerMap : modelLayerMap.second) {
+			RenderLayer* renderLayer = matLayerMap.second;
+			for (auto renderer : renderLayer->renderers) {
+				renderer->inView = false;
+			}
+		}
+	}
 }
 
 void engine::GPU::drawUI() {
+	if (ui) {
+		ui -> init(ctx);
+	}
+	nk_glfw3_new_frame();
+	if (ui) {
+		ui -> visit(ctx);
+	}
+	nk_glfw3_render(NK_ANTI_ALIASING_ON);
+	if (ui) {
+		ui -> cleanup(ctx);
+	}
 	glDisable(GL_DEPTH_TEST);
 }
 

@@ -129,7 +129,7 @@ void instance::uc_transfer(call c)
   user_card uc;
   uc.tree() = c.tree().get_child("data");  
   BOOST_LOG_TRIVIAL(trace) << "received user card: " << uc.tree().get<std::string>("user.name");
-  ucl.add(uc);
+  csm -> ucl.add(uc);
 }
 
 void instance::move_cb(call c)
@@ -142,9 +142,9 @@ void instance::move_cb(call c)
 
 void instance::irc_cb(call c)
 {
-  BOOST_LOG_TRIVIAL(info) << "received message";
   message m(c.tree().get_child("payload"));
-  cl.add(m);
+  BOOST_LOG_TRIVIAL(info) << "received message " << m.uuid;
+  csm -> cl.add(m);
 }
 
 void instance::slice_cb(call c)
